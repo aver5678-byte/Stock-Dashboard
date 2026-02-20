@@ -114,6 +114,9 @@ def fetch_and_analyze_news():
     # 轉換為 0-100 的「市場恐慌/貪婪指數」
     market_index = (avg_polarity + 1) / 2 * 100
     
+    if not news_data:
+        return pd.DataFrame(columns=["發布時間", "新聞標題", "AI 情緒分數", "市場訊號"]), market_index
+        
     return pd.DataFrame(news_data), market_index
 
 def page_ai_sentiment():
