@@ -10,6 +10,7 @@ from data_fetcher import fetch_data
 from strategy_7pct import analyze_7pct_strategy, calculate_7pct_statistics
 from wave_analyzer import analyze_waves
 from page_portfolio import page_portfolio_visualizer
+from page_ai_sentiment import page_ai_sentiment
 import datetime
 
 st.set_page_config(page_title="台股預警儀表板 | 40週乖離率監控", layout="wide", initial_sidebar_state="expanded")
@@ -743,7 +744,8 @@ def main():
         "📊 40週乖離率分析": page_bias_analysis,
         "📉 股市 7% 回檔進場分析": page_downward_bias,
         "📈 乖離底部反彈上漲模組": page_upward_bias,
-        "💼 資產配置回測 (Portfolio)": page_portfolio_visualizer
+        "💼 資產配置回測 (Portfolio)": page_portfolio_visualizer,
+        "🧠 AI 全球情緒雷達": page_ai_sentiment
     }
     
     # 如果是站長登入，就可以看到私密的後台
