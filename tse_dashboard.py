@@ -11,6 +11,7 @@ from strategy_7pct import analyze_7pct_strategy, calculate_7pct_statistics
 from wave_analyzer import analyze_waves
 from page_portfolio import page_portfolio_visualizer
 from page_ai_sentiment import page_ai_sentiment
+from ui_theme import apply_global_theme
 import datetime
 
 st.set_page_config(page_title="台股預警儀表板 | 40週乖離率監控", layout="wide", initial_sidebar_state="expanded")
@@ -38,38 +39,42 @@ def log_visit(page_name):
 # 您專屬的管理員信箱
 ADMIN_EMAIL = "your_google_email@gmail.com" 
 
-# 自定義 CSS (深色模式與閃爍動畫)
+# 套用全站深邃黑白紅主題
+apply_global_theme()
+
+# 自定義額外狀態方塊 CSS (深色模式與閃爍動畫)
 st.markdown("""
 <style>
 @keyframes blink {
-  0% { opacity: 1; background-color: #5a0000; box-shadow: 0 0 10px red; }
-  50% { opacity: 0.8; background-color: #2e0000; box-shadow: 0 0 5px darkred; }
-  100% { opacity: 1; background-color: #5a0000; box-shadow: 0 0 10px red; }
+  0% { opacity: 1; border-color: #ff0000; box-shadow: 0 0 10px red; }
+  50% { opacity: 0.8; border-color: #8b0000; box-shadow: 0 0 2px darkred; }
+  100% { opacity: 1; border-color: #ff0000; box-shadow: 0 0 10px red; }
 }
 .danger-zone {
   animation: blink 1.5s infinite;
   padding: 20px;
-  border-radius: 10px;
-  border: 2px solid #ff4b4b;
+  background-color: #0b0b0b;
+  border-radius: 4px;
+  border: 1px solid #ff0000;
   text-align: center;
   color: white;
   margin-bottom: 20px;
 }
 .normal-zone {
   padding: 20px;
-  border-radius: 10px;
-  background-color: #1e1e1e;
-  border: 1px solid #4CAF50;
+  border-radius: 4px;
+  background-color: #0b0b0b;
+  border: 1px solid #555555;
   text-align: center;
   color: white;
   margin-bottom: 20px;
 }
 .warning-box {
-  background-color: #331a00;
-  border-left: 5px solid #ff9900;
+  background-color: #0d0d0d;
+  border-left: 3px solid #ff0000;
   padding: 15px;
   margin: 10px 0;
-  border-radius: 5px;
+  border-radius: 2px;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -295,11 +300,11 @@ def page_bias_analysis():
                         name='K線'), row=1, col=1)
                         
         fig.add_trace(go.Scatter(x=df.index, y=df['SMA40'], 
-                                 line=dict(color='#FFA500', width=2), 
+                                 line=dict(color='white', width=2), 
                                  name='40週均線'), row=1, col=1)
                                  
         fig.add_trace(go.Scatter(x=df.index, y=df['Bias'], 
-                                 line=dict(color='#00FFFF', width=1.5), 
+                                 line=dict(color='#888888', width=1.5), 
                                  name='乖離率'), row=2, col=1)
                                  
         if not b_df.empty:
@@ -311,15 +316,15 @@ def page_bias_analysis():
             type_b_points = df.loc[df.index.intersection(type_b_dates)]
             
             fig.add_trace(go.Scatter(x=type_a_points.index, y=type_a_points['Bias'],
-                                     mode='markers', marker=dict(color='lime', size=10, symbol='circle', line=dict(width=2, color='white')),
+                                     mode='markers', marker=dict(color='white', size=8, symbol='circle', line=dict(width=1, color='gray')),
                                      name='類型 A (低基期)'), row=2, col=1)
                                      
             fig.add_trace(go.Scatter(x=type_b_points.index, y=type_b_points['Bias'],
-                                     mode='markers', marker=dict(color='red', size=10, symbol='circle', line=dict(width=2, color='white')),
+                                     mode='markers', marker=dict(color='red', size=8, symbol='circle', line=dict(width=1, color='darkred')),
                                      name='類型 B (高位段)'), row=2, col=1)
 
-        fig.add_hline(y=0, line_dash="dash", line_color="gray", row=2, col=1)
-        fig.add_hline(y=20, line_dash="dash", line_color="yellow", row=2, col=1, annotation_text="20% 警戒線")
+        fig.add_hline(y=0, line_dash="solid", line_color="#333333", row=2, col=1)
+        fig.add_hline(y=20, line_dash="dash", line_color="white", row=2, col=1, annotation_text="20% 警戒線")
         fig.add_hline(y=22, line_dash="solid", line_color="red", row=2, col=1, annotation_text="22% 極端線")
         
         fig.update_layout(height=650, template="plotly_dark", xaxis_rangeslider_visible=False,
@@ -377,18 +382,20 @@ def page_bias_analysis():
     past_sma = list(df['SMA40'].iloc[-lookback:])
     
     fig_pred.add_trace(go.Scatter(x=past_d + f_dates, y=past_c + f_closes, 
-                                 line=dict(color='gray', width=2, dash='dot'), 
+                                 line=dict(color='#444444', width=2, dash='dot'), 
                                  name='假設維持現價不變的指數路徑'))
     
     fig_pred.add_trace(go.Scatter(x=past_d, y=past_sma, 
-                                 line=dict(color='#FFA500', width=2), 
+                                 line=dict(color='white', width=2), 
                                  name='過去 SMA40'))
                                  
     fig_pred.add_trace(go.Scatter(x=f_dates, y=f_smas, 
-                                 line=dict(color='magenta', width=2), 
+                                 line=dict(color='red', width=2, dash='dot'), 
                                  name='預測的 SMA40 上升路徑'))
                                  
     fig_pred.update_layout(height=450, template="plotly_dark", 
+                           plot_bgcolor="rgba(0,0,0,0)",
+                           paper_bgcolor="rgba(0,0,0,0)",
                            title=f"未來 {future_weeks} 週 40 週均線扣抵預測圖",
                            margin=dict(l=0, r=0, t=40, b=0))
     st.plotly_chart(fig_pred, use_container_width=True)

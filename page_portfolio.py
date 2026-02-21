@@ -205,7 +205,7 @@ def page_portfolio_visualizer():
                 y=portfolio_growth * initial_amount,
                 mode='lines', 
                 name='您的投資組合 (Portfolio)',
-                line=dict(color='#00ff99', width=2)
+                line=dict(color='white', width=2)
             ))
             
             # Benchmark
@@ -234,7 +234,7 @@ def page_portfolio_visualizer():
             bench_dd = (bench_growth / bench_growth.cummax()) - 1
             
             fig_dd = go.Figure()
-            fig_dd.add_trace(go.Scatter(x=port_dd.index, y=port_dd * 100, mode='lines', fill='tozeroy', name='組合回檔', line=dict(color='#ff4b4b')))
+            fig_dd.add_trace(go.Scatter(x=port_dd.index, y=port_dd * 100, mode='lines', fill='tozeroy', name='組合回檔', line=dict(color='#ff0000')))
             fig_dd.update_layout(
                 yaxis_title="回檔幅度 (%)",
                 template="plotly_dark",
