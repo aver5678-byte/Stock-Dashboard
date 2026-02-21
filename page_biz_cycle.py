@@ -117,6 +117,7 @@ def page_biz_cycle():
 
     history_data = [
         {"period": f"2025.09 - 進行中 ({now.strftime('%Y.%m')})", "months": float(months_ongoing), "type": "長延續型 (預估)", "color": "#EF4444", "bg": "#FEE2E2"},
+        {"period": "2024.04 - 2025.04", "months": 13.0, "type": "長延續型", "color": "#EF4444", "bg": "#FEE2E2"},
         {"period": "2020.12 - 2022.02", "months": 15.0, "type": "長延續型", "color": "#EF4444", "bg": "#FEE2E2"},
         {"period": "2009.12 - 2011.02", "months": 15.0, "type": "長延續型", "color": "#EF4444", "bg": "#FEE2E2"},
         {"period": "2003.11 - 2004.09", "months": 11.0, "type": "長延續型", "color": "#EF4444", "bg": "#FEE2E2"},
