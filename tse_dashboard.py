@@ -115,42 +115,42 @@ def backtest(df):
                 end_date = date
                 drop_price = close_p
                 
-                max_surge = (max_price - trigger_price) / trigger_price * 100
-                total_drop = (drop_price - max_price) / max_price * 100
-                weeks = (end_date - start_date).days // 7
+                max_surge = (max_price - trigger_price) / trigger_price * 100 if trigger_price and trigger_price != 0 else 0
+                total_drop = (drop_price - max_price) / max_price * 100 if max_price and max_price != 0 else 0
+                weeks = (end_date - start_date).days // 7 if start_date and end_date else 0
                 
                 results.append({
-                    '觸發日期': start_date.strftime('%Y-%m-%d'),
-                    '類型': regime,
-                    '前12月最大回檔(%)': round(max_dd, 2),
-                    '觸發時指數': round(trigger_price, 2),
-                    '觸發時乖離率(%)': round(trigger_bias, 2),
-                    '22%警戒線指數': round(trigger_warning_price, 2),
-                    '波段最高日期': max_date.strftime('%Y-%m-%d'),
-                    '波段最高指數': round(max_price, 2),
-                    '最高噴出漲幅(%)': round(max_surge, 2),
-                    '回歸0%日期': end_date.strftime('%Y-%m-%d'),
-                    '回歸0%指數': round(drop_price, 2),
-                    '回歸0%總跌幅(%)': round(total_drop, 2),
+                    '觸發日期': start_date.strftime('%Y-%m-%d') if start_date else "N/A",
+                    '類型': regime if regime else "未知",
+                    '前12月最大回檔(%)': round(float(max_dd), 2) if max_dd is not None else 0.0,
+                    '觸發時指數': round(float(trigger_price), 2) if trigger_price is not None else 0.0,
+                    '觸發時乖離率(%)': round(float(trigger_bias), 2) if trigger_bias is not None else 0.0,
+                    '22%警戒線指數': round(float(trigger_warning_price), 2) if trigger_warning_price is not None else 0.0,
+                    '波段最高日期': max_date.strftime('%Y-%m-%d') if max_date else "N/A",
+                    '波段最高指數': round(float(max_price), 2) if max_price is not None else 0.0,
+                    '最高噴出漲幅(%)': round(float(max_surge), 2) if max_surge is not None else 0.0,
+                    '回歸0%日期': end_date.strftime('%Y-%m-%d') if end_date else None,
+                    '回歸0%指數': round(float(drop_price), 2) if drop_price is not None else None,
+                    '回歸0%總跌幅(%)': round(float(total_drop), 2) if total_drop is not None else None,
                     '完成回檔所需週數': weeks
                 })
                 
     if in_danger:
-        max_surge = (max_price - trigger_price) / trigger_price * 100
+        max_surge = (max_price - trigger_price) / trigger_price * 100 if trigger_price and trigger_price != 0 else 0
         results.append({
-            '觸發日期': start_date.strftime('%Y-%m-%d'),
-            '類型': regime,
-            '前12月最大回檔(%)': round(max_dd, 2),
-            '觸發時指數': round(trigger_price, 2),
-            '觸發時乖離率(%)': round(trigger_bias, 2),
-            '22%警戒線指數': round(trigger_warning_price, 2),
-            '波段最高日期': max_date.strftime('%Y-%m-%d'),
-            '波段最高指數': round(max_price, 2),
-            '最高噴出漲幅(%)': round(max_surge, 2),
+            '觸發日期': start_date.strftime('%Y-%m-%d') if start_date else "N/A",
+            '類型': regime if regime else "未知",
+            '前12月最大回檔(%)': round(float(max_dd), 2) if max_dd is not None else 0.0,
+            '觸發時指數': round(float(trigger_price), 2) if trigger_price is not None else 0.0,
+            '觸發時乖離率(%)': round(float(trigger_bias), 2) if trigger_bias is not None else 0.0,
+            '22%警戒線指數': round(float(trigger_warning_price), 2) if trigger_warning_price is not None else 0.0,
+            '波段最高日期': max_date.strftime('%Y-%m-%d') if max_date else "N/A",
+            '波段最高指數': round(float(max_price), 2) if max_price is not None else 0.0,
+            '最高噴出漲幅(%)': round(float(max_surge), 2) if max_surge is not None else 0.0,
             '回歸0%日期': None,
             '回歸0%指數': None,
             '回歸0%總跌幅(%)': None,
-            '完成回檔所需週數': ((df.index[-1] - start_date).days // 7)
+            '完成回檔所需週數': ((df.index[-1] - start_date).days // 7) if start_date else 0
         })
         
     return pd.DataFrame(results)
@@ -246,12 +246,12 @@ def page_bias_analysis():
                     hovertemplate='時間: %{x|%Y/%m/%d}<br>開: %{open:.2f}<br>高: %{high:.2f}<br>低: %{low:.2f}<br>收: %{close:.2f}<extra></extra>'), row=1, col=1)
                     
     fig.add_trace(go.Scatter(x=df.index, y=df['SMA40'], 
-                             line=dict(color='#A1A1AA', width=2), 
+                             line={'color': '#A1A1AA', 'width': 2}, 
                              name='40週均線',
                              hovertemplate='40週均線: %{y:.2f}<extra></extra>'), row=1, col=1)
                              
     fig.add_trace(go.Scatter(x=df.index, y=df['Bias'], 
-                             line=dict(color='#60A5FA', width=1.5), 
+                             line={'color': '#60A5FA', 'width': 1.5}, 
                              name='乖離率',
                              hovertemplate='乖離率: %{y:.2f}%<extra></extra>'), row=2, col=1)
                              
@@ -264,11 +264,11 @@ def page_bias_analysis():
         type_b_points = df.loc[df.index.intersection(type_b_dates)]
         
         fig.add_trace(go.Scatter(x=type_a_points.index, y=type_a_points['Bias'],
-                                 mode='markers', marker=dict(color='#ECECEC', size=8, symbol='circle', line=dict(width=1, color='#3F3F46')),
+                                 mode='markers', marker={'color': '#ECECEC', 'size': 8, 'symbol': 'circle', 'line': {'width': 1, 'color': '#3F3F46'}},
                                  name='類型 A (低基期)'), row=2, col=1)
                                  
         fig.add_trace(go.Scatter(x=type_b_points.index, y=type_b_points['Bias'],
-                                 mode='markers', marker=dict(color='red', size=8, symbol='circle', line=dict(width=1, color='darkred')),
+                                 mode='markers', marker={'color': 'red', 'size': 8, 'symbol': 'circle', 'line': {'width': 1, 'color': 'darkred'}},
                                  name='類型 B (高位段)'), row=2, col=1)
 
     fig.add_hline(y=0, line_dash="solid", line_color="#3F3F46", row=2, col=1)

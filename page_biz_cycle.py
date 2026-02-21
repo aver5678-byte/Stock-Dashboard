@@ -8,17 +8,25 @@ def page_biz_cycle():
     st.title("景氣指標與大盤對照分析")
     st.write("本模組分析台灣景氣對策信號與加權指數的長期關聯性。")
 
-    # 定義檔案路徑 (嘗試從可能的路徑讀取)
-    data_dir = r"c:\Users\user\Desktop\AI代理專案\景氣訊號"
-    taiex_path = os.path.join(data_dir, "taiex_monthly.csv")
+    # 定義檔案路徑 (優先嘗試相對路徑，再嘗試絕對路徑)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    taiex_path = os.path.join(current_dir, "taiex_monthly.csv")
     
-    # 讀取大盤數據
+    # 備用路徑 (原絕對路徑)
+    backup_path = r"c:\Users\user\Desktop\AI代理專案\景氣訊號\taiex_monthly.csv"
+    
     if not os.path.exists(taiex_path):
-        st.error(f"找不到大盤數據檔案：{taiex_path}")
-        return
+        if os.path.exists(backup_path):
+            taiex_path = backup_path
+        else:
+            st.error(f"找不到大盤數據檔案 (taiex_monthly.csv)。請確保檔案存在。")
+            return
 
     try:
         df_taiex = pd.read_csv(taiex_path)
+        if df_taiex.empty:
+            st.warning("大盤數據檔案為空。")
+            return
         df_taiex['Date'] = pd.to_datetime(df_taiex['Date'])
         df_taiex = df_taiex.sort_values('Date')
     except Exception as e:

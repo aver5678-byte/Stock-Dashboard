@@ -23,21 +23,24 @@ def load_upward_data(ticker_symbol):
         
     results = []
     for w in up_waves:
-        start_date = w['start_date'].strftime('%Y-%m-%d')
-        end_date = w['end_date'].strftime('%Y-%m-%d')
-        start_price = w['start_price']
-        end_price = w['end_price']
-        gain_pct = (end_price - start_price) / start_price * 100
-        days = (w['end_date'] - w['start_date']).days
+        s_date = w.get('start_date')
+        e_date = w.get('end_date')
+        start_date_str = s_date.strftime('%Y-%m-%d') if s_date else "N/A"
+        end_date_str = e_date.strftime('%Y-%m-%d') if e_date else "N/A"
+        
+        start_price = w.get('start_price', 0)
+        end_price = w.get('end_price', 0)
+        gain_pct = (end_price - start_price) / start_price * 100 if start_price and start_price != 0 else 0
+        days = (e_date - s_date).days if s_date and e_date else 0
         
         status = '進行中' if w.get('ongoing', False) else '已完結'
         
         results.append({
-            '起漲日期 (前波破底)': start_date,
-            '最高日期 (下波前高)': end_date,
-            '起漲價格': round(float(start_price), 2),
-            '最高價格': round(float(end_price), 2),
-            '漲幅(%)': round(float(gain_pct), 2),
+            '起漲日期 (前波破底)': start_date_str,
+            '最高日期 (下波前高)': end_date_str,
+            '起漲價格': round(float(start_price), 2) if start_price is not None else 0.0,
+            '最高價格': round(float(end_price), 2) if end_price is not None else 0.0,
+            '漲幅(%)': round(float(gain_pct), 2) if gain_pct is not None else 0.0,
             '花費天數': int(days),
             '狀態': status
         })
