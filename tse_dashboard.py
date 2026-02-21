@@ -631,16 +631,22 @@ if user_info := google_login():
 
 def render_user_profile():
     """ 渲染置底的個人中心名牌 """
-    user_email = st.session_state.get('user_email', '訪客 (未登入)')
+    user_email = st.session_state.get('user_email')
+    if not user_email:
+        user_email = '訪客 (未登入)'
+        
     role_name = '站長' if st.session_state.get('user_role') == 'admin' else '一般會員' if st.session_state.get('user_role') == 'user' else 'Guest'
     avatar_init = user_email[0].upper() if user_email and user_email[0].isalpha() else 'G'
     
+    # 處理顯示名稱 (如果是 Email 則去除 @ 之後的文字)
+    display_name = user_email.split("@")[0] if "@" in user_email else user_email
+
     st.sidebar.markdown("---")
     st.sidebar.markdown(f'''
         <div class="user-profile-card">
             <div class="user-avatar">{avatar_init}</div>
             <div class="user-info-text">
-                <div class="user-name">{user_email.split("@")[0]}</div>
+                <div class="user-name">{display_name}</div>
                 <div class="user-role">{role_name}</div>
             </div>
         </div>
