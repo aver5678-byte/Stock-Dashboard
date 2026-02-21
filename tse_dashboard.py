@@ -208,17 +208,19 @@ def page_bias_analysis():
     if latest_bias > 20:
         st.markdown(f"""
         <div class="danger-zone">
-            <h2>🚨 警告：已進入極端乖離風險區</h2>
-            <p>目前乖離率：<b>{latest_bias:.2f}%</b> (超過 20% 警戒線)</p>
-            <p style="font-size:16px; opacity:0.8;">目前指數：{latest_close:,.2f} | 40週均線：{latest_sma:,.2f}</p>
+            <h2>🚨 風險預警：極端乖離</h2>
+            <p>目前乖離率：<b>{latest_bias:.2f}%</b> <span style="font-size:14px; opacity:0.6;">(閾值 20%)</span></p>
+            <p style="margin-top:10px; font-size:15px; opacity:0.8;">
+                指數：{latest_close:,.2f} | 40W 均線：{latest_sma:,.2f}
+            </p>
         </div>
         """, unsafe_allow_html=True)
     else:
         st.markdown(f"""
         <div class="normal-zone">
-            <h2 style="color: #10B981 !important; border:none; margin:0;">✅ 目前狀態：安全 (Normal)</h2>
-            <p style="font-size: 20px; font-weight:600; margin:10px 0;">目前乖離率：{latest_bias:.2f}%</p>
-            <p style="font-size:14px; opacity:0.8;">目前指數：{latest_close:,.2f} | 40週均線：{latest_sma:,.2f}</p>
+            <h2 style="color: #10B981 !important; border:none; margin:0; font-size:24px;">✅ 目前狀態：安全</h2>
+            <p style="font-size: 18px; margin:12px 0;">目前乖離率：<b>{latest_bias:.2f}%</b></p>
+            <p style="font-size:14px; opacity:0.7;">指數：{latest_close:,.2f} | 40W 均線：{latest_sma:,.2f}</p>
         </div>
         """, unsafe_allow_html=True)
         

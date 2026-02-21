@@ -2,169 +2,162 @@ import streamlit as st
 
 def apply_global_theme():
     """
-    專業金融冷靜深色主題 (ChatGPT 風格)
-    低飽和、低對比、灰階分層
+    極致極簡：石墨黑沈浸方案 (Immersive Graphite)
+    解決問題：
+    1. 背景白邊割裂 (全站強制石墨黑)
+    2. 標題視覺層級 (雜誌級排版)
+    3. 警告區質感 (磨砂玻璃透明紅)
     """
     st.markdown("""
         <style>
-        /* 1. 整體背景與字體 - ChatGPT 深色風格 */
-        .stApp {
-            background-color: #212121 !important;
-            color: #ECECEC;
-            font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        /* 1. 全站背景強制覆蓋 (解決白邊問題) */
+        .stApp, .stAppViewContainer, .stMain, [data-testid="stHeader"], [data-testid="stSidebar"], .block-container {
+            background-color: #0D0D0D !important;
+            background-image: none !important;
+            color: #FFFFFF !important;
         }
-        
-        /* 主內容容器：置中並限制寬度 */
+
+        /* 頂部導航欄模糊化 */
+        header[data-testid="stHeader"] {
+            background-color: rgba(13, 13, 13, 0.7) !important;
+            backdrop-filter: blur(10px) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+
+        /* 主內容區：置中排版優化 */
         .main .block-container {
             max-width: 1100px !important;
-            padding-top: 3rem !important;
-            padding-bottom: 5rem !important;
+            padding: 4rem 1.5rem !important;
             margin: 0 auto !important;
         }
 
-        /* 2. 側邊欄 (Sidebar) 寬度與背景 */
-        section[data-testid="stSidebar"] {
-            background-color: #171717 !important;
-            min-width: 320px !important;
-            max-width: 320px !important;
-            border-right: 1px solid #2D2D2D;
-        }
-        
-        /* 側邊欄內容間距 */
-        section[data-testid="stSidebar"] .st-emotion-cache-16txtl3 {
-            padding: 2.5rem 1.25rem !important;
-        }
-
-        /* 側邊欄所有標題 */
-        section[data-testid="stSidebar"] h1, 
-        section[data-testid="stSidebar"] h2, 
-        section[data-testid="stSidebar"] h3 {
+        /* 2. 標題與字體系統 (解決標題層級問題) */
+        h1, h2, h3 {
+            font-family: 'Inter', 'Segoe UI Semibold', sans-serif !important;
             color: #FFFFFF !important;
-            font-size: 24px !important;
-            font-weight: 800 !important;
-            margin-bottom: 24px !important;
+            letter-spacing: -0.04em !important;
             border: none !important;
         }
         
-        /* 側邊欄普通文字與 Label */
-        section[data-testid="stSidebar"] .stMarkdown p,
-        section[data-testid="stSidebar"] .stWidgetLabel p {
-            color: #ECECEC !important;
-            font-size: 18px !important;
-            font-weight: 700 !important;
-            opacity: 1 !important;
-        }
-
-        /* 選單項目設計 (Radio group) */
-        section[data-testid="stSidebar"] div[role="radiogroup"] {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            padding-top: 15px;
-        }
-
-        section[data-testid="stSidebar"] div[role="radiogroup"] > label {
-            padding: 16px 20px !important;
-            border-radius: 12px !important;
-            color: #ECECEC !important;
-            font-size: 19px !important;
-            font-weight: 700 !important;
-            transition: all 0.2s ease !important;
-            cursor: pointer;
-            background-color: transparent !important;
-            border: 1px solid transparent !important;
-            display: flex !important;
-            align-items: center !important;
-            width: 100% !important;
+        h1 {
+            font-size: 36px !important;
+            font-weight: 900 !important;
+            margin-bottom: 2rem !important;
+            line-height: 1.1 !important;
         }
         
-        /* 選單文字強制白色 */
-        section[data-testid="stSidebar"] div[role="radiogroup"] label div p {
-            color: #ECECEC !important;
+        h2 {
+            font-size: 24px !important;
+            font-weight: 800 !important;
+            margin-top: 1.5rem !important;
+        }
+
+        /* 3. 側邊欄：導航體驗升級 */
+        section[data-testid="stSidebar"] {
+            width: 320px !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+
+        /* 選單標籤樣式 */
+        section[data-testid="stSidebar"] .stMarkdown p, 
+        section[data-testid="stSidebar"] div[role="radiogroup"] label p {
             font-size: 19px !important;
+            font-weight: 700 !important;
+            color: #ECECEC !important;
             margin: 0 !important;
         }
 
-        /* 選單 Hover */
+        /* 選單 Radio 項目項目自訂 */
+        section[data-testid="stSidebar"] div[role="radiogroup"] > label {
+            padding: 18px 22px !important;
+            border-radius: 14px !important;
+            margin-bottom: 12px !important;
+            transition: all 0.25s cubic-bezier(0.19, 1, 0.22, 1) !important;
+            border: 1px solid transparent !important;
+            background-color: transparent !important;
+        }
+
         section[data-testid="stSidebar"] div[role="radiogroup"] > label:hover {
-            background-color: #2A2B32 !important;
-            border: 1px solid #3F3F46 !important;
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
         }
-        
-        /* 選單 Active (選中狀態) */
+
+        /* Active 狀態：紅條與深色底 */
         section[data-testid="stSidebar"] div[role="radiogroup"] > label[data-checked="true"] {
-            background-color: #343541 !important;
-            color: #FFFFFF !important;
-            box-shadow: inset 4px 0 0 0 #F87171 !important; /* 內部紅條，更穩定 */
-            border: 1px solid #4D4D4D !important;
+            background-color: #1A1A1A !important;
+            box-shadow: inset 5px 0 0 0 #F87171 !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
         }
-        
+
         section[data-testid="stSidebar"] div[role="radiogroup"] > label[data-checked="true"] p {
             color: #FFFFFF !important;
-            font-weight: 800 !important;
+            font-weight: 900 !important;
         }
-        
-        /* 隱藏 Radio 圈圈 (修正：只隱藏第一個 div) */
+
+        /* 隱藏原生 Radio 圓圈 */
         section[data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child {
             display: none !important;
         }
 
-        /* 3. 主內容區卡片系統 */
-        [data-testid="stMetric"] {
-            background-color: #2A2B32 !important;
-            border: 1px solid #3F3F46 !important;
-            border-radius: 16px !important;
-            padding: 24px !important;
-        }
-
-        h1 {
-            font-size: 34px !important;
-            font-weight: 800 !important;
-            margin-bottom: 24px !important;
-            color: #FFFFFF !important;
-            border-bottom: 1px solid #2D2D2D !important;
-        }
-
-        /* 4. 警示與安全區 */
+        /* 4. 警告區：沈浸式磨砂紅 (解決警告區質感問題) */
         .danger-zone {
-            background-color: rgba(127, 29, 29, 0.45) !important;
-            border: 1px solid #EF4444 !important;
-            border-radius: 16px !important;
-            padding: 35px !important;
+            background-color: rgba(239, 68, 68, 0.06) !important;
+            border: 1px solid rgba(239, 68, 68, 0.4) !important;
+            border-radius: 20px !important;
+            padding: 30px !important;
             margin-bottom: 30px !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
         }
         
         .danger-zone h2 {
             color: #F87171 !important;
-            font-size: 28px !important;
-            font-weight: 800 !important;
-            border: none !important;
+            font-size: 26px !important;
+            margin-bottom: 10px !important;
+        }
+        
+        .danger-zone b {
+            font-family: 'JetBrains Mono', 'Monaco', monospace !important;
+            font-size: 24px !important;
+            color: #FFFFFF !important;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 8px;
+            border-radius: 6px;
         }
 
         .normal-zone {
-            background-color: rgba(16, 185, 129, 0.15) !important;
-            border: 1px solid #10B981 !important;
-            border-radius: 16px !important;
-            padding: 28px !important;
+            background-color: rgba(16, 185, 129, 0.04) !important;
+            border: 1px solid rgba(16, 185, 129, 0.3) !important;
+            border-radius: 20px !important;
+            padding: 24px !important;
         }
 
-        /* 5. 組件樣式優化 */
-        section[data-testid="stSidebar"] .stTextInput input {
-            height: 45px !important;
-            font-size: 16px !important;
-            background-color: #2A2B32 !important;
-            border: 1px solid #3F3F46 !important;
-            color: #FFFFFF !important;
+        /* 5. 數據指標 (Metric) 優化 */
+        [data-testid="stMetric"] {
+            background-color: rgba(255, 255, 255, 0.02) !important;
+            border: 1px solid rgba(255, 255, 255, 0.05) !important;
+            border-radius: 18px !important;
+            padding: 24px !important;
         }
         
-        section[data-testid="stSidebar"] button {
-            height: 45px !important;
-            font-size: 17px !important;
-            font-weight: 700 !important;
-            background-color: #F87171 !important; /* 登入按鈕改用紅色點綴 */
+        [data-testid="stMetricValue"] {
             color: #FFFFFF !important;
-            border: none !important;
-            border-radius: 10px !important;
+            font-weight: 800 !important;
+        }
+
+        /* 登入按鈕 */
+        .stButton button {
+            background-color: #F87171 !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            border-radius: 12px !important;
+            height: 50px !important;
+            transition: all 0.2s ease;
+        }
+        
+        .stButton button:hover {
+            background-color: #EF4444 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(248, 113, 113, 0.3);
         }
         </style>
     """, unsafe_allow_html=True)
