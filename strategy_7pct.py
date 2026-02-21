@@ -143,24 +143,23 @@ def calculate_7pct_statistics(events_df):
     # Distribution of Residual Drawdowns
     perfs = events_df['剩餘跌幅(%)'].copy()
     
-    # Bins for residual drawdown (e.g. 0-10, 10-20, 20-30, etc.)
-    # Since prices fall, residual drawdown is a positive number representing loss.
-    max_dd = perfs.max() if not perfs.empty else 0
-    max_bin = int(np.ceil(max_dd / 10)) * 10 if pd.notna(max_dd) else 10
+    # Bins for residual drawdown
+    # Use finer granularity for smaller ranges
+    bins = [0, 2, 4, 6, 8, 10, 15, 20, 30, 1000]
+    labels = ['0%~2%', '2%~4%', '4%~6%', '6%~8%', '8%~10%', '10%~15%', '15%~20%', '20%~30%', '>30%']
     
-    bins = list(range(0, max(max_bin + 10, 20), 10))
-    counts = pd.cut(perfs, bins=bins, right=False).value_counts().sort_index()
+    counts = pd.cut(perfs, bins=bins, labels=labels, right=False).value_counts().sort_index()
     
     dist_results = []
     n_total = len(events_df)
     
-    for interval, count in counts.items():
-        if pd.isna(interval):
+    for label, count in counts.items():
+        if count == 0:
             continue
+            
         prob = count / n_total * 100 if n_total > 0 else 0
-        interval_str = f"{interval.left:.0f}% ~ {interval.right:.0f}%" if hasattr(interval, 'left') else str(interval)
         dist_results.append({
-            'Range': interval_str,
+            'Range': label,
             'Count': count,
             'Probability (%)': round(prob, 2)
         })

@@ -33,11 +33,11 @@ def analyze_waves(df, reversal_percent=10.0):
         
         # Initial state determination
         if state == 0:
-            if close >= current_extreme_price * (1 + reversal_percent / 100.0):
+            if high >= current_extreme_price * (1 + reversal_percent / 100.0):
                 state = 1
                 current_extreme_price = high
                 current_extreme_date = date
-            elif close <= current_extreme_price * (1 - reversal_percent / 100.0):
+            elif low <= current_extreme_price * (1 - reversal_percent / 100.0):
                 state = -1
                 current_extreme_price = low
                 current_extreme_date = date
@@ -58,7 +58,7 @@ def analyze_waves(df, reversal_percent=10.0):
                 current_extreme_date = date
                 
             # Check for reversal to downtrend
-            if close <= current_extreme_price * (1 - reversal_percent / 100.0):
+            if low <= current_extreme_price * (1 - reversal_percent / 100.0):
                 wave = {
                     'type': 'up',
                     'start_date': wave_start_date,
@@ -86,7 +86,7 @@ def analyze_waves(df, reversal_percent=10.0):
                 current_extreme_date = date
                 
             # Check for reversal to uptrend
-            if close >= current_extreme_price * (1 + reversal_percent / 100.0):
+            if high >= current_extreme_price * (1 + reversal_percent / 100.0):
                 wave = {
                     'type': 'down',
                     'start_date': wave_start_date,
