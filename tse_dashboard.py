@@ -35,48 +35,12 @@ def log_visit(page_name):
     })
 
 # 您專屬的管理員信箱
-ADMIN_EMAIL = "your_google_email@gmail.com" 
+# 您專屬的管理員信箱
+ADMIN_EMAIL = "aver5678@gmail.com" 
 
 # 套用全站深邃黑白紅主題
 apply_global_theme()
 
-# 自定義額外狀態方塊 CSS (深色模式與閃爍動畫)
-st.markdown("""
-<style>
-@keyframes blink {
-  0% { opacity: 1; border-color: #ff0000; box-shadow: 0 0 10px red; }
-  50% { opacity: 0.8; border-color: #8b0000; box-shadow: 0 0 2px darkred; }
-  100% { opacity: 1; border-color: #ff0000; box-shadow: 0 0 10px red; }
-}
-.danger-zone {
-  animation: blink 1.5s infinite;
-  padding: 20px;
-  background-color: #ffffff;
-  border-radius: 4px;
-  border: 1px solid #ff0000;
-  text-align: center;
-  color: #000000;
-  margin-bottom: 20px;
-}
-.normal-zone {
-  padding: 20px;
-  border-radius: 4px;
-  background-color: #ffffff;
-  border: 1px solid #cccccc;
-  text-align: center;
-  color: #000000;
-  margin-bottom: 20px;
-}
-.warning-box {
-  background-color: #fce4e4;
-  border-left: 3px solid #ff0000;
-  padding: 15px;
-  margin: 10px 0;
-  border-radius: 2px;
-  color: #000000;
-}
-</style>
-""", unsafe_allow_html=True)
 
 @st.cache_data(ttl=3600)
 def load_data():
@@ -299,11 +263,11 @@ def page_bias_analysis():
                         name='K線'), row=1, col=1)
                         
         fig.add_trace(go.Scatter(x=df.index, y=df['SMA40'], 
-                                 line=dict(color='black', width=2), 
+                                 line=dict(color='#A1A1AA', width=2), 
                                  name='40週均線'), row=1, col=1)
                                  
         fig.add_trace(go.Scatter(x=df.index, y=df['Bias'], 
-                                 line=dict(color='#888888', width=1.5), 
+                                 line=dict(color='#60A5FA', width=1.5), 
                                  name='乖離率'), row=2, col=1)
                                  
         if not b_df.empty:
@@ -315,20 +279,21 @@ def page_bias_analysis():
             type_b_points = df.loc[df.index.intersection(type_b_dates)]
             
             fig.add_trace(go.Scatter(x=type_a_points.index, y=type_a_points['Bias'],
-                                     mode='markers', marker=dict(color='white', size=8, symbol='circle', line=dict(width=1, color='black')),
+                                     mode='markers', marker=dict(color='#ECECEC', size=8, symbol='circle', line=dict(width=1, color='#3F3F46')),
                                      name='類型 A (低基期)'), row=2, col=1)
                                      
             fig.add_trace(go.Scatter(x=type_b_points.index, y=type_b_points['Bias'],
                                      mode='markers', marker=dict(color='red', size=8, symbol='circle', line=dict(width=1, color='darkred')),
                                      name='類型 B (高位段)'), row=2, col=1)
 
-        fig.add_hline(y=0, line_dash="solid", line_color="#cccccc", row=2, col=1)
-        fig.add_hline(y=20, line_dash="dash", line_color="black", row=2, col=1, annotation_text="20% 警戒線")
-        fig.add_hline(y=22, line_dash="solid", line_color="red", row=2, col=1, annotation_text="22% 極端線")
+        fig.add_hline(y=0, line_dash="solid", line_color="#3F3F46", row=2, col=1)
+        fig.add_hline(y=20, line_dash="dash", line_color="#A1A1AA", row=2, col=1, annotation_text="20% 警戒線")
+        fig.add_hline(y=22, line_dash="solid", line_color="#F87171", row=2, col=1, annotation_text="22% 極端線")
         
         fig.update_layout(height=650, xaxis_rangeslider_visible=False,
                           plot_bgcolor="rgba(0,0,0,0)",
                           paper_bgcolor="rgba(0,0,0,0)",
+                          font=dict(color="#ECECEC"),
                           margin=dict(l=0, r=0, t=30, b=0))
         st.plotly_chart(fig, use_container_width=True)
         
@@ -383,20 +348,21 @@ def page_bias_analysis():
     past_sma = list(df['SMA40'].iloc[-lookback:])
     
     fig_pred.add_trace(go.Scatter(x=past_d + f_dates, y=past_c + f_closes, 
-                                 line=dict(color='#444444', width=2, dash='dot'), 
+                                 line=dict(color='#A1A1AA', width=2, dash='dot'), 
                                  name='假設維持現價不變的指數路徑'))
     
     fig_pred.add_trace(go.Scatter(x=past_d, y=past_sma, 
-                                 line=dict(color='black', width=2), 
+                                 line=dict(color='#ECECEC', width=2), 
                                  name='過去 SMA40'))
                                  
     fig_pred.add_trace(go.Scatter(x=f_dates, y=f_smas, 
-                                 line=dict(color='red', width=2, dash='dot'), 
+                                 line=dict(color='#F87171', width=2, dash='dot'), 
                                  name='預測的 SMA40 上升路徑'))
                                  
     fig_pred.update_layout(height=450, 
                            plot_bgcolor="rgba(0,0,0,0)",
                            paper_bgcolor="rgba(0,0,0,0)",
+                           font=dict(color="#ECECEC"),
                            title=f"未來 {future_weeks} 週 40 週均線扣抵預測圖",
                            margin=dict(l=0, r=0, t=40, b=0))
     st.plotly_chart(fig_pred, use_container_width=True)
@@ -693,6 +659,7 @@ def page_admin_dashboard():
             fig_pie = go.Figure(data=[go.Pie(labels=page_counts['模組'], values=page_counts['次數'], hole=.3)])
             fig_pie.update_layout(height=300, 
                                   margin=dict(l=0, r=0, t=30, b=0),
+                                  font=dict(color="#ECECEC"),
                                   paper_bgcolor="rgba(0,0,0,0)",
                                   plot_bgcolor="rgba(0,0,0,0)")
             st.plotly_chart(fig_pie, use_container_width=True)
