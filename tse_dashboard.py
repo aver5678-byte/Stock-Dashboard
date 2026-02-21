@@ -287,55 +287,97 @@ def page_bias_analysis():
     st.plotly_chart(fig, use_container_width=True)
 
 
-    st.write("---")
+    # --- 底部統計摘要 (置中卡片) ---
+    st.markdown('<h2 style="text-align:center; margin-top:50px;">📊 歷史回測數據概覽</h2>', unsafe_allow_html=True)
     
     col_s1, col_s2 = st.columns(2)
     with col_s1:
-        st.subheader("歷史勝率估計")
         win_rate, total_cases = calc_win_rate(df, latest_bias)
-        st.info(f"📍 歷史上乖離率落在 **{latest_bias - 2:.2f}% ~ {latest_bias + 2:.2f}%** 共發生過 **{total_cases}** 次。")
+        st.markdown(f'''
+            <div class="summary-card">
+                <div class="summary-label">見頂風險估計 (下月下跌勝率)</div>
+                <div class="summary-value" style="color: #EF4444;">{win_rate}%</div>
+                <div style="color: #6B7280; font-size: 14px;">歷史相似乖離共發生 {total_cases} 次</div>
+            </div>
+        ''', unsafe_allow_html=True)
         
-        if isinstance(win_rate, (int, float)):
-             st.metric(label="未來一個月內下跌機率", value=f"{win_rate}%")
-        else:
-             st.metric(label="未來一個月內下跌機率", value=f"{win_rate}")
-             
     with col_s2:
-        st.subheader("類型數據統計")
         if not b_df.empty:
             finished_df = b_df.dropna(subset=['回歸0%總跌幅(%)'])
             if not finished_df.empty:
                 avg_stats = finished_df.groupby('類型').agg({
-                    '回歸0%總跌幅(%)': 'mean',
-                    '完成回檔所需週數': 'mean'
-                }).reset_index()
+                    '回歸0%總跌幅(%)': 'mean'
+                }).to_dict()['回歸0%總跌幅(%)']
                 
-                for _, r in avg_stats.iterrows():
-                    st.markdown(f"**{r['類型']}**")
-                    st.markdown(f"- 平均總跌幅: **{r['回歸0%總跌幅(%)']:.2f}%**")
-                    st.markdown(f"- 平均歷時: **{r['完成回檔所需週數']:.1f} 週**")
+                avg_a = avg_stats.get('類型 A (低基期反彈)', 0)
+                avg_b = avg_stats.get('類型 B (高位末升段)', 0)
+                
+                st.markdown(f'''
+                    <div class="summary-card">
+                        <div class="summary-label">類型歷史平均跌幅</div>
+                        <div style="display: flex; justify-content: space-around; align-items: center; margin-top:20px;">
+                            <div>
+                                <div style="font-size:14px; color:#6B7280;">類型 A (低基期)</div>
+                                <div style="font-size:24px; font-weight:900; color:#111827;">{avg_a:+.2f}%</div>
+                            </div>
+                            <div style="width:1px; height:40px; background:#E5E7EB;"></div>
+                            <div>
+                                <div style="font-size:14px; color:#6B7280;">類型 B (末升段)</div>
+                                <div style="font-size:24px; font-weight:900; color:#111827;">{avg_b:+.2f}%</div>
+                            </div>
+                        </div>
+                    </div>
+                ''', unsafe_allow_html=True)
             else:
-                st.write("尚無完整回歸的歷史數據")
+                st.markdown('<div class="summary-card">尚無完整回歸數據</div>', unsafe_allow_html=True)
+        else:
+            st.markdown('<div class="summary-card">尚無歷史觸發數據</div>', unsafe_allow_html=True)
 
-    st.write("---")
-    st.subheader("📝 歷史回測：時空背景與大於 22% 乖離率追蹤")
-    st.markdown("將歷史事件區分為「低基期反彈」與「高位末升段」，並追蹤回歸 0% 期間的波段數據。")
-    
+    # --- 精簡化歷史表格 ---
+    st.markdown('<h2 style="text-align:center; margin-top:60px;">📜 歷史極端乖離回測詳情清單</h2>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:center; color:#6B7280; font-size:14px; margin-bottom:30px;">僅保留核心時空數據，助您快速對比歷史爆發力與修正壓力。</p>', unsafe_allow_html=True)
+
     if not b_df.empty:
-        st.dataframe(b_df, use_container_width=True)
+        # 準備精簡後的數據表
+        display_df = b_df.copy()
         
+        # 合併資訊欄位
+        display_df['時空背景 / 類型'] = display_df.apply(lambda r: f"📅 {r['觸發日期']}\n({r['類型'].split(' (')[0]})", axis=1)
+        
+        # 選擇並重命名黃金 5+1 欄位
+        final_df = display_df[[
+            '時空背景 / 類型', 
+            '前12月最大回檔(%)', 
+            '最高噴出漲幅(%)', 
+            '回歸0%總跌幅(%)', 
+            '完成回檔所需週數'
+        ]]
+        
+        final_df.columns = ['時間與背景', '前置回檔', '噴出漲幅', '修正跌幅', '修復耗時']
+        
+        # 格式化顯示 (加上 Icon 與單位)
+        final_df['前置回檔'] = final_df['前置回檔'].apply(lambda x: f"{x:.1f}%")
+        final_df['噴出漲幅'] = final_df['噴出漲幅'].apply(lambda x: f"📈 {x:.1f}%")
+        final_df['修正跌幅'] = final_df['修正跌幅'].apply(lambda x: f"📉 {x:.1f}%" if pd.notna(x) else "進行中")
+        final_df['修復耗時'] = final_df['修復耗時'].apply(lambda x: f"⏱️ {int(x)} 週" if pd.notna(x) else "進行中")
+
+        st.dataframe(final_df, use_container_width=True, height=450)
+        
+        # 下載按鈕 (保留完整版數據下載)
         buffer = io.BytesIO()
         with pd.ExcelWriter(buffer, engine='xlsxwriter', engine_kwargs={'options': {'nan_inf_to_errors': True}}) as writer:
-            b_df.to_excel(writer, index=False, sheet_name='回測結果')
+            b_df.to_excel(writer, index=False, sheet_name='詳細回測結果')
             
         st.download_button(
-            label="📥 匯出詳細回測報表 (Excel)",
+            label="📥 匯出完整詳細回測報表 (Excel)",
             data=buffer.getvalue(),
-            file_name="台股40週乖離率_時空分類回測報表.xlsx",
+            file_name="台股40週乖離率_詳細回測報表.xlsx",
             mime="application/vnd.ms-excel"
         )
     else:
         st.success("歷史上沒有發生過大於 22% 乖離率的事件。")
+
+    st.write("<p style='text-align:center; color:#9CA3AF; font-size:12px; margin-top:30px;'>* 以上數據基於台股加權指數歷史走勢計算，由 aver5678 系統量化模組驅動。</p>", unsafe_allow_html=True)
 
 def page_upward_bias():
     log_visit("股市上漲統計表")
