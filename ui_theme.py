@@ -145,14 +145,38 @@ def apply_global_theme():
         /* --- 6. 警示狀態設計規格 --- */
         
         /* 極端警示 (極少用，低明度暗紅底 + 警示紅文字，非刺眼的純紅) */
+        @keyframes blink {
+          0% { opacity: 1; border-color: #ff0000; box-shadow: 0 0 10px red; }
+          50% { opacity: 0.8; border-color: #8b0000; box-shadow: 0 0 2px darkred; }
+          100% { opacity: 1; border-color: #ff0000; box-shadow: 0 0 10px red; }
+        }
+        
         .danger-zone {
-            background-color: #2C1111; /* 低飽和暗紅 */
-            border: 1px solid #7F1D1D; /* 強調紅框 */
+            animation: blink 1.5s infinite;
+            background-color: #ffffff;
+            border: 1px solid #ff0000;
             border-radius: 12px;
             padding: 20px;
-            color: #FCA5A5; /* 安全感警示文字 */
+            text-align: center;
+            color: #000000;
             margin-bottom: 24px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .danger-zone h2 {
+            color: #ff0000 !important;
+            font-size: 28px !important;
+            border-bottom: none;
+            margin-top: 0;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .danger-zone p {
+            color: #000000 !important;
+            font-size: 20px !important;
+            font-weight: 500 !important;
+            text-align: center;
         }
         
         /* 一般安全 / 中立區塊 */

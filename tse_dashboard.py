@@ -249,80 +249,56 @@ def page_bias_analysis():
         </div>
         """, unsafe_allow_html=True)
         
-    col1, col2 = st.columns([3, 1])
+    st.subheader("📉 時空背景動態圖表")
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
+                        vertical_spacing=0.05, 
+                        subplot_titles=('加權指數與 40週均線 (週線)', '40週乖離率 (%)'),
+                        row_width=[0.3, 0.7])
+
+    fig.add_trace(go.Candlestick(x=df.index,
+                    open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'],
+                    name='K線'), row=1, col=1)
+                    
+    fig.add_trace(go.Scatter(x=df.index, y=df['SMA40'], 
+                             line=dict(color='#A1A1AA', width=2), 
+                             name='40週均線'), row=1, col=1)
+                             
+    fig.add_trace(go.Scatter(x=df.index, y=df['Bias'], 
+                             line=dict(color='#60A5FA', width=1.5), 
+                             name='乖離率'), row=2, col=1)
+                             
+    if not b_df.empty:
+        type_a_dates = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 A')]['觸發日期'])
+        type_b_dates = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 B')]['觸發日期'])
+        
+        # 使用 get_indexer 以防日期不存在 df index
+        type_a_points = df.loc[df.index.intersection(type_a_dates)]
+        type_b_points = df.loc[df.index.intersection(type_b_dates)]
+        
+        fig.add_trace(go.Scatter(x=type_a_points.index, y=type_a_points['Bias'],
+                                 mode='markers', marker=dict(color='#ECECEC', size=8, symbol='circle', line=dict(width=1, color='#3F3F46')),
+                                 name='類型 A (低基期)'), row=2, col=1)
+                                 
+        fig.add_trace(go.Scatter(x=type_b_points.index, y=type_b_points['Bias'],
+                                 mode='markers', marker=dict(color='red', size=8, symbol='circle', line=dict(width=1, color='darkred')),
+                                 name='類型 B (高位段)'), row=2, col=1)
+
+    fig.add_hline(y=0, line_dash="solid", line_color="#3F3F46", row=2, col=1)
+    fig.add_hline(y=20, line_dash="dash", line_color="#A1A1AA", row=2, col=1, annotation_text="20% 警戒線")
+    fig.add_hline(y=22, line_dash="solid", line_color="#F87171", row=2, col=1, annotation_text="22% 極端線")
     
-    with col1:
-        st.subheader("📉 時空背景動態圖表")
-        fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
-                            vertical_spacing=0.05, 
-                            subplot_titles=('加權指數與 40週均線 (週線)', '40週乖離率 (%)'),
-                            row_width=[0.3, 0.7])
+    fig.update_layout(height=650, xaxis_rangeslider_visible=False,
+                      plot_bgcolor="rgba(0,0,0,0)",
+                      paper_bgcolor="rgba(0,0,0,0)",
+                      font=dict(color="#ECECEC"),
+                      hovermode="x unified",
+                      margin=dict(l=0, r=0, t=30, b=0))
+                      
+    fig.update_xaxes(showspikes=True, spikemode="across", spikesnap="cursor", showline=True, spikedash="solid", spikethickness=1, spikecolor="#ECECEC")
+    fig.update_yaxes(showspikes=True, spikemode="across", spikesnap="cursor", showline=True, spikedash="solid", spikethickness=1, spikecolor="#ECECEC")
+    
+    st.plotly_chart(fig, use_container_width=True)
 
-        fig.add_trace(go.Candlestick(x=df.index,
-                        open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'],
-                        name='K線'), row=1, col=1)
-                        
-        fig.add_trace(go.Scatter(x=df.index, y=df['SMA40'], 
-                                 line=dict(color='#A1A1AA', width=2), 
-                                 name='40週均線'), row=1, col=1)
-                                 
-        fig.add_trace(go.Scatter(x=df.index, y=df['Bias'], 
-                                 line=dict(color='#60A5FA', width=1.5), 
-                                 name='乖離率'), row=2, col=1)
-                                 
-        if not b_df.empty:
-            type_a_dates = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 A')]['觸發日期'])
-            type_b_dates = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 B')]['觸發日期'])
-            
-            # 使用 get_indexer 以防日期不存在 df index
-            type_a_points = df.loc[df.index.intersection(type_a_dates)]
-            type_b_points = df.loc[df.index.intersection(type_b_dates)]
-            
-            fig.add_trace(go.Scatter(x=type_a_points.index, y=type_a_points['Bias'],
-                                     mode='markers', marker=dict(color='#ECECEC', size=8, symbol='circle', line=dict(width=1, color='#3F3F46')),
-                                     name='類型 A (低基期)'), row=2, col=1)
-                                     
-            fig.add_trace(go.Scatter(x=type_b_points.index, y=type_b_points['Bias'],
-                                     mode='markers', marker=dict(color='red', size=8, symbol='circle', line=dict(width=1, color='darkred')),
-                                     name='類型 B (高位段)'), row=2, col=1)
-
-        fig.add_hline(y=0, line_dash="solid", line_color="#3F3F46", row=2, col=1)
-        fig.add_hline(y=20, line_dash="dash", line_color="#A1A1AA", row=2, col=1, annotation_text="20% 警戒線")
-        fig.add_hline(y=22, line_dash="solid", line_color="#F87171", row=2, col=1, annotation_text="22% 極端線")
-        
-        fig.update_layout(height=650, xaxis_rangeslider_visible=False,
-                          plot_bgcolor="rgba(0,0,0,0)",
-                          paper_bgcolor="rgba(0,0,0,0)",
-                          font=dict(color="#ECECEC"),
-                          margin=dict(l=0, r=0, t=30, b=0))
-        st.plotly_chart(fig, use_container_width=True)
-        
-    with col2:
-        st.subheader("📊 歷史勝率估計")
-        win_rate, total_cases = calc_win_rate(df, latest_bias)
-        st.info(f"📍 歷史上乖離率落在 **{latest_bias - 2:.2f}% ~ {latest_bias + 2:.2f}%** 共發生過 **{total_cases}** 次。")
-        
-        if isinstance(win_rate, (int, float)):
-             st.metric(label="未來一個月內下跌機率", value=f"{win_rate}%")
-        else:
-             st.metric(label="未來一個月內下跌機率", value=f"{win_rate}")
-             
-        st.markdown("---")
-        st.subheader("🧠 類型數據統計")
-        if not b_df.empty:
-            finished_df = b_df.dropna(subset=['回歸0%總跌幅(%)'])
-            if not finished_df.empty:
-                avg_stats = finished_df.groupby('類型').agg({
-                    '回歸0%總跌幅(%)': 'mean',
-                    '完成回檔所需週數': 'mean'
-                }).reset_index()
-                
-                for _, r in avg_stats.iterrows():
-                    st.markdown(f"**{r['類型']}**")
-                    st.markdown(f"- 平均總跌幅: **{r['回歸0%總跌幅(%)']:.2f}%**")
-                    st.markdown(f"- 平均歷時: **{r['完成回檔所需週數']:.1f} 週**")
-            else:
-                st.write("尚無完整回歸的歷史數據")
 
     st.write("---")
     st.subheader("🔮 未來均線路徑預測 (假設維持現價不動)")
@@ -366,6 +342,36 @@ def page_bias_analysis():
                            title=f"未來 {future_weeks} 週 40 週均線扣抵預測圖",
                            margin=dict(l=0, r=0, t=40, b=0))
     st.plotly_chart(fig_pred, use_container_width=True)
+
+    st.write("---")
+    
+    col_s1, col_s2 = st.columns(2)
+    with col_s1:
+        st.subheader("歷史勝率估計")
+        win_rate, total_cases = calc_win_rate(df, latest_bias)
+        st.info(f"📍 歷史上乖離率落在 **{latest_bias - 2:.2f}% ~ {latest_bias + 2:.2f}%** 共發生過 **{total_cases}** 次。")
+        
+        if isinstance(win_rate, (int, float)):
+             st.metric(label="未來一個月內下跌機率", value=f"{win_rate}%")
+        else:
+             st.metric(label="未來一個月內下跌機率", value=f"{win_rate}")
+             
+    with col_s2:
+        st.subheader("類型數據統計")
+        if not b_df.empty:
+            finished_df = b_df.dropna(subset=['回歸0%總跌幅(%)'])
+            if not finished_df.empty:
+                avg_stats = finished_df.groupby('類型').agg({
+                    '回歸0%總跌幅(%)': 'mean',
+                    '完成回檔所需週數': 'mean'
+                }).reset_index()
+                
+                for _, r in avg_stats.iterrows():
+                    st.markdown(f"**{r['類型']}**")
+                    st.markdown(f"- 平均總跌幅: **{r['回歸0%總跌幅(%)']:.2f}%**")
+                    st.markdown(f"- 平均歷時: **{r['完成回檔所需週數']:.1f} 週**")
+            else:
+                st.write("尚無完整回歸的歷史數據")
 
     st.write("---")
     st.subheader("📝 歷史回測：時空背景與大於 22% 乖離率追蹤")
