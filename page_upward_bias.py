@@ -115,7 +115,7 @@ def page_upward_bias():
     st.subheader("📊 歷史漲幅機率區間分布 (7% 轉折模型)")
 
     if not dist_df.empty:
-        chart = alt.Chart(dist_df).mark_bar(color='#00ff99', cornerRadiusTopLeft=3, cornerRadiusTopRight=3).encode(
+        chart = alt.Chart(dist_df).mark_bar(color='#3B82F6', cornerRadiusTopLeft=6, cornerRadiusTopRight=6).encode(
             x=alt.X('區間:N', title='反彈漲幅區間 (%)', sort=None),
             y=alt.Y('機率(%):Q', title='發生機率 (%)'),
             tooltip=['區間:N', '次數:Q', '機率(%):Q']
@@ -124,8 +124,9 @@ def page_upward_bias():
         text = chart.mark_text(
             align='center',
             baseline='bottom',
-            dy=-5,
-            color='white'
+            dy=-8,
+            color='#111827',
+            fontWeight=700
         ).encode(
             text=alt.Text('機率(%):Q', format='.1f')
         )

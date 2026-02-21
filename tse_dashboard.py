@@ -629,59 +629,75 @@ if user_info := google_login():
         顯示_一般會員側邊欄()
 """)
 
-def login_simulator():
-    """ 這是一個輕量級的登入模擬器，讓您體會一下流程 """
+def render_user_profile():
+    """ 渲染置底的個人中心名牌 """
+    user_email = st.session_state.get('user_email', '訪客 (未登入)')
+    role_name = '站長' if st.session_state.get('user_role') == 'admin' else '一般會員' if st.session_state.get('user_role') == 'user' else 'Guest'
+    avatar_init = user_email[0].upper() if user_email and user_email[0].isalpha() else 'G'
+    
     st.sidebar.markdown("---")
+    st.sidebar.markdown(f'''
+        <div class="user-profile-card">
+            <div class="user-avatar">{avatar_init}</div>
+            <div class="user-info-text">
+                <div class="user-name">{user_email.split("@")[0]}</div>
+                <div class="user-role">{role_name}</div>
+            </div>
+        </div>
+    ''', unsafe_allow_html=True)
     
     if st.session_state['user_role'] == 'guest':
-        st.sidebar.subheader("🔒 會員登入 (體驗版)")
-        st.sidebar.write("請輸入信箱以模擬登入流程：")
+        if st.sidebar.button("🔐 模擬登入 (體驗版)"):
+            st.session_state['show_login'] = not st.session_state.get('show_login', False)
         
-        email_input = st.sidebar.text_input("Google Email", key="login_email")
-        
-        # 如果輸入的是您的帳號，就變成站長，否則是一般會員
-        if st.sidebar.button("登入 (Login)"):
-            if email_input == ADMIN_EMAIL:
-                st.session_state['user_role'] = 'admin'
-                st.session_state['user_email'] = email_input
-                st.rerun()
-            elif email_input:
-                st.session_state['user_role'] = 'user'
-                st.session_state['user_email'] = email_input
-                st.rerun()
-            else:
-                st.sidebar.error("請輸入信箱！")
+        if st.session_state.get('show_login', False):
+            with st.sidebar.expander("輸入信箱登入", expanded=True):
+                email = st.text_input("Google Email", key="login_email_input")
+                if st.button("確認登入"):
+                    if email == ADMIN_EMAIL:
+                        st.session_state['user_role'] = 'admin'
+                        st.session_state['user_email'] = email
+                        st.rerun()
+                    elif email:
+                        st.session_state['user_role'] = 'user'
+                        st.session_state['user_email'] = email
+                        st.rerun()
     else:
-        st.sidebar.success(f"✅ 您好，{st.session_state['user_email']}")
-        st.sidebar.write(f"身分：{'站長' if st.session_state['user_role'] == 'admin' else '一般會員'}")
-        
-        if st.sidebar.button("登出 (Logout)"):
+        if st.sidebar.button("🚪 登出系統"):
             st.session_state['user_role'] = 'guest'
             st.session_state['user_email'] = None
             st.rerun()
 
 def main():
-    st.sidebar.title("股市分析系統")
-    st.sidebar.markdown("請選擇您要查看的功能：")
+    # 1. 頂部 Logo (GPT 風格)
+    st.sidebar.markdown('<h1 style="border:none; margin-bottom:0;">📊 股市盤後系統</h1>', unsafe_allow_html=True)
     
-    # 掛載登入模擬器
-    login_simulator()
+    # 2. 功能導航分組
+    st.sidebar.markdown('<p class="sidebar-section-header">分析核心</p>', unsafe_allow_html=True)
     
     pages = {
-        "40週乖離率分析": page_bias_analysis,
-        "股市回檔統計表": page_downward_bias,
-        "股市上漲統計表": page_upward_bias,
-        "景氣信號": page_biz_cycle
+        "📉 40週乖離率分析": page_bias_analysis,
+        "🌡️ 景氣信號監控": page_biz_cycle
     }
     
-    # 如果是站長登入，就可以看到私密的後台
-    if st.session_state['user_role'] == 'admin':
-        pages["管理員後台"] = page_admin_dashboard
-        
-    selection = st.sidebar.radio("功能導覽", list(pages.keys()))
+    st.sidebar.markdown('<p class="sidebar-section-header">策略回測</p>', unsafe_allow_html=True)
+    pages.update({
+        "🩸 股市回檔統計": page_downward_bias,
+        "📈 股市上漲統計": page_upward_bias
+    })
     
-    st.sidebar.write("---")
-    st.sidebar.info("這是一個整合多個股市量化分析功能的入口網站。您可以隨時點選不同策略模組。")
+    # 如果是站長登入，隱藏分組
+    if st.session_state.get('user_role') == 'admin':
+        st.sidebar.markdown('<p class="sidebar-section-header">系統管理</p>', unsafe_allow_html=True)
+        pages["⚙️ 管理員後台"] = page_admin_dashboard
+        
+    selection = st.sidebar.radio("Navigation", list(pages.keys()), label_visibility="collapsed")
+    
+    # 3. 底部資訊與個人中心
+    st.sidebar.write("")
+    st.sidebar.info("這是一個整合多個股市量化分析功能的入口網站。透過左側 GPT 風格選單切換模組。")
+    
+    render_user_profile()
     
     # 執行對應的頁面函數
     pages[selection]()

@@ -5,8 +5,8 @@ from plotly.subplots import make_subplots
 import os
 
 def page_biz_cycle():
-    st.title("景氣指標與大盤對照分析")
-    st.write("本模組分析台灣景氣對策信號與加權指數的長期關聯性。")
+    st.markdown('<h1 class="centered-title">景氣指標與大盤對照分析</h1>', unsafe_allow_html=True)
+    st.write("<p style='text-align:center; color:#6B7280;'>本模組分析台灣景氣對策信號與加權指數的長期關聯性。</p>", unsafe_allow_html=True)
 
     # 定義檔案路徑 (優先嘗試相對路徑，再嘗試絕對路徑)
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -42,12 +42,14 @@ def page_biz_cycle():
         y=df_taiex['^TWII'],
         mode='lines',
         name='加權指數',
-        line=dict(color='#F87171', width=2)
+        line=dict(color='#3B82F6', width=2)
     ))
 
     fig.update_layout(
-        template="plotly_dark",
+        template="plotly_white",
         height=500,
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
         margin=dict(l=0, r=0, t=30, b=0),
         xaxis_title="年份",
         yaxis_title="指數點數"

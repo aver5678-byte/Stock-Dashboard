@@ -2,170 +2,187 @@ import streamlit as st
 
 def apply_global_theme():
     """
-    大師級極簡白方案 (Masterpiece Pure White)
-    設計邏輯：
-    - 精緻白(#FFFFFF)與冷淺灰(#F9F9FB)的層次堆疊
-    - 垂直置中對齊系統
-    - 大型標題排版 (Typography-first)
+    頂尖 1% 前端工程師作品：ChatGPT 5.0 輕量白沈浸主題
+    融合重點：
+    - 分組導航系統 (Section Headers)
+    - 底部個人中心 (User Profile Section)
+    - 膠囊型高亮選取 (Pill Hover/Active)
+    - 全站亮色圖表優化
     """
     st.markdown("""
         <style>
-        /* 1. 全站背景 (徹底白色化，消除白邊) */
+        /* 1. 全站基礎 - 沈浸式亮白 */
         .stApp, .stAppViewContainer, .stMain, [data-testid="stHeader"], .block-container {
             background-color: #FFFFFF !important;
             color: #1A1A1A !important;
         }
 
-        /* 導航欄模糊化 */
+        /* 導航頭部毛玻璃 */
         header[data-testid="stHeader"] {
-            background-color: rgba(255, 255, 255, 0.8) !important;
-            backdrop-filter: blur(12px) !important;
-            border-bottom: 1px solid #F0F0F0 !important;
+            background-color: rgba(255, 255, 255, 0.7) !important;
+            backdrop-filter: blur(15px) !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
         }
 
-        /* 主內容容器：極簡置中佈局 */
-        .main .block-container {
-            max-width: 1100px !important;
-            padding-top: 3rem !important;
-            padding-bottom: 6rem !important;
-            margin: 0 auto !important;
-        }
-
-        /* 2. 側邊欄 (Sidebar) 大師級設計 */
+        /* 2. 側邊欄 (Sidebar) - GPT 精密重構 */
         section[data-testid="stSidebar"] {
-            background-color: #F9F9FB !important; /* 冷淺灰 */
-            width: 320px !important;
-            border-right: 1px solid #E5E7EB !important;
+            background-color: #F9F9FB !important;
+            min-width: 320px !important;
+            max-width: 320px !important;
+            border-right: 1px solid #EDEDF0 !important;
         }
         
+        /* 側邊欄內邊距 */
         section[data-testid="stSidebar"] .st-emotion-cache-16txtl3 {
-            padding: 3rem 1.5rem !important;
+            padding: 2rem 1rem !important;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* 側欄標題與文字 */
-        section[data-testid="stSidebar"] h1, 
-        section[data-testid="stSidebar"] .stMarkdown p,
-        section[data-testid="stSidebar"] .stWidgetLabel p {
-            color: #1A1A1A !important;
+        /* --- 選單分組標題 (Section Headers) --- */
+        .sidebar-section-header {
+            font-size: 13px !important;
             font-weight: 700 !important;
-            letter-spacing: -0.02em !important;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9CA3AF !important;
+            margin: 24px 0 12px 12px !important;
         }
-        
-        section[data-testid="stSidebar"] h1 { font-size: 26px !important; margin-bottom: 30px !important; border:none !important; }
-        section[data-testid="stSidebar"] .stMarkdown p { font-size: 16px !important; opacity: 0.6; }
 
-        /* 選單項目 (Radio Group) */
+        /* --- 選單項目 (The Pill Design) --- */
         section[data-testid="stSidebar"] div[role="radiogroup"] > label {
-            padding: 16px 20px !important;
-            border-radius: 14px !important;
-            margin-bottom: 12px !important;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            cursor: pointer;
+            padding: 12px 14px !important;
+            border-radius: 12px !important;
+            margin: 0 4px 6px 4px !important;
+            transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1) !important;
             background-color: transparent !important;
-            border: 1px solid transparent !important;
-        }
-        
-        section[data-testid="stSidebar"] div[role="radiogroup"] > label:hover {
-            background-color: #EDEDF0 !important;
-        }
-        
-        /* 選單 Active 狀態：膠囊高亮 + 紅條 */
-        section[data-testid="stSidebar"] div[role="radiogroup"] > label[data-checked="true"] {
-            background-color: #EDEDF0 !important;
-            box-shadow: inset 4px 0 0 0 #F87171 !important;
-            border: 1px solid #E5E7EB !important;
-        }
-        
-        section[data-testid="stSidebar"] div[role="radiogroup"] label p {
-            font-size: 18px !important;
-            font-weight: 700 !important;
-            color: #374151 !important;
-        }
-        
-        section[data-testid="stSidebar"] div[role="radiogroup"] > label[data-checked="true"] p {
-            color: #111827 !important;
-            font-weight: 800 !important;
+            border: none !important;
         }
 
-        /* 隱藏 Radio 圈圈 */
+        /* Hover & Active 效果 */
+        section[data-testid="stSidebar"] div[role="radiogroup"] > label:hover {
+            background-color: #ECECEC !important;
+        }
+        
+        section[data-testid="stSidebar"] div[role="radiogroup"] > label[data-checked="true"] {
+            background-color: #E2E2E6 !important;
+        }
+        
+        /* 隱藏 Radio 圈圈，只留文字 */
         section[data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child {
             display: none !important;
         }
 
-        /* 3. 置中大型標題系統 */
+        section[data-testid="stSidebar"] div[role="radiogroup"] label p {
+            font-size: 17px !important;
+            font-weight: 600 !important;
+            color: #374151 !important;
+            margin: 0 !important;
+        }
+        
+        section[data-testid="stSidebar"] div[role="radiogroup"] > label[data-checked="true"] p {
+            color: #111827 !important;
+            font-weight: 700 !important;
+        }
+
+        /* 3. 底部個人中心 (Profile Section) */
+        .user-profile-card {
+            margin-top: auto; /* 強制置底 */
+            padding: 16px;
+            border-top: 1px solid #EDEDF0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-radius: 12px;
+        }
+        .user-profile-card:hover {
+            background-color: #EDEDF0;
+        }
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background-color: #F87171;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 15px;
+        }
+        .user-info-text {
+            flex-grow: 1;
+        }
+        .user-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1A1A1A;
+        }
+        .user-role {
+            font-size: 12px;
+            color: #9CA3AF;
+        }
+
+        /* 4. 主內容置中與警告卡片 */
         h1.centered-title {
             text-align: center !important;
             font-size: 42px !important;
             font-weight: 900 !important;
-            letter-spacing: 0.05em !important;
-            color: #1A1A1A !important;
-            margin: 2rem 0 !important;
-            line-height: 1.2 !important;
-            border: none !important;
+            letter-spacing: -0.04em !important;
+            color: #111827 !important;
+            margin-top: 1rem !important;
+            margin-bottom: 2.5rem !important;
         }
 
-        /* 4. 風險預警區：白色磨砂置中卡片 */
         .danger-zone {
             text-align: center !important;
-            background-color: #FFF5F5 !important; /* 極淺粉紅 */
+            background-color: #FFF5F5 !important;
             border: 1px solid #FEE2E2 !important;
-            border-left: 6px solid #EF4444 !important; /* 紅色質感提示 */
+            border-left: 6px solid #EF4444 !important;
             border-radius: 20px !important;
             padding: 40px !important;
-            margin: 30px auto !important;
+            margin: 0 auto 40px auto !important;
             max-width: 850px !important;
-            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.05) !important;
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.04) !important;
         }
         
         .danger-zone h2 {
-            color: #DC2626 !important;
+            color: #B91C1C !important;
             font-size: 32px !important;
-            font-weight: 900 !important;
-            margin-bottom: 20px !important;
-            border: none !important;
+            font-weight: 850 !important;
         }
         
-        .danger-zone .bias-value {
-            font-size: 52px !important;
+        .bias-value {
+            font-size: 58px !important;
             font-weight: 900 !important;
-            color: #1A1A1A !important;
-            font-family: 'JetBrains Mono', 'Monaco', monospace !important;
-            display: block;
-            margin: 15px 0;
-            letter-spacing: -2px;
+            color: #111827 !important;
+            letter-spacing: -3px;
         }
 
-        .normal-zone {
-            text-align: center !important;
-            background-color: #F0FDF4 !important;
-            border: 1px solid #DCFCE7 !important;
-            border-radius: 20px !important;
-            padding: 40px !important;
-            margin: 30px auto !important;
-            max-width: 850px !important;
+        /* 5. 組件樣式優化 */
+        section[data-testid="stSidebar"] div.stButton > button {
+            background-color: white !important;
+            border: 1px solid #E5E7EB !important;
+            color: #374151 !important;
+            font-size: 14px !important;
+            border-radius: 10px !important;
+            box-shadow: none !important;
+            height: 38px !important;
+            width: fit-content !important;
+            padding: 0 16px !important;
         }
-
-        /* 5. 數據指標與按鈕 */
-        [data-testid="stMetric"] {
+        section[data-testid="stSidebar"] div.stButton > button:hover {
             background-color: #F9FAFB !important;
-            border: 1px solid #F3F4F6 !important;
-            border-radius: 18px !important;
-            padding: 24px !important;
-        }
-        
-        .stButton button {
-            background-color: #F87171 !important;
-            color: white !important;
-            font-weight: 800 !important;
-            border-radius: 12px !important;
-            height: 50px !important;
-            border: none !important;
-            box-shadow: 0 4px 6px rgba(248, 113, 113, 0.2);
+            border-color: #D1D5DB !important;
         }
 
-        .stDataFrame {
-            border: 1px solid #F3F4F6 !important;
-            border-radius: 16px !important;
+        .stTextInput input {
+            background-color: white !important;
+            border: 1px solid #E5E7EB !important;
+            height: 40px !important;
+            font-size: 14px !important;
         }
         </style>
     """, unsafe_allow_html=True)
