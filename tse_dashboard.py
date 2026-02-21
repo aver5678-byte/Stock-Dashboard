@@ -250,23 +250,25 @@ def page_bias_analysis():
         </div>
         """, unsafe_allow_html=True)
         
-    st.subheader("📉 時空背景動態圖表")
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
                         vertical_spacing=0.05, 
-                        subplot_titles=('加權指數與 40週均線 (週線)', '40週乖離率 (%)'),
+                        subplot_titles=('<b style="font-size:24px;">台股加權指數40週乖離率</b>', '40週乖離率 (%)'),
                         row_width=[0.3, 0.7])
 
     fig.add_trace(go.Candlestick(x=df.index,
                     open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'],
-                    name='K線'), row=1, col=1)
+                    name='加權指數',
+                    hovertemplate='時間: %{x|%Y/%m/%d}<br>開: %{open:.2f}<br>高: %{high:.2f}<br>低: %{low:.2f}<br>收: %{close:.2f}<extra></extra>'), row=1, col=1)
                     
     fig.add_trace(go.Scatter(x=df.index, y=df['SMA40'], 
                              line=dict(color='#A1A1AA', width=2), 
-                             name='40週均線'), row=1, col=1)
+                             name='40週均線',
+                             hovertemplate='40週均線: %{y:.2f}<extra></extra>'), row=1, col=1)
                              
     fig.add_trace(go.Scatter(x=df.index, y=df['Bias'], 
                              line=dict(color='#60A5FA', width=1.5), 
-                             name='乖離率'), row=2, col=1)
+                             name='乖離率',
+                             hovertemplate='乖離率: %{y:.2f}%<extra></extra>'), row=2, col=1)
                              
     if not b_df.empty:
         type_a_dates = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 A')]['觸發日期'])
