@@ -117,7 +117,7 @@ def backtest(df):
                 
                 max_surge = (max_price - trigger_price) / trigger_price * 100 if trigger_price and trigger_price != 0 else 0
                 total_drop = (drop_price - max_price) / max_price * 100 if max_price and max_price != 0 else 0
-                weeks = int((end_date - start_date).days // 7) if start_date and end_date else 0
+                weeks = int((end_date - start_date).days) if start_date and end_date else 0
                 
                 results.append({
                     '觸發日期': start_date.strftime('%Y-%m-%d') if start_date else "N/A",
@@ -132,7 +132,7 @@ def backtest(df):
                     '回歸0%日期': end_date.strftime('%Y-%m-%d') if end_date else None,
                     '回歸0%指數': round(float(drop_price), 2) if drop_price is not None else None,
                     '回歸0%總跌幅(%)': round(float(total_drop), 2) if total_drop is not None else None,
-                    '完成回檔所需週數': weeks
+                    '完成回檔所需天數': weeks
                 })
                 
     if in_danger:
@@ -150,7 +150,7 @@ def backtest(df):
             '回歸0%日期': None,
             '回歸0%指數': None,
             '回歸0%總跌幅(%)': None,
-            '完成回檔所需週數': ((df.index[-1] - start_date).days // 7) if start_date else 0
+            '完成回檔所需天數': (df.index[-1] - start_date).days if start_date else 0
         })
         
     return pd.DataFrame(results)
@@ -357,9 +357,10 @@ def page_bias_analysis():
     if not b_df.empty:
         # 建立流水日誌介面
         for _, r in b_df.sort_values(by='觸發日期', ascending=False).iterrows():
+            # 取得基礎計算數據
             max_surge = float(r['最高噴出漲幅(%)'])
             max_drop = float(r['回歸0%總跌幅(%)']) if pd.notna(r['回歸0%總跌幅(%)']) else 0
-            weeks = r['完成回檔所需週數']
+            days_total = r['完成回檔所需天數']
             type_full = r['類型']
             type_tag = type_full.split(' (')[0]
             tag_color = "#3B82F6" if "類型 A" in type_full else "#EF4444"
@@ -368,30 +369,58 @@ def page_bias_analysis():
             # 計算能量條寬度 (假設上限 40%)
             surge_w = min(100.0, float(max_surge / 40 * 100))
             drop_w = min(100.0, float(abs(max_drop) / 40 * 100))
+
+            # 取得點位數據
+            line_22 = r['22%警戒線指數']
+            peak_val = r['波段最高指數']
+            recover_val = r['回歸0%指數'] if pd.notna(r['回歸0%指數']) else 0
             
             st.markdown(f'''
-                <div class="log-item">
-                    <div class="log-date">📅 {r['觸發日期']}</div>
-                    <div style="flex: 1;">
-                        <span class="log-type-tag" style="color:{tag_color}; background:{tag_bg};">{type_tag}</span>
+                <div class="log-item" style="padding: 25px;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div class="log-date">📅 {r['觸發日期']}</div>
+                        <div style="text-align:right;">
+                            <div style="font-size:11px; color:#9CA3AF;">修復耗時</div>
+                            <div style="font-family:'JetBrains Mono'; font-weight:800; color:#4B5563;">{int(days_total) if pd.notna(days_total) else "--"}天</div>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top:15px;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span class="log-type-tag" style="color:{tag_color}; background:{tag_bg}; margin:0;">{type_tag}</span>
+                            <span style="font-size:12px; color:#9CA3AF;">(前波回檔: {r['前12月最大回檔(%)']:.1f}%)</span>
+                        </div>
+                        
                         <div style="display:flex; gap:30px; margin-top:15px;">
                             <div style="flex:1;">
                                 <div style="display:flex; justify-content:space-between; font-size:12px; color:#6B7280;">
-                                    <span>最高噴出</span><span>{max_surge:+.1f}%</span>
+                                    <span>最高噴出漲幅</span><span>{max_surge:+.1f}%</span>
                                 </div>
                                 <div class="energy-bar-container"><div class="energy-bar-fill-up" style="width:{surge_w}%;"></div></div>
                             </div>
                             <div style="flex:1;">
                                 <div style="display:flex; justify-content:space-between; font-size:12px; color:#6B7280;">
-                                    <span>回歸跌幅</span><span>{max_drop:+.1f}%</span>
+                                    <span>回歸 0% 跌幅</span><span>{max_drop:+.1f}%</span>
                                 </div>
                                 <div class="energy-bar-container"><div class="energy-bar-fill-down" style="width:{drop_w}%;"></div></div>
                             </div>
                         </div>
-                    </div>
-                    <div style="text-align:right; min-width:80px;">
-                        <div style="font-size:11px; color:#9CA3AF;">修復耗時</div>
-                        <div style="font-family:'JetBrains Mono'; font-weight:800; color:#4B5563;">{int(weeks) if pd.notna(weeks) else "--"}週</div>
+                        
+                        <!-- 點位細節 Ticker Strip -->
+                        <div style="display:flex; gap:15px; margin-top:20px; padding:12px; background:rgba(0,0,0,0.02); border-radius:10px; border:1px solid #EDEDF0;">
+                            <div style="flex:1; border-right:1px solid #E5E7EB; border-style:dashed;">
+                                <div style="font-size:10px; color:#9CA3AF;">📍 22% 觸發價</div>
+                                <div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#4B5563;">{line_22:,.0f}</div>
+                            </div>
+                            <div style="flex:1; border-right:1px solid #E5E7EB; border-style:dashed;">
+                                <div style="font-size:10px; color:#9CA3AF;">🚀 期間最高價</div>
+                                <div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#3B82F6;">{peak_val:,.0f}</div>
+                            </div>
+                            <div style="flex:1;">
+                                <div style="font-size:10px; color:#9CA3AF;">🎯 回穩目標價</div>
+                                <div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#10B981;">{recover_val:,.0f if recover_val > 0 else "--"}</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             ''', unsafe_allow_html=True)
