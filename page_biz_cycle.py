@@ -4,15 +4,24 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import os
 
+from datetime import datetime
+
 def page_biz_cycle():
     st.markdown('<h1 class="centered-title">🌡️ 景氣對策信號監控 (Business Cycle Monitor)</h1>', unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#9CA3AF; margin-top:-30px; margin-bottom:50px;'>系統更新時間：2025-02-22 | 數據版本：Research Phase 4.0</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#9CA3AF; margin-top:-30px; margin-bottom:50px;'>系統更新時間：2026-02-22 | 數據版本：Auto-Sync Terminal v4.2</p>", unsafe_allow_html=True)
+    
+    # --- 動態時間計算 ---
+    # 起始日 2025-09-01，今日 2026-02-22
+    now = datetime.now()
+    research_start = datetime(2025, 9, 1)
+    # 計算相差月數
+    months_ongoing = (now.year - research_start.year) * 12 + (now.month - research_start.month)
+    if months_ongoing < 1: months_ongoing = 1 # 確保最小為 1
     
     # --- 1. 頂部狀態：景氣壓力計 ---
     col_t1, col_t2 = st.columns([1.2, 1])
     
-    current_score = 34.0  # 最新公布分數
-    months_ongoing = 5.0  # 自 2025-09 起算至今約 5 個月
+    current_score = 34.0  # 最新公布分數 (由研究模組提供)
     
     with col_t1:
         fig_score = go.Figure(go.Indicator(
@@ -41,6 +50,8 @@ def page_biz_cycle():
         st.plotly_chart(fig_score, use_container_width=True)
 
     with col_t2:
+        # 計算進度條 (相對於中位數 10 個月)
+        progress = min(100.0, float(months_ongoing / 10.0 * 100.0))
         st.markdown(f'''
             <div class="tech-card" style="margin-top:50px; text-align:center;">
                 <div class="summary-label">本次黃紅燈已持續</div>
@@ -49,7 +60,7 @@ def page_biz_cycle():
                     歷史中位數: 10 個月 | 歷史平均: 8.4 個月
                 </div>
                 <div class="energy-bar-container" style="height:10px; margin-top:15px;">
-                    <div class="energy-bar-fill-up" style="width:{float(months_ongoing/10.0*100.0) if months_ongoing < 10 else 100.0}%; background:#EF4444;"></div>
+                    <div class="energy-bar-fill-up" style="width:{progress}%; background:#EF4444;"></div>
                 </div>
                 <p style="font-size:12px; color:#9CA3AF; margin-top:10px;">目前循環：高機率進入「長延續型」擴張週期</p>
             </div>
@@ -94,7 +105,7 @@ def page_biz_cycle():
                     <span class="log-type-tag" style="background:#FEE2E2; color:#B91C1C;">2003</span>
                     <span class="log-type-tag" style="background:#FEE2E2; color:#B91C1C;">2009</span>
                     <span class="log-type-tag" style="background:#FEE2E2; color:#B91C1C;">2020</span>
-                    <span class="log-type-tag" style="background:#FEE2E2; color:#B91C1C;">2024 (預估)</span>
+                    <span class="log-type-tag" style="background:#FEE2E2; color:#B91C1C;">2025 (預估)</span>
                 </div>
                 <div style="margin-top:20px; font-size:12px; color:#9CA3AF;">發生率: 57% | 影響: 長期牛市</div>
             </div>
@@ -105,7 +116,7 @@ def page_biz_cycle():
     st.markdown('<p style="text-align:center; color:#9CA3AF; margin-bottom:40px;">能量條代表該循環持續月數 (Scale: 0-16 個月)</p>', unsafe_allow_html=True)
 
     history_data = [
-        {"period": "2024.09 - 進行中", "months": 5.0, "type": "長延續型 (預估)", "color": "#EF4444", "bg": "#FEE2E2"},
+        {"period": f"2025.09 - 進行中 ({now.strftime('%Y.%m')})", "months": float(months_ongoing), "type": "長延續型 (預估)", "color": "#EF4444", "bg": "#FEE2E2"},
         {"period": "2020.12 - 2022.02", "months": 15.0, "type": "長延續型", "color": "#EF4444", "bg": "#FEE2E2"},
         {"period": "2009.12 - 2011.02", "months": 15.0, "type": "長延續型", "color": "#EF4444", "bg": "#FEE2E2"},
         {"period": "2003.11 - 2004.09", "months": 11.0, "type": "長延續型", "color": "#EF4444", "bg": "#FEE2E2"},
