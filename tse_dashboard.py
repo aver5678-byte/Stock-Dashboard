@@ -117,7 +117,7 @@ def backtest(df):
                 
                 max_surge = (max_price - trigger_price) / trigger_price * 100 if trigger_price and trigger_price != 0 else 0
                 total_drop = (drop_price - max_price) / max_price * 100 if max_price and max_price != 0 else 0
-                weeks = (end_date - start_date).days // 7 if start_date and end_date else 0
+                weeks = int((end_date - start_date).days // 7) if start_date and end_date else 0
                 
                 results.append({
                     '觸發日期': start_date.strftime('%Y-%m-%d') if start_date else "N/A",
@@ -199,40 +199,48 @@ def page_bias_analysis():
     # 執行回測以獲取所有標籤
     b_df = backtest(df)
     
-    # 目前狀態判定
-    current_regime_label = "尚未觸發過"
-    if not b_df.empty:
-        # 取最後一筆事件來了解目前的定位
-        curr_event = b_df.iloc[-1]
-        current_regime_label = curr_event['類型']
-        
-    if latest_bias > 20:
-        st.markdown(f"""
-        <div class="danger-zone">
-            <h2>🚨 風險預警：極端乖離</h2>
-            <span class="bias-value">{latest_bias:.2f}%</span>
-            <p style="margin-top:10px; font-size:18px; color: #4B5563;">目前指數：{latest_close:,.2f} | 40W 線：{latest_sma:,.2f}</p>
+    # --- 頂部區域：數位儀表板 (Gauge) ---
+    st.markdown('<div style="margin-top:-20px;"></div>', unsafe_allow_html=True)
+    
+    # 建立目前乖離率儀表板
+    fig_gauge = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = latest_bias,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        title = {'text': "目前市場壓力計 (40W Bias)", 'font': {'size': 20, 'color': '#6B7280', 'weight': 'bold'}},
+        gauge = {
+            'axis': {'range': [None, 35], 'tickwidth': 1, 'tickcolor': "#E5E7EB"},
+            'bar': {'color': "#EF4444" if latest_bias > 22 else "#FBBF24" if latest_bias > 15 else "#10B981"},
+            'bgcolor': "white",
+            'borderwidth': 2,
+            'bordercolor': "#F3F4F6",
+            'steps': [
+                {'range': [0, 15], 'color': '#F0FDF4'},
+                {'range': [15, 22], 'color': '#FFFBEB'},
+                {'range': [22, 35], 'color': '#FFF1F2'}
+            ],
+            'threshold': {
+                'line': {'color': "red", 'width': 4},
+                'thickness': 0.75,
+                'value': 22
+            }
+        },
+        number = {'font': {'size': 50, 'family': 'JetBrains Mono', 'color': '#111827'}}
+    ))
+    
+    fig_gauge.update_layout(height=350, margin=dict(l=30, r=30, t=50, b=0), paper_bgcolor='rgba(0,0,0,0)')
+    st.plotly_chart(fig_gauge, use_container_width=True)
+    
+    # 顯示目前指數數據 (中心對齊標籤) - 數位跳表風格
+    st.markdown(f'''
+        <div class="gauge-center-data" style="background:#F9FAFB; padding:15px; border-radius:15px; display:inline-block; margin: -60px auto 40px auto; border:1px solid #EDEDF0;">
+            <div style="font-family:'JetBrains Mono'; font-weight:800; font-size:22px; color:#111827;">
+                <span style="color:#6B7280; font-size:14px; font-weight:500;">TAIEX</span> {latest_close:,.2f} 
+                <span style="color:#E5E7EB; margin:0 15px;">|</span>
+                <span style="color:#6B7280; font-size:14px; font-weight:500;">SMA40</span> {latest_sma:,.2f}
+            </div>
         </div>
-        """, unsafe_allow_html=True)
-    else:
-        st.markdown(f"""
-        <div class="normal-zone">
-            <h2 style="color: #059669 !important; border:none; margin:0; font-size:32px;">✅ 目前狀態：安全範圍</h2>
-            <p style="font-size: 20px; margin:15px 0; color: #4B5563;">目前乖離率：<b>{latest_bias:.2f}%</b></p>
-            <p style="font-size:16px; opacity:0.8; color: #6B7280;">指數：{latest_close:,.2f} | 40W 線：{latest_sma:,.2f}</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    # 如果正在危險區，並且是類型B，顯示專屬警告
-    if latest_bias > 20 and "類型 B" in current_regime_label:
-        st.markdown(f"""
-        <div class="warning-box">
-            <h4>時空背景定位：{current_regime_label}</h4>
-            <p style="font-size: 16px; color: #ff0000;">
-               <b>系統警告：</b> 本次回檔判定為高位噴出。歷史數據顯示，此類型背景下的回歸通常更為劇烈，請密切注意移動停利以及風險控管。
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
+    ''', unsafe_allow_html=True)
         
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
                         vertical_spacing=0.05, 
@@ -277,7 +285,7 @@ def page_bias_analysis():
     fig.update_layout(height=650, xaxis_rangeslider_visible=False,
                       plot_bgcolor="rgba(0,0,0,0)",
                       paper_bgcolor="rgba(0,0,0,0)",
-                      font=dict(color="#ECECEC"),
+                      font=dict(color="#111827"),
                       hovermode="x unified",
                       margin=dict(l=0, r=0, t=30, b=0))
                       
@@ -287,97 +295,117 @@ def page_bias_analysis():
     st.plotly_chart(fig, use_container_width=True)
 
 
-    # --- 底部統計摘要 (置中卡片) ---
-    st.markdown('<h2 style="text-align:center; margin-top:50px;">📊 歷史回測數據概覽</h2>', unsafe_allow_html=True)
+    # --- 底部區域：歷史決策儀表 (Gauge) ---
+    st.markdown('<h2 style="text-align:center; margin-top:80px;">📊 歷史回測決策建議</h2>', unsafe_allow_html=True)
     
-    col_s1, col_s2 = st.columns(2)
-    with col_s1:
-        win_rate, total_cases = calc_win_rate(df, latest_bias)
-        st.markdown(f'''
-            <div class="summary-card">
-                <div class="summary-label">見頂風險估計 (下月下跌勝率)</div>
-                <div class="summary-value" style="color: #EF4444;">{win_rate}%</div>
-                <div style="color: #6B7280; font-size: 14px;">歷史相似乖離共發生 {total_cases} 次</div>
-            </div>
-        ''', unsafe_allow_html=True)
-        
-    with col_s2:
+    col_g1, col_g2 = st.columns([1, 1])
+    
+    win_rate, total_cases = calc_win_rate(df, latest_bias)
+    
+    with col_g1:
+        # 下跌勝率儀表
+        fig_prob = go.Figure(go.Indicator(
+            mode = "gauge+number",
+            value = float(win_rate) if isinstance(win_rate, (int, float)) else 0,
+            title = {'text': "未來一個月下跌機率", 'font': {'size': 18, 'color': '#6B7280'}},
+            gauge = {
+                'axis': {'range': [0, 100], 'tickcolor': "#E5E7EB"},
+                'bar': {'color': "#EF4444"},
+                'steps': [
+                    {'range': [0, 30], 'color': '#DCFCE7'},
+                    {'range': [30, 70], 'color': '#FEF3C7'},
+                    {'range': [70, 100], 'color': '#FEE2E2'}
+                ]
+            },
+            number = {'suffix': "%", 'font': {'family': 'JetBrains Mono', 'size': 42}}
+        ))
+        fig_prob.update_layout(height=300, margin=dict(l=20, r=20, t=40, b=20), paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig_prob, use_container_width=True)
+        st.markdown(f'<p style="text-align:center; color:#9CA3AF; font-size:14px; margin-top:-30px;">基於史上相似 {total_cases} 次樣本</p>', unsafe_allow_html=True)
+
+    with col_g2:
+        # 類型統計卡片 (Tech Corner Style)
         if not b_df.empty:
             finished_df = b_df.dropna(subset=['回歸0%總跌幅(%)'])
             if not finished_df.empty:
-                avg_stats = finished_df.groupby('類型').agg({
-                    '回歸0%總跌幅(%)': 'mean'
-                }).to_dict()['回歸0%總跌幅(%)']
-                
+                avg_stats = finished_df.groupby('類型').agg({'回歸0%總跌幅(%)': 'mean'}).to_dict()['回歸0%總跌幅(%)']
                 avg_a = avg_stats.get('類型 A (低基期反彈)', 0)
                 avg_b = avg_stats.get('類型 B (高位末升段)', 0)
-                
-                st.markdown(f'''
-                    <div class="summary-card">
-                        <div class="summary-label">類型歷史平均跌幅</div>
-                        <div style="display: flex; justify-content: space-around; align-items: center; margin-top:20px;">
-                            <div>
-                                <div style="font-size:14px; color:#6B7280;">類型 A (低基期)</div>
-                                <div style="font-size:24px; font-weight:900; color:#111827;">{avg_a:+.2f}%</div>
+            else:
+                avg_a, avg_b = 0, 0
+            
+            st.markdown(f'''
+                <div class="tech-card" style="height:250px; display:flex; flex-direction:column; justify-content:center; margin-top:20px;">
+                    <div class="summary-label" style="text-align:center; margin-bottom:20px;">歷史平均回歸幅度</div>
+                    <div style="display:flex; justify-content:space-around;">
+                        <div style="text-align:center;">
+                            <div style="color:#6B7280; font-size:12px;">類型 A (低基期)</div>
+                            <div style="font-size:28px; font-weight:900; color:#10B981;">{avg_a:+.1f}%</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="color:#6B7280; font-size:12px;">類型 B (末升段)</div>
+                            <div style="font-size:28px; font-weight:900; color:#EF4444;">{avg_b:+.1f}%</div>
+                        </div>
+                    </div>
+                </div>
+            ''', unsafe_allow_html=True)
+
+    # --- 數位流水日誌 (Timeline Logs) ---
+    st.markdown('<h2 style="text-align:center; margin-top:80px;">📜 歷史極端乖離：全紀錄電子日誌</h2>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:center; color:#9CA3AF; margin-bottom:40px;">透過能量條直觀判定：歷史爆發力 vs 修復壓力 (Scale: 0-40%)</p>', unsafe_allow_html=True)
+
+    if not b_df.empty:
+        # 建立流水日誌介面
+        for _, r in b_df.sort_values(by='觸發日期', ascending=False).iterrows():
+            max_surge = float(r['最高噴出漲幅(%)'])
+            max_drop = float(r['回歸0%總跌幅(%)']) if pd.notna(r['回歸0%總跌幅(%)']) else 0
+            weeks = r['完成回檔所需週數']
+            type_full = r['類型']
+            type_tag = type_full.split(' (')[0]
+            tag_color = "#3B82F6" if "類型 A" in type_full else "#EF4444"
+            tag_bg = "#EFF6FF" if "類型 A" in type_full else "#FEF2F2"
+            
+            # 計算能量條寬度 (假設上限 40%)
+            surge_w = min(100.0, float(max_surge / 40 * 100))
+            drop_w = min(100.0, float(abs(max_drop) / 40 * 100))
+            
+            st.markdown(f'''
+                <div class="log-item">
+                    <div class="log-date">📅 {r['觸發日期']}</div>
+                    <div style="flex: 1;">
+                        <span class="log-type-tag" style="color:{tag_color}; background:{tag_bg};">{type_tag}</span>
+                        <div style="display:flex; gap:30px; margin-top:15px;">
+                            <div style="flex:1;">
+                                <div style="display:flex; justify-content:space-between; font-size:12px; color:#6B7280;">
+                                    <span>最高噴出</span><span>{max_surge:+.1f}%</span>
+                                </div>
+                                <div class="energy-bar-container"><div class="energy-bar-fill-up" style="width:{surge_w}%;"></div></div>
                             </div>
-                            <div style="width:1px; height:40px; background:#E5E7EB;"></div>
-                            <div>
-                                <div style="font-size:14px; color:#6B7280;">類型 B (末升段)</div>
-                                <div style="font-size:24px; font-weight:900; color:#111827;">{avg_b:+.2f}%</div>
+                            <div style="flex:1;">
+                                <div style="display:flex; justify-content:space-between; font-size:12px; color:#6B7280;">
+                                    <span>回歸跌幅</span><span>{max_drop:+.1f}%</span>
+                                </div>
+                                <div class="energy-bar-container"><div class="energy-bar-fill-down" style="width:{drop_w}%;"></div></div>
                             </div>
                         </div>
                     </div>
-                ''', unsafe_allow_html=True)
-            else:
-                st.markdown('<div class="summary-card">尚無完整回歸數據</div>', unsafe_allow_html=True)
-        else:
-            st.markdown('<div class="summary-card">尚無歷史觸發數據</div>', unsafe_allow_html=True)
+                    <div style="text-align:right; min-width:80px;">
+                        <div style="font-size:11px; color:#9CA3AF;">修復耗時</div>
+                        <div style="font-family:'JetBrains Mono'; font-weight:800; color:#4B5563;">{int(weeks) if pd.notna(weeks) else "--"}週</div>
+                    </div>
+                </div>
+            ''', unsafe_allow_html=True)
 
-    # --- 精簡化歷史表格 ---
-    st.markdown('<h2 style="text-align:center; margin-top:60px;">📜 歷史極端乖離回測詳情清單</h2>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align:center; color:#6B7280; font-size:14px; margin-bottom:30px;">僅保留核心時空數據，助您快速對比歷史爆發力與修正壓力。</p>', unsafe_allow_html=True)
-
-    if not b_df.empty:
-        # 準備精簡後的數據表
-        display_df = b_df.copy()
+        st.markdown('<div style="margin-top:50px; text-align:center;"></div>', unsafe_allow_html=True)
         
-        # 合併資訊欄位
-        display_df['時空背景 / 類型'] = display_df.apply(lambda r: f"📅 {r['觸發日期']}\n({r['類型'].split(' (')[0]})", axis=1)
-        
-        # 選擇並重命名黃金 5+1 欄位
-        final_df = display_df[[
-            '時空背景 / 類型', 
-            '前12月最大回檔(%)', 
-            '最高噴出漲幅(%)', 
-            '回歸0%總跌幅(%)', 
-            '完成回檔所需週數'
-        ]]
-        
-        final_df.columns = ['時間與背景', '前置回檔', '噴出漲幅', '修正跌幅', '修復耗時']
-        
-        # 格式化顯示 (加上 Icon 與單位)
-        final_df['前置回檔'] = final_df['前置回檔'].apply(lambda x: f"{x:.1f}%")
-        final_df['噴出漲幅'] = final_df['噴出漲幅'].apply(lambda x: f"📈 {x:.1f}%")
-        final_df['修正跌幅'] = final_df['修正跌幅'].apply(lambda x: f"📉 {x:.1f}%" if pd.notna(x) else "進行中")
-        final_df['修復耗時'] = final_df['修復耗時'].apply(lambda x: f"⏱️ {int(x)} 週" if pd.notna(x) else "進行中")
-
-        st.dataframe(final_df, use_container_width=True, height=450)
-        
-        # 下載按鈕 (保留完整版數據下載)
         buffer = io.BytesIO()
-        with pd.ExcelWriter(buffer, engine='xlsxwriter', engine_kwargs={'options': {'nan_inf_to_errors': True}}) as writer:
+        with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
             b_df.to_excel(writer, index=False, sheet_name='詳細回測結果')
-            
-        st.download_button(
-            label="📥 匯出完整詳細回測報表 (Excel)",
-            data=buffer.getvalue(),
-            file_name="台股40週乖離率_詳細回測報表.xlsx",
-            mime="application/vnd.ms-excel"
-        )
+        st.download_button("📥 匯出完整數據日誌 (Excel)", buffer.getvalue(), "TAIEX_40W_Log.xlsx", "application/vnd.ms-excel")
     else:
-        st.success("歷史上沒有發生過大於 22% 乖離率的事件。")
+        st.info("歷史上查無此極端數據。")
 
-    st.write("<p style='text-align:center; color:#9CA3AF; font-size:12px; margin-top:30px;'>* 以上數據基於台股加權指數歷史走勢計算，由 aver5678 系統量化模組驅動。</p>", unsafe_allow_html=True)
+    st.write("<p style='text-align:center; color:#9CA3AF; font-size:12px; margin-top:50px;'>系統由 aver5678 量化模組驅動 | 視覺化引擎: Command-Center v3.0</p>", unsafe_allow_html=True)
 
 def page_upward_bias():
     log_visit("股市上漲統計表")
@@ -685,11 +713,11 @@ def render_user_profile():
 
     st.sidebar.markdown("---")
     st.sidebar.markdown(f'''
-        <div class="user-profile-card">
-            <div class="user-avatar">{avatar_init}</div>
+        <div class="user-profile-card" style="background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+            <div class="user-avatar" style="box-shadow: 0 2px 8px rgba(248,113,113,0.4);">{avatar_init}</div>
             <div class="user-info-text">
-                <div class="user-name">{display_name}</div>
-                <div class="user-role">{role_name}</div>
+                <div class="user-name" style="font-weight:900; color:#111827;">{display_name}</div>
+                <div class="user-role" style="font-size:10px; color:#F87171; font-weight:800; text-transform:uppercase; letter-spacing:1px;">{role_name}</div>
             </div>
         </div>
     ''', unsafe_allow_html=True)

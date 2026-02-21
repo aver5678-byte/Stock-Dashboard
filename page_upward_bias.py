@@ -82,8 +82,8 @@ def load_upward_data(ticker_symbol):
     return up_df, dist_df, metrics
 
 def page_upward_bias():
-    st.title("📈 股市上漲統計表")
-    st.write("這是一個獨立的分析頁面！\\n計算每一次從低點起漲（經過前波大於 7% 的修正洗盤），一直抱到「下一次再發生 7% 大回檔」前的小波段/大波段真正漲幅。")
+    st.markdown('<h1 class="centered-title">📈 股市上漲統計表 (Bottom Bounce Analysis)</h1>', unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#6B7280;'>計算每一次從低點起漲（經過前波大於 7% 的修正洗盤），一直抱到『下一次再發生 7% 大回檔』前的小波段/大波段真正漲幅。</p>", unsafe_allow_html=True)
     
     tickers = {
         "S&P 500 (^GSPC)": "^GSPC",

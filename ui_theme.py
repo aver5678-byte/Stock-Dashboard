@@ -2,144 +2,118 @@ import streamlit as st
 
 def apply_global_theme():
     """
-    頂尖 1% 前端工程師作品：ChatGPT 5.0 旗艦白美學 (Masterpiece v2)
-    更新：導入置中數據卡片、精簡化專業表格與高級陰影系統
+    頂尖 1% 前端工程師作品：GPT-Command-Center 極簡白旗艦美學
+    核心技術：半圓儀表盤、數位流水日誌、能量條可視化、科技角卡片
     """
     st.markdown("""
         <style>
-        /* 1. 全站沈浸式白底 */
-        .stApp, .stAppViewContainer, .stMain, [data-testid="stHeader"], [data-testid="stSidebar"], .block-container {
+        /* 1. 核心字體與背景 */
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;800&family=Inter:wght@400;700;900&display=swap');
+        
+        .stApp, .block-container {
             background-color: #FFFFFF !important;
             color: #1A1A1A !important;
+            font-family: 'Inter', sans-serif !important;
         }
 
-        header[data-testid="stHeader"] {
-            background-color: rgba(255, 255, 255, 0.7) !important;
-            backdrop-filter: blur(15px) !important;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.03) !important;
+        /* 2. 科技感卡片系統 (Tech corners) */
+        .tech-card {
+            background: #FFFFFF;
+            border: 1px solid #EDEDF0;
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            transition: transform 0.2s ease;
+            margin-bottom: 20px;
+        }
+        
+        .tech-card::before, .tech-card::after {
+            content: "";
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border: 2px solid #F87171;
+            opacity: 0.3;
+        }
+        .tech-card::before { top: 10px; left: 10px; border-right: 0; border-bottom: 0; }
+        .tech-card::after { bottom: 10px; right: 10px; border-left: 0; border-top: 0; }
+
+        /* 3. 能量條 (Energy Bars for Logs) */
+        .energy-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #F3F4F6;
+            border-radius: 4px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        .energy-bar-fill-up { height: 100%; background: #10B981; border-radius: 4px; } /* 綠色漲幅 */
+        .energy-bar-fill-down { height: 100%; background: #EF4444; border-radius: 4px; } /* 紅色跌幅 */
+
+        /* 4. 數位流水日誌卡片 (Timeline Log Card) */
+        .log-item {
+            display: flex;
+            align-items: center;
+            padding: 18px 25px;
+            border-bottom: 1px solid #F3F4F6;
+            gap: 20px;
+            transition: background 0.2s;
+        }
+        .log-item:hover { background: #F9FAFB; }
+        
+        .log-date {
+            min-width: 110px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800;
+            font-size: 15px;
+            color: #374151;
+        }
+        .log-type-tag {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
         }
 
-        .main .block-container {
-            max-width: 1100px !important;
-            padding: 3rem 1.5rem !important;
-            margin: 0 auto !important;
-        }
-
-        /* 2. 側邊欄：GPT 導航進化 */
+        /* 5. 側邊欄：GPT 導航 */
         section[data-testid="stSidebar"] {
             background-color: #F9F9FB !important;
-            min-width: 320px !important;
             border-right: 1px solid #EDEDF0 !important;
         }
         
-        /* 分組標題設計 */
         .sidebar-section-header {
-            font-size: 13px !important;
-            font-weight: 700 !important;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+            font-size: 11px !important;
+            font-weight: 800 !important;
             color: #9CA3AF !important;
-            margin: 28px 0 10px 12px !important;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 24px 0 8px 12px !important;
         }
 
-        /* 選項膠囊 */
-        section[data-testid="stSidebar"] div[role="radiogroup"] > label {
-            padding: 12px 14px !important;
-            border-radius: 14px !important;
-            margin: 2px 4px !important;
-            transition: all 0.2s ease !important;
-        }
-        
-        section[data-testid="stSidebar"] div[role="radiogroup"] > label:hover {
-            background-color: #ECECEC !important;
-        }
-        
-        section[data-testid="stSidebar"] div[role="radiogroup"] > label[data-checked="true"] {
-            background-color: #E2E2E6 !important;
-            box-shadow: inset 4px 0 0 0 #F87171 !important;
-        }
-
-        /* 3. 置中大標題與卡片系統 */
+        /* 6. 置中標題 */
         h1.centered-title {
             text-align: center !important;
-            font-size: 42px !important;
+            font-size: 40px !important;
             font-weight: 900 !important;
-            letter-spacing: -0.05em !important;
-            margin: 2rem 0 !important;
-        }
-
-        .summary-card {
-            background-color: #FFFFFF !important;
-            border: 1px solid #E5E7EB !important;
-            border-radius: 24px !important;
-            padding: 35px !important;
-            text-align: center !important;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04) !important;
-            transition: transform 0.3s ease !important;
-        }
-        
-        .summary-card:hover {
-            transform: translateY(-5px) !important;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06) !important;
-        }
-
-        .summary-value {
-            font-size: 48px !important;
-            font-weight: 900 !important;
+            letter-spacing: -0.06em !important;
+            margin: 1rem 0 3rem 0 !important;
             color: #111827 !important;
-            letter-spacing: -2px !important;
-            margin: 10px 0 !important;
-        }
-        
-        .summary-label {
-            font-size: 16px !important;
-            font-weight: 700 !important;
-            color: #6B7280 !important;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
 
-        /* 4. 專業化歷史回測表格樣式 */
-        .stDataFrame {
-            border: none !important;
-            border-radius: 20px !important;
-            overflow: hidden !important;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+        /* 7. 修復原本毀損的警告區 (改造成半圓中心數據) */
+        .gauge-center-data {
+            text-align: center;
+            margin-top: -60px; /* 向上移動至儀表板圓心 */
+            z-index: 10;
         }
-
-        /* 5. 底部個人中心 (Profile Section) */
-        .user-profile-card {
-            margin-top: auto;
-            padding: 20px 16px;
-            border-top: 1px solid #EDEDF0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-radius: 12px;
-        }
-        
-        .user-avatar {
-            width: 38px;
-            height: 38px;
-            background-color: #F87171;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
+        .gauge-value-main {
+            font-size: 56px;
             font-weight: 900;
-        }
-
-        /* 6. 其他 UI 元件微調 */
-        .stButton button {
-            border-radius: 14px !important;
-            font-weight: 800 !important;
-            transition: all 0.2s !important;
-        }
-        
-        .stSelectbox div[data-baseweb="select"] {
-            border-radius: 14px !important;
-            background-color: #F9FAFB !important;
+            font-family: 'JetBrains Mono', monospace;
+            color: #111827;
+            letter-spacing: -3px;
         }
         </style>
     """, unsafe_allow_html=True)
