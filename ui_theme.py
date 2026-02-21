@@ -7,197 +7,143 @@ def apply_global_theme():
     """
     st.markdown("""
         <style>
-        /* 1. 整體背景與字體 (色票系統) */
+        /* 1. 整體背景與字體 - ChatGPT 深色風格 */
         .stApp {
-            background-color: #212121; /* 主背景 */
-            color: #ECECEC;           /* 第一層級文字 (Primary) */
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        
-        /* 2. 側邊欄 (左側選單) */
-        [data-testid="stSidebar"] {
-            background-color: #171717; /* 側邊欄背景 */
-            border-right: 1px solid #262626;
-        }
-        
-        /* 隱藏預設 Radio button 的圈圈，改造成選單樣式 */
-        [data-testid="stSidebar"] div[role="radiogroup"] > label > div:first-of-type {
-            display: none;
-        }
-        
-        /* 左側選單設計規格：一般狀態 */
-        [data-testid="stSidebar"] div[role="radiogroup"] > label {
-            padding: 10px 14px;
-            border-radius: 8px;
-            margin-bottom: 4px;
-            color: #A1A1AA; /* 預設為次要灰色 */
-            transition: all 0.2s ease;
-            cursor: pointer;
-            background-color: transparent;
-            display: flex;
-            align-items: center;
-        }
-        
-        /* 左側選單設計規格：Hover 狀態 */
-        [data-testid="stSidebar"] div[role="radiogroup"] > label:hover {
-            background-color: #2A2B32; /* 懸停底色 */
-            color: #ECECEC; /* 懸停字體亮起 */
-        }
-        
-        /* 左側選單設計規格：Active 狀態 */
-        /* Streamlit checked state is nested but applies aria-checked */
-        [data-testid="stSidebar"] div[role="radiogroup"] > label[data-checked="true"],
-        [data-testid="stSidebar"] div[role="radiogroup"] > label[aria-checked="true"] {
-            background-color: #343541 !important; /* 選中狀態，如 ChatGPT */
-            color: #ECECEC !important;
-            font-weight: 500;
-        }
-        
-        /* 3. 主畫面卡片系統 (stMetric) */
-        [data-testid="stMetric"] {
-            background-color: #1E1E1E;
-            border: 1px solid #262626; /* 框線 */
-            border-radius: 12px;       /* 圓角 12px */
-            padding: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* 柔和陰影 */
-            transition: all 0.2s ease;
-        }
-        [data-testid="stMetric"]:hover {
-            border-color: #3F3F46;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* 卡片標題：次要資訊 (Low Contrast) */
-        [data-testid="stMetricLabel"] {
-            color: #A1A1AA !important;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        /* 卡片數值：主要資訊 */
-        [data-testid="stMetricValue"] {
-            color: #FFFFFF !important;
-            font-size: 32px !important;
-            font-weight: 600;
-            padding-top: 8px;
-        }
-        
-        /* 卡片小指標 (綠/紅) 自動由框架控制，我們不強制寫死，保留柔和感 */
-        
-        /* 4. 字級階層系統 */
-        h1 {
-            font-size: 24px !important;
-            font-weight: 600 !important;
-            color: #ECECEC !important;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #262626;
-            margin-bottom: 24px;
-        }
-        h2 {
-            font-size: 18px !important;
-            font-weight: 600 !important;
-            color: #ECECEC !important;
-            margin-top: 32px;
-            margin-bottom: 16px;
-        }
-        h3 {
-            font-size: 16px !important;
-            font-weight: 500 !important;
-            color: #D4D4D8 !important;
-        }
-        p, li {
-            font-size: 14px !important;
-            font-weight: 400 !important;
-            color: #D4D4D8 !important;
-            line-height:建设 1.6;
-        }
-        
-        /* 5. 分隔線與間距規範 */
-        hr {
-            border-top: 1px solid #262626;
-            margin: 32px 0; /* 區塊間距至少 32px */
-        }
-        
-        /* 表格與 DataFrame (卡片化) */
-        [data-testid="stDataFrame"] {
-            background-color: #1E1E1E;
-            border-radius: 12px;
-            border: 1px solid #262626;
-            overflow: hidden;
-        }
-        
-        /* 按鈕設計 */
-        .stButton>button {
-            background-color: #262626;
-            border: 1px solid #3F3F46;
+            background-color: #212121 !important;
             color: #ECECEC;
-            border-radius: 8px;
-            font-weight: 500;
-            padding: 8px 16px;
-            transition: all 0.2s ease;
-        }
-        .stButton>button:hover {
-            background-color: #3F3F46;
-            border-color: #52525B;
-            color: #FFFFFF;
+            font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
         
-        /* --- 6. 警示狀態設計規格 --- */
-        
-        /* 極端警示 (極少用，低明度暗紅底 + 警示紅文字，非刺眼的純紅) */
-        @keyframes blink {
-          0% { opacity: 1; border-color: #ff0000; box-shadow: 0 0 10px red; }
-          50% { opacity: 0.8; border-color: #8b0000; box-shadow: 0 0 2px darkred; }
-          100% { opacity: 1; border-color: #ff0000; box-shadow: 0 0 10px red; }
+        /* 主內容容器：置中並限制寬度 (SaaS 質感) */
+        .main .block-container {
+            max-width: 1100px !important;
+            padding-top: 3rem !important;
+            padding-bottom: 5rem !important;
+            margin: 0 auto !important;
+        }
+
+        /* 2. 側邊欄 (Sidebar) 改進 */
+        [data-testid="stSidebar"] {
+            background-color: #171717 !important;
+            min-width: 300px !important;
+            max-width: 300px !important;
+            border-right: 1px solid #2D2D2D;
         }
         
+        /* 側邊欄標題 */
+        [data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2 {
+            font-size: 22px !important;
+            font-weight: 700 !important;
+            color: #ECECEC !important;
+            margin-bottom: 20px !important;
+            border: none !important;
+        }
+
+        /* 選單項目設計 */
+        [data-testid="stSidebar"] div[role="radiogroup"] > label {
+            padding: 12px 16px !important;
+            border-radius: 12px !important;
+            margin-bottom: 8px !important;
+            color: #A1A1AA !important;
+            font-size: 17px !important;
+            font-weight: 600 !important;
+            transition: all 0.2s ease !important;
+            cursor: pointer;
+            background-color: transparent !important;
+            border: 1px solid transparent !important;
+        }
+        
+        /* 選單 Hover */
+        [data-testid="stSidebar"] div[role="radiogroup"] > label:hover {
+            background-color: #2A2B32 !important;
+            color: #ECECEC !important;
+        }
+        
+        /* 選單 Active (選中狀態) */
+        [data-testid="stSidebar"] div[role="radiogroup"] > label[data-checked="true"] {
+            background-color: #343541 !important;
+            color: #ECECEC !important;
+            border-left: 4px solid #F87171 !important; /* 左側亮條 */
+        }
+        
+        /* 隱藏 Radio 圈圈 */
+        [data-testid="stSidebar"] div[role="radiogroup"] label div[data-testid="stMarkdownArmchair"] {
+            display: none !important;
+        }
+        [data-testid="stSidebar"] div[role="radiogroup"] label div:first-child {
+            display: none !important;
+        }
+
+        /* 3. 卡片與容器系統 (stMetric / DataFrame) */
+        [data-testid="stMetric"], [data-testid="stDataFrame"], .stAlert {
+            background-color: #2A2B32 !important;
+            border: 1px solid #3F3F46 !important;
+            border-radius: 16px !important;
+            padding: 24px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        /* 標題加強 */
+        h1, h2, h3 {
+            font-family: 'Inter', sans-serif !important;
+            letter-spacing: -0.02em !important;
+        }
+        
+        h1 {
+            font-size: 32px !important;
+            font-weight: 700 !important;
+            margin-bottom: 24px !important;
+            border-bottom: 1px solid #2D2D2D !important;
+            padding-bottom: 12px !important;
+        }
+
+        /* 4. 警示區改進 - Danger Zone (低對比專業感) */
         .danger-zone {
-            animation: blink 1.5s infinite;
-            background-color: #ffffff;
-            border: 1px solid #ff0000;
-            border-radius: 12px;
-            padding: 24px;
-            text-align: center;
-            color: #000000;
-            margin-bottom: 32px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            background-color: rgba(127, 29, 29, 0.4) !important; /* 深紅半透明 */
+            border: 1px solid #EF4444 !important; /* 紅色細框 */
+            border-radius: 16px !important;
+            padding: 30px !important;
+            margin-bottom: 30px !important;
+            color: #ECECEC !important;
         }
         
         .danger-zone h2 {
-            color: #ff0000 !important;
-            font-size: 32px !important;
-            border-bottom: none;
-            margin-top: 0;
-            margin-bottom: 16px;
-            text-align: center;
+            color: #F87171 !important;
+            font-size: 26px !important;
+            margin-top: 0 !important;
+            font-weight: 700 !important;
+            border: none !important;
         }
         
         .danger-zone p {
-            color: #000000 !important;
-            font-size: 24px !important;
-            font-weight: 600 !important;
-            text-align: center;
-            margin: 12px 0;
+            font-size: 18px !important;
+            color: #D1D5DB !important;
         }
-        
-        /* 一般安全 / 中立區塊 */
+
         .normal-zone {
-            background-color: #1E1E1E;
-            border: 1px solid #262626;
-            border-radius: 12px;
-            padding: 20px;
-            color: #D4D4D8;
-            margin-bottom: 24px;
+            background-color: rgba(16, 185, 129, 0.1) !important;
+            border: 1px solid #10B981 !important;
+            border-radius: 16px !important;
+            padding: 24px !important;
+        }
+
+        /* 5. 其他元件優化 */
+        .stSelectbox div[data-baseweb="select"] {
+            background-color: #2A2B32 !important;
+            border-radius: 12px !important;
         }
         
-        /* 時空背景提示框 (黃底暖色，非極端警示) */
-        .warning-box {
-            background-color: #221A0F; /* 低飽和暗橘黃 */
-            border-left: 4px solid #D97706; /* 框線提示 */
-            border-radius: 4px 12px 12px 4px; /* 單邊直角，其餘圓角 */
-            padding: 16px;
-            margin: 16px 0;
-            color: #FDE68A; /* 暖黃文字 */
+        .stButton>button {
+            border-radius: 12px !important;
+            background-color: #3F3F46 !important;
+            border: none !important;
+            font-weight: 600 !important;
+        }
+        
+        /* 避免 Plotly 容器溢出 */
+        .js-plotly-plot {
+            border-radius: 16px !important;
+            overflow: hidden !important;
         }
         </style>
     """, unsafe_allow_html=True)

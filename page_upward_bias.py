@@ -3,8 +3,7 @@ import pandas as pd
 import altair as alt
 from data_fetcher import fetch_data
 from wave_analyzer import analyze_waves
-
-st.set_page_config(page_title="股市上漲波段分析", page_icon="📈", layout="wide")
+from ui_theme import apply_global_theme
 
 @st.cache_data(ttl=3600)
 def load_upward_data(ticker_symbol):
@@ -56,7 +55,10 @@ def load_upward_data(ticker_symbol):
     bins = [0, 10, 20, 30, 40, 50, 60, 70, 10000]
     labels = ['     0~10%', '  10~20%', '  20~30%', '  30~40%', '  40~50%', '  50~60%', '  60~70%', '70% 以上']
     
-    counts = pd.cut(finished_waves['漲幅(%)'], bins=bins, labels=labels, right=False).value_counts().sort_index()
+    try:
+        counts = pd.cut(finished_waves['漲幅(%)'], bins=bins, labels=labels, right=False).value_counts().sort_index()
+    except:
+        counts = pd.Series(0, index=labels)
     
     dist_results = []
     total = len(finished_waves)
@@ -79,57 +81,63 @@ def load_upward_data(ticker_symbol):
         
     return up_df, dist_df, metrics
 
-st.title("📈 乖離底部反彈上漲模組")
-st.write("這是一個獨立的分析頁面！\n計算每一次從低點起漲（經過前波大於 7% 的修正洗盤），一直抱到「下一次再發生 7% 大回檔」前的小波段/大波段真正漲幅。")
-
-tickers = {
-    "S&P 500 (^GSPC)": "^GSPC",
-    "NASDAQ (^IXIC)": "^IXIC",
-    "台灣加權指數 (^TWII)": "^TWII"
-}
-
-selected_name = st.selectbox("選擇分析指數 (上漲模組)", list(tickers.keys()))
-symbol = tickers[selected_name]
-
-up_df, dist_df, metrics = load_upward_data(symbol)
-
-if up_df.empty:
-    st.warning("目前尚無足夠歷史數據可供分析。")
-    st.stop()
+def page_upward_bias():
+    st.title("📈 股市上漲統計表")
+    st.write("這是一個獨立的分析頁面！\\n計算每一次從低點起漲（經過前波大於 7% 的修正洗盤），一直抱到「下一次再發生 7% 大回檔」前的小波段/大波段真正漲幅。")
     
-st.markdown("---")
+    tickers = {
+        "S&P 500 (^GSPC)": "^GSPC",
+        "NASDAQ (^IXIC)": "^IXIC",
+        "台灣加權指數 (^TWII)": "^TWII"
+    }
 
-# KPI metrics
-st.subheader("📊 歷史【反彈上漲波段】爆發力")
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("歷史完整波段數", f"{metrics.get('總完整波段數', 0)} 次")
-c2.metric("平均波段漲幅", f"{metrics.get('平均漲幅(%)', 0)}%")
-c3.metric("平均耗時 (天)", f"{metrics.get('平均花費天數', 0)}")
-c4.metric("漲幅破 20% 勝率", f"{metrics.get('漲幅超過 20% 機率', 0)}%")
+    selected_name = st.selectbox("選擇分析指數 (上漲模組)", list(tickers.keys()))
+    symbol = tickers[selected_name]
 
-st.markdown("---")
+    up_df, dist_df, metrics = load_upward_data(symbol)
 
-st.subheader("📊 歷史漲幅機率區間分布 (7% 轉折模型)")
+    if up_df.empty:
+        st.warning("目前尚無足夠歷史數據可供分析。")
+        return
+        
+    st.markdown("---")
 
-if not dist_df.empty:
-    chart = alt.Chart(dist_df).mark_bar(color='#00ff99', cornerRadiusTopLeft=3, cornerRadiusTopRight=3).encode(
-        x=alt.X('區間:N', title='反彈漲幅區間 (%)', sort=None),
-        y=alt.Y('機率(%):Q', title='發生機率 (%)'),
-        tooltip=['區間:N', '次數:Q', '機率(%):Q']
-    ).properties(height=350)
-    
-    text = chart.mark_text(
-        align='center',
-        baseline='bottom',
-        dy=-5,
-        color='white'
-    ).encode(
-        text=alt.Text('機率(%):Q', format='.1f')
-    )
-    
-    st.altair_chart(chart + text, use_container_width=True)
-    
-st.markdown("---")
+    # KPI metrics
+    st.subheader("📊 歷史【反彈上漲波段】爆發力")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("歷史完整波段數", f"{metrics.get('總完整波段數', 0)} 次")
+    c2.metric("平均波段漲幅", f"{metrics.get('平均漲幅(%)', 0)}%")
+    c3.metric("平均耗時 (天)", f"{metrics.get('平均花費天數', 0)}")
+    c4.metric("漲幅破 20% 勝率", f"{metrics.get('漲幅超過 20% 機率', 0)}%")
 
-st.subheader("📜 歷史上漲波段詳情清單")
-st.dataframe(up_df.sort_values(by='起漲日期 (前波破底)', ascending=False), height=400)
+    st.markdown("---")
+
+    st.subheader("📊 歷史漲幅機率區間分布 (7% 轉折模型)")
+
+    if not dist_df.empty:
+        chart = alt.Chart(dist_df).mark_bar(color='#00ff99', cornerRadiusTopLeft=3, cornerRadiusTopRight=3).encode(
+            x=alt.X('區間:N', title='反彈漲幅區間 (%)', sort=None),
+            y=alt.Y('機率(%):Q', title='發生機率 (%)'),
+            tooltip=['區間:N', '次數:Q', '機率(%):Q']
+        ).properties(height=350)
+        
+        text = chart.mark_text(
+            align='center',
+            baseline='bottom',
+            dy=-5,
+            color='white'
+        ).encode(
+            text=alt.Text('機率(%):Q', format='.1f')
+        )
+        
+        st.altair_chart(chart + text, use_container_width=True)
+        
+    st.markdown("---")
+
+    st.subheader("📜 歷史上漲波段詳情清單")
+    st.dataframe(up_df.sort_values(by='起漲日期 (前波破底)', ascending=False), height=400)
+
+if __name__ == "__main__":
+    st.set_page_config(page_title="股市上漲分析", page_icon="📈", layout="wide")
+    apply_global_theme()
+    page_upward_bias()
