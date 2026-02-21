@@ -11,6 +11,7 @@ from strategy_7pct import analyze_7pct_strategy, calculate_7pct_statistics
 from wave_analyzer import analyze_waves
 from ui_theme import apply_global_theme
 import datetime
+from page_biz_cycle import page_biz_cycle
 
 st.set_page_config(page_title="台股預警儀表板 | 40週乖離率監控", layout="wide", initial_sidebar_state="expanded")
 
@@ -178,22 +179,6 @@ def calc_win_rate(df, current_bias):
     win_rate = (drops / total) * 100
     return round(win_rate, 2), total
 
-def simulate_sma(df, weeks=18):
-    latest_close = df['Close'].iloc[-1]
-    last_date = df.index[-1]
-    
-    future_dates = [last_date + pd.Timedelta(days=7 * i) for i in range(1, weeks + 1)]
-    past_closes = df['Close'].tolist()
-    future_closes = [latest_close] * weeks
-    all_closes = past_closes + future_closes
-    
-    future_smas = []
-    for i in range(len(past_closes), len(all_closes)):
-        window = all_closes[i-39:i+1]
-        sma = sum(window) / 40
-        future_smas.append(sma)
-        
-    return future_dates, future_smas, future_closes
 
 def page_bias_analysis():
     log_visit("40週乖離率分析")
@@ -302,49 +287,6 @@ def page_bias_analysis():
     
     st.plotly_chart(fig, use_container_width=True)
 
-
-    st.write("---")
-    st.subheader("🔮 未來均線路徑預測 (假設維持現價不動)")
-    
-    future_weeks = 18
-    f_dates, f_smas, f_closes = simulate_sma(df, weeks=future_weeks)
-    target_sma = f_smas[-1]
-    target_date = f_dates[-1]
-    
-    drop_from_current = (target_sma - latest_close) / latest_close * 100
-    
-    st.markdown(f"假設加權指數在未來 **{future_weeks} 週** 內都維持在目前的價位 **{latest_close:,.2f}** 不動，隨著時間推移與高檔扣抵：")
-    
-    col_f1, col_f2, col_f3 = st.columns(3)
-    col_f1.metric("預測到期日期", target_date.strftime('%Y-%m-%d'))
-    col_f2.metric("屆時 40 週均線預期攀升至", f"{target_sma:,.2f}")
-    col_f3.metric("目前價位距離屆時均線", f"{drop_from_current:.2f}%")
-    
-    fig_pred = go.Figure()
-    lookback = 40
-    past_d = list(df.index[-lookback:])
-    past_c = list(df['Close'].iloc[-lookback:])
-    past_sma = list(df['SMA40'].iloc[-lookback:])
-    
-    fig_pred.add_trace(go.Scatter(x=past_d + f_dates, y=past_c + f_closes, 
-                                 line=dict(color='#A1A1AA', width=2, dash='dot'), 
-                                 name='假設維持現價不變的指數路徑'))
-    
-    fig_pred.add_trace(go.Scatter(x=past_d, y=past_sma, 
-                                 line=dict(color='#ECECEC', width=2), 
-                                 name='過去 SMA40'))
-                                 
-    fig_pred.add_trace(go.Scatter(x=f_dates, y=f_smas, 
-                                 line=dict(color='#F87171', width=2, dash='dot'), 
-                                 name='預測的 SMA40 上升路徑'))
-                                 
-    fig_pred.update_layout(height=450, 
-                           plot_bgcolor="rgba(0,0,0,0)",
-                           paper_bgcolor="rgba(0,0,0,0)",
-                           font=dict(color="#ECECEC"),
-                           title=f"未來 {future_weeks} 週 40 週均線扣抵預測圖",
-                           margin=dict(l=0, r=0, t=40, b=0))
-    st.plotly_chart(fig_pred, use_container_width=True)
 
     st.write("---")
     
@@ -587,7 +529,7 @@ def page_downward_bias():
         return
 
     st.markdown("---")
-    st.subheader(f"📡 即時監控板 ({last_date})")
+    st.markdown(f"<h2><b style='font-size: 36px'>📡 即時監控板 ({last_date})</b></h2>", unsafe_allow_html=True)
 
     col1, col2 = st.columns([1, 2])
     with col1:
@@ -603,7 +545,7 @@ def page_downward_bias():
             st.success(f"✅ **安全區間**：目前回檔幅度小於 7%，不符合歷史劇烈回檔進場條件。")
 
     st.markdown("---")
-    st.subheader("📊 歷史關鍵數據 (觸發 7% 後的平均表現)")
+    st.markdown("<h2><b style='font-size: 36px'>📊 歷史關鍵數據 (觸發 7% 後的平均表現)</b></h2>", unsafe_allow_html=True)
     kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
     kpi1.metric("歷史觸發次數", f"{metrics.get('Recovered Events', 0)} 次")
@@ -612,8 +554,7 @@ def page_downward_bias():
     kpi4.metric("平均解套/回歸天數", f"{metrics.get('Avg Days to Recovery', 0)} 天")
 
     st.markdown("---")
-    st.subheader("📉 觸發 7% 後的「剩餘跌幅」機率分布")
-    st.write("這張圖顯示當市場跌破 7% 後，歷史上還「額外跌了多少」才見底的機率分配。")
+    st.markdown("<h2><b style='font-size: 36px'>📉 觸發 7% 後的「剩餘跌幅」機率分布</b></h2>", unsafe_allow_html=True)
 
     if not dist_df.empty:
         chart = alt.Chart(dist_df).mark_bar(color='#fc5185', cornerRadiusTopLeft=3, cornerRadiusTopRight=3).encode(
@@ -634,7 +575,7 @@ def page_downward_bias():
         st.altair_chart(chart + text, use_container_width=True)
 
     st.markdown("---")
-    st.subheader("📜 歷史波段詳情清單")
+    st.markdown("<h2><b style='font-size: 36px'>📜 歷史波段詳情清單</b></h2>", unsafe_allow_html=True)
     st.write("列出 2000 年來每一次觸發 7% 回檔的完整歷程：")
 
     display_cols = ['觸發日期', '前高日期', '破底日期', '解套日期', 
@@ -730,7 +671,8 @@ def main():
     pages = {
         "40週乖離率分析": page_bias_analysis,
         "股市回檔統計表": page_downward_bias,
-        "股市上漲統計表": page_upward_bias
+        "股市上漲統計表": page_upward_bias,
+        "景氣信號": page_biz_cycle
     }
     
     # 如果是站長登入，就可以看到私密的後台
