@@ -375,13 +375,19 @@ def page_bias_analysis():
             peak_val = r['波段最高指數']
             recover_val = r['回歸0%指數'] if pd.notna(r['回歸0%指數']) else 0
             
+            # 預處理顯示文字，避免 f-string 語法錯誤
+            line_22_str = f"{line_22:,.0f}" if pd.notna(line_22) else "--"
+            peak_val_str = f"{peak_val:,.0f}" if pd.notna(peak_val) else "--"
+            recover_val_str = f"{recover_val:,.0f}" if recover_val > 0 else "--"
+            days_str = str(int(days_total)) if pd.notna(days_total) else "--"
+            
             st.markdown(f'''
                 <div class="log-item" style="padding: 25px;">
                     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                         <div class="log-date">📅 {r['觸發日期']}</div>
                         <div style="text-align:right;">
                             <div style="font-size:11px; color:#9CA3AF;">修復耗時</div>
-                            <div style="font-family:'JetBrains Mono'; font-weight:800; color:#4B5563;">{int(days_total) if pd.notna(days_total) else "--"}天</div>
+                            <div style="font-family:'JetBrains Mono'; font-weight:800; color:#4B5563;">{days_str}天</div>
                         </div>
                     </div>
                     
@@ -410,15 +416,15 @@ def page_bias_analysis():
                         <div style="display:flex; gap:15px; margin-top:20px; padding:12px; background:rgba(0,0,0,0.02); border-radius:10px; border:1px solid #EDEDF0;">
                             <div style="flex:1; border-right:1px solid #E5E7EB; border-style:dashed;">
                                 <div style="font-size:10px; color:#9CA3AF;">📍 22% 觸發價</div>
-                                <div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#4B5563;">{line_22:,.0f}</div>
+                                <div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#4B5563;">{line_22_str}</div>
                             </div>
                             <div style="flex:1; border-right:1px solid #E5E7EB; border-style:dashed;">
                                 <div style="font-size:10px; color:#9CA3AF;">🚀 期間最高價</div>
-                                <div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#3B82F6;">{peak_val:,.0f}</div>
+                                <div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#3B82F6;">{peak_val_str}</div>
                             </div>
                             <div style="flex:1;">
                                 <div style="font-size:10px; color:#9CA3AF;">🎯 回穩目標價</div>
-                                <div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#10B981;">{recover_val:,.0f if recover_val > 0 else "--"}</div>
+                                <div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#10B981;">{recover_val_str}</div>
                             </div>
                         </div>
                     </div>
