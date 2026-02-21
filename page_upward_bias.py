@@ -83,7 +83,7 @@ def load_upward_data(ticker_symbol):
 
 def page_upward_bias():
     st.markdown('<h1 class="centered-title">📈 股市上漲統計表 (Bottom Bounce Analysis)</h1>', unsafe_allow_html=True)
-    st.markdown("<p style='text-align:center; color:#6B7280;'>計算每一次從低點起漲（經過前波大於 7% 的修正洗盤），一直抱到『下一次再發生 7% 大回檔』前的小波段/大波段真正漲幅。</p>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#6B7280; margin-bottom:50px;'>計算每一次從低點起漲（經過前波大於 7% 的修正洗盤），一直抱到『下一次再發生 7% 大回檔』前的小波段/大波段真正漲幅。</p>", unsafe_allow_html=True)
     
     tickers = {
         "S&P 500 (^GSPC)": "^GSPC",
@@ -100,45 +100,59 @@ def page_upward_bias():
         st.warning("目前尚無足夠歷史數據可供分析。")
         return
         
-    st.markdown("---")
-
-    # KPI metrics
-    st.subheader("📊 歷史【反彈上漲波段】爆發力")
+    # --- 1. KPI 數據卡片 (Tech Card Style) ---
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("歷史完整波段數", f"{metrics.get('總完整波段數', 0)} 次")
-    c2.metric("平均波段漲幅", f"{metrics.get('平均漲幅(%)', 0)}%")
-    c3.metric("平均耗時 (天)", f"{metrics.get('平均花費天數', 0)}")
-    c4.metric("漲幅破 20% 勝率", f"{metrics.get('漲幅超過 20% 機率', 0)}%")
+    with c1:
+        st.markdown(f'''<div class="tech-card"><div class="summary-label">歷史完整波段數</div><div class="summary-value" style="color:#111827;">{metrics.get('總完整波段數', 0)}<span style="font-size:14px;">次</span></div></div>''', unsafe_allow_html=True)
+    with c2:
+        st.markdown(f'''<div class="tech-card"><div class="summary-label">平均波段漲幅</div><div class="summary-value" style="color:#10B981;">{metrics.get('平均漲幅(%)', 0):+.1f}%</div></div>''', unsafe_allow_html=True)
+    with c3:
+        st.markdown(f'''<div class="tech-card"><div class="summary-label">平均耗時 (天)</div><div class="summary-value" style="color:#3B82F6;">{metrics.get('平均花費天數', 0)}<span style="font-size:14px;">天</span></div></div>''', unsafe_allow_html=True)
+    with c4:
+        st.markdown(f'''<div class="tech-card"><div class="summary-label">漲幅破 20% 勝率</div><div class="summary-value" style="color:#EF4444;">{metrics.get('漲幅超過 20% 機率', 0)}%</div></div>''', unsafe_allow_html=True)
 
-    st.markdown("---")
-
-    st.subheader("📊 歷史漲幅機率區間分布 (7% 轉折模型)")
+    # --- 2. 歷史分佈圖 (Premium Theme) ---
+    st.markdown('<h2 style="text-align:center; margin-top:80px;">📊 歷史漲幅機率區間分布</h2>', unsafe_allow_html=True)
 
     if not dist_df.empty:
-        chart = alt.Chart(dist_df).mark_bar(color='#3B82F6', cornerRadiusTopLeft=6, cornerRadiusTopRight=6).encode(
-            x=alt.X('區間:N', title='反彈漲幅區間 (%)', sort=None),
+        chart = alt.Chart(dist_df).mark_bar(color='#10B981', cornerRadiusTopLeft=8, cornerRadiusTopRight=8).encode(
+            x=alt.X('區間:N', title='反彈漲幅區稱 (%)', sort=None),
             y=alt.Y('機率(%):Q', title='發生機率 (%)'),
             tooltip=['區間:N', '次數:Q', '機率(%):Q']
-        ).properties(height=350)
+        ).properties(height=350).configure_view(strokeWidth=0).configure_axis(grid=False, domain=False)
         
-        text = chart.mark_text(
-            align='center',
-            baseline='bottom',
-            dy=-8,
-            color='#111827',
-            fontWeight=700
-        ).encode(
-            text=alt.Text('機率(%):Q', format='.1f')
-        )
+        st.altair_chart(chart, use_container_width=True)
         
-        st.altair_chart(chart + text, use_container_width=True)
-        
-    st.markdown("---")
+    # --- 3. 電子流水日誌 (Timeline Logs) ---
+    st.markdown('<h2 style="text-align:center; margin-top:80px;">📜 上漲波段電子日誌</h2>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:center; color:#9CA3AF; margin-bottom:40px;">透過能量條直觀判定：歷史爆發力 (Scale: 0-70%)</p>', unsafe_allow_html=True)
 
-    st.subheader("📜 歷史上漲波段詳情清單")
-    st.dataframe(up_df.sort_values(by='起漲日期 (前波破底)', ascending=False), height=400)
+    if not up_df.empty:
+        sorted_up = up_df.sort_values(by='起漲日期 (前波破底)', ascending=False)
+        for _, r in sorted_up.iterrows():
+            gain = float(r['漲幅(%)'])
+            days = int(r['花費天數'])
+            status = r['狀態']
+            # Scale 0-70%
+            w = min(100.0, (gain / 70) * 100)
+            tag_color = "#10B981" if status == '已完結' else "#3B82F6"
+            tag_bg = "#F0FDF4" if status == '已完結' else "#EFF6FF"
+            
+            st.markdown(f'''
+                <div class="log-item">
+                    <div class="log-date" style="min-width:140px;">📅 {r['起漲日期 (前波破底)']}</div>
+                    <div style="flex: 1;">
+                        <span class="log-type-tag" style="color:{tag_color}; background:{tag_bg};">{status}</span>
+                        <div style="display:flex; align-items:center; gap:20px; margin-top:10px;">
+                            <div class="energy-bar-container" style="flex:1;"><div class="energy-bar-fill-up" style="width:{w}%;"></div></div>
+                            <div style="font-family:'JetBrains Mono'; font-weight:800; font-size:18px; color:#111827;">{gain:+.1f}%</div>
+                        </div>
+                    </div>
+                    <div style="text-align:right; min-width:100px;">
+                        <div style="font-size:11px; color:#9CA3AF;">歷時</div>
+                        <div style="font-family:'JetBrains Mono'; font-weight:800; color:#4B5563;">{days}天</div>
+                    </div>
+                </div>
+            ''', unsafe_allow_html=True)
 
-if __name__ == "__main__":
-    st.set_page_config(page_title="股市上漲分析", page_icon="📈", layout="wide")
-    apply_global_theme()
-    page_upward_bias()
+    st.write("<p style='text-align:center; color:#9CA3AF; font-size:12px; margin-top:80px;'>系統由 aver5678 量化模組驅動 | 上漲爆發力引擎: Wave-Analyzer v2.1</p>", unsafe_allow_html=True)

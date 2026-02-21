@@ -597,63 +597,112 @@ def page_downward_bias():
         st.warning("目前尚無足夠歷史數據可供分析。")
         return
 
-    st.markdown("---")
-    st.markdown(f"<h2><b style='font-size: 36px'>📡 即時監控板 ({last_date})</b></h2>", unsafe_allow_html=True)
+    # --- 1. 頂部狀態：目前回檔監控 ---
+    st.markdown(f'<h1 class="centered-title">🩸 股市回檔統計監控 (7% DD Analysis)</h1>', unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align:center; color:#9CA3AF; margin-bottom:40px;'>監控標普 500、那斯達克及台股：當自高點跌破 7% 時的勝率與剩餘風險分析。</p>", unsafe_allow_html=True)
 
-    col1, col2 = st.columns([1, 2])
-    with col1:
-        st.metric(label="目前距離前高跌幅", value=f"-{max(0, current_dd):.2f}%", 
-                  delta="已觸發進場標準!" if current_dd >= 7.0 else f"尚未觸發 (剩 {-7 + current_dd:.2f}%)", 
-                  delta_color="inverse" if current_dd >= 7.0 else "normal")
+    col_gauge, col_info = st.columns([1, 1.2])
+    
+    with col_gauge:
+        fig_dd = go.Figure(go.Indicator(
+            mode = "gauge+number",
+            value = float(max(0, current_dd)),
+            title = {'text': "目前距離前高跌幅", 'font': {'size': 18, 'color': '#6B7280'}},
+            gauge = {
+                'axis': {'range': [0, 25], 'tickcolor': "#E5E7EB"},
+                'bar': {'color': "#EF4444" if current_dd >= 7.0 else "#FBBF24"},
+                'steps': [
+                    {'range': [0, 7], 'color': '#F0FDF4'},
+                    {'range': [7, 15], 'color': '#FFFBEB'},
+                    {'range': [15, 25], 'color': '#FFF1F2'}
+                ],
+                'threshold': {
+                    'line': {'color': "red", 'width': 4},
+                    'thickness': 0.75,
+                    'value': 7.0
+                }
+            },
+            number = {'suffix': "%", 'font': {'family': 'JetBrains Mono', 'size': 42}}
+        ))
+        fig_dd.update_layout(height=300, margin=dict(l=20, r=20, t=40, b=20), paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig_dd, use_container_width=True)
 
-    with col2:
+    with col_info:
+        status_html = ""
         if current_dd >= 7.0:
             prob_worse = metrics.get('Prob Residual DD > 10%', 0)
-            st.error(f"🚨 **進場警示**：目前已進入 7% 觸發區間！\n\n根據歷史回測，若您在此時進場，後續這波再跌超過 **10%** 的機率約為 **{prob_worse:.1f}%**。請做好資金控管。")
+            status_html = f'''
+                <div class="danger-zone" style="padding:25px; margin-top:30px;">
+                    <h3 style="color:#B91C1C; margin:0;">🚨 已觸發進場標準</h3>
+                    <p style="font-size:14px; margin-top:10px;">目前已進入 7% 劇烈回檔區間。歷史上此後再跌破 10% 的機率為 <b>{prob_worse:.1f}%</b>。請嚴格執行分批進場計畫。</p>
+                </div>
+            '''
         else:
-            st.success(f"✅ **安全區間**：目前回檔幅度小於 7%，不符合歷史劇烈回檔進場條件。")
+            status_html = f'''
+                <div class="normal-zone" style="padding:25px; margin-top:30px;">
+                    <h3 style="color:#047857; margin:0;">✅ 處於安全區間</h3>
+                    <p style="font-size:14px; margin-top:10px;">目前回檔幅度未達 7% 指標，不建議啟動劇烈回檔波段策略。</p>
+                </div>
+            '''
+        st.markdown(status_html, unsafe_allow_html=True)
 
-    st.markdown("---")
-    st.markdown("<h2><b style='font-size: 36px'>📊 歷史關鍵數據 (觸發 7% 後的平均表現)</b></h2>", unsafe_allow_html=True)
-    kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+    # --- 2. KPI 統計卡片 ---
+    st.markdown('<div style="margin-top:50px;"></div>', unsafe_allow_html=True)
+    k1, k2, k3, k4 = st.columns(4)
+    with k1:
+        st.markdown(f'''<div class="tech-card"><div class="summary-label">歷史觸發次數</div><div class="summary-value">{metrics.get('Recovered Events', 0)}<span style="font-size:14px;">次</span></div></div>''', unsafe_allow_html=True)
+    with k2:
+        st.markdown(f'''<div class="tech-card"><div class="summary-label">平均剩餘跌幅</div><div class="summary-value" style="color:#EF4444;">-{metrics.get('Avg Residual Drawdown (%)', 0):.1f}%</div></div>''', unsafe_allow_html=True)
+    with k3:
+        st.markdown(f'''<div class="tech-card"><div class="summary-label">平均見底天數</div><div class="summary-value" style="color:#3B82F6;">{metrics.get('Avg Days to Bottom', 0)}<span style="font-size:14px;">天</span></div></div>''', unsafe_allow_html=True)
+    with k4:
+        st.markdown(f'''<div class="tech-card"><div class="summary-label">平均解套天數</div><div class="summary-value" style="color:#6B7280;">{metrics.get('Avg Days to Recovery', 0)}<span style="font-size:14px;">天</span></div></div>''', unsafe_allow_html=True)
 
-    kpi1.metric("歷史觸發次數", f"{metrics.get('Recovered Events', 0)} 次")
-    kpi2.metric("平均再跌(剩餘)幅度", f"-{metrics.get('Avg Residual Drawdown (%)', 0)}%")
-    kpi3.metric("平均見底天數", f"{metrics.get('Avg Days to Bottom', 0)} 天")
-    kpi4.metric("平均解套/回歸天數", f"{metrics.get('Avg Days to Recovery', 0)} 天")
-
-    st.markdown("---")
-    st.markdown("<h2><b style='font-size: 36px'>📉 觸發 7% 後的「剩餘跌幅」機率分布</b></h2>", unsafe_allow_html=True)
+    # --- 3. 歷史分佈圖 ---
+    st.markdown('<h2 style="text-align:center; margin-top:80px;">📊 觸發 7% 後的「剩餘跌幅」機率分布</h2>', unsafe_allow_html=True)
 
     if not dist_df.empty:
-        chart = alt.Chart(dist_df).mark_bar(color='#fc5185', cornerRadiusTopLeft=3, cornerRadiusTopRight=3).encode(
+        chart = alt.Chart(dist_df).mark_bar(color='#F87171', cornerRadiusTopLeft=8, cornerRadiusTopRight=8).encode(
             x=alt.X('Range:N', title='剩餘跌幅區間 (%)', sort=None),
             y=alt.Y('Probability (%):Q', title='發生機率 (%)'),
             tooltip=['Range:N', 'Count:Q', 'Probability (%):Q']
-        ).properties(height=350)
-        
-        text = chart.mark_text(
-            align='center',
-            baseline='bottom',
-            dy=-5,
-            color='black'
-        ).encode(
-            text=alt.Text('Probability (%):Q', format='.1f')
-        )
-        
-        st.altair_chart(chart + text, use_container_width=True)
+        ).properties(height=350).configure_view(strokeWidth=0).configure_axis(grid=False, domain=False)
+        st.altair_chart(chart, use_container_width=True)
 
-    st.markdown("---")
-    st.markdown("<h2><b style='font-size: 36px'>📜 歷史波段詳情清單</b></h2>", unsafe_allow_html=True)
-    st.write("列出 2000 年來每一次觸發 7% 回檔的完整歷程：")
+    # --- 4. 電子流水日誌 ---
+    st.markdown('<h2 style="text-align:center; margin-top:80px;">📜 回檔波段詳細日誌</h2>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align:center; color:#9CA3AF; margin-bottom:40px;">能量條代表總跌幅強度 (Scale: 0-50%)</p>', unsafe_allow_html=True)
 
-    display_cols = ['觸發日期', '前高日期', '破底日期', '解套日期', 
-                    '最大跌幅(%)', '剩餘跌幅(%)', '破底花費天數', '解套花費天數', '狀態']
-    
-    # Check if we have these columns to prevent KeyErrors
-    cols_to_show = [c for c in display_cols if c in events_df.columns]
-    
-    st.dataframe(events_df[cols_to_show].sort_values(by='觸發日期', ascending=False), height=400)
+    if not events_df.empty:
+        for _, r in events_df.sort_values(by='觸發日期', ascending=False).iterrows():
+            total_dd = float(r['最大跌幅(%)'])
+            resid_dd = float(r['剩餘跌幅(%)'])
+            days_to_bottom = int(r['破底花費天數'])
+            status = r['狀態']
+            # Scale 0-50%
+            w = min(100.0, (abs(total_dd) / 50) * 100)
+            tag_color = "#EF4444" if status == '已解套' else "#3B82F6"
+            tag_bg = "#FEF2F2" if status == '已解套' else "#EFF6FF"
+            
+            st.markdown(f'''
+                <div class="log-item">
+                    <div class="log-date" style="min-width:140px;">📅 {r['觸發日期']}</div>
+                    <div style="flex: 1;">
+                        <span class="log-type-tag" style="color:{tag_color}; background:{tag_bg};">{status}</span>
+                        <div style="display:flex; align-items:center; gap:20px; margin-top:10px;">
+                            <div class="energy-bar-container" style="flex:1;"><div class="energy-bar-fill-down" style="width:{w}%;"></div></div>
+                            <div style="font-family:'JetBrains Mono'; font-weight:800; font-size:18px; color:#EF4444;">-{total_dd:.1f}%</div>
+                        </div>
+                        <div style="font-size:11px; color:#9CA3AF; margin-top:5px;">進場後加碼壓力: -{resid_dd:.1f}% | 破底耗時: {days_to_bottom}天</div>
+                    </div>
+                    <div style="text-align:right; min-width:100px;">
+                        <div style="font-size:11px; color:#9CA3AF;">解套日期</div>
+                        <div style="font-family:'JetBrains Mono'; color:#4B5563;">{r['解套日期'] if pd.notna(r['解套日期']) else "--"}</div>
+                    </div>
+                </div>
+            ''', unsafe_allow_html=True)
+
+    st.write("<p style='text-align:center; color:#9CA3AF; font-size:12px; margin-top:80px;'>系統由 aver5678 量化模組驅動 | 回檔動能引擎: Strategy-7pct v3.2</p>", unsafe_allow_html=True)
 
 def page_admin_dashboard():
     log_visit("管理員後台")
