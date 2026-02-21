@@ -6,18 +6,19 @@ import os
 
 def page_biz_cycle():
     st.markdown('<h1 class="centered-title">🌡️ 景氣對策信號監控 (Business Cycle Monitor)</h1>', unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#9CA3AF; margin-top:-30px; margin-bottom:50px;'>系統更新時間：2025-02-22 | 數據版本：Research Phase 4.0</p>", unsafe_allow_html=True)
     
     # --- 1. 頂部狀態：景氣壓力計 ---
     col_t1, col_t2 = st.columns([1.2, 1])
     
-    current_score = 34  # 假設目前最新分數 (或是能抓到的最新)
-    months_ongoing = 5  # 假設目前已持續 5 個月
+    current_score = 34.0  # 最新公布分數
+    months_ongoing = 5.0  # 自 2025-09 起算至今約 5 個月
     
     with col_t1:
         fig_score = go.Figure(go.Indicator(
             mode = "gauge+number",
             value = current_score,
-            title = {'text': "目前景氣綜合分數", 'font': {'size': 20, 'color': '#6B7280'}},
+            title = {'text': "最新景氣對策信號分數", 'font': {'size': 20, 'color': '#6B7280'}},
             gauge = {
                 'axis': {'range': [9, 45], 'tickcolor': "#E5E7EB"},
                 'bar': {'color': "#EF4444" if current_score >= 32 else "#10B981"},
@@ -43,14 +44,14 @@ def page_biz_cycle():
         st.markdown(f'''
             <div class="tech-card" style="margin-top:50px; text-align:center;">
                 <div class="summary-label">本次黃紅燈已持續</div>
-                <div class="summary-value" style="color:#EF4444;">{months_ongoing} <span style="font-size:18px;">個月</span></div>
+                <div class="summary-value" style="color:#EF4444;">{int(months_ongoing)} <span style="font-size:18px;">個月</span></div>
                 <div style="margin-top:20px; font-size:14px; color:#6B7280;">
                     歷史中位數: 10 個月 | 歷史平均: 8.4 個月
                 </div>
                 <div class="energy-bar-container" style="height:10px; margin-top:15px;">
-                    <div class="energy-bar-fill-up" style="width:{(months_ongoing/10)*100 if months_ongoing < 10 else 100}%; background:#EF4444;"></div>
+                    <div class="energy-bar-fill-up" style="width:{float(months_ongoing/10.0*100.0) if months_ongoing < 10 else 100.0}%; background:#EF4444;"></div>
                 </div>
-                <p style="font-size:12px; color:#9CA3AF; margin-top:10px;">目前循環：較偏向「長延續型」擴張</p>
+                <p style="font-size:12px; color:#9CA3AF; margin-top:10px;">目前循環：高機率進入「長延續型」擴張週期</p>
             </div>
         ''', unsafe_allow_html=True)
 
