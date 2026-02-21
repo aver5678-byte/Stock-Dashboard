@@ -182,7 +182,8 @@ def calc_win_rate(df, current_bias):
 
 def page_bias_analysis():
     log_visit("40週乖離率分析")
-    st.title("40週乖離率分析 (TSE 40W Bias Dashboard)")
+    # 使用置中大標題
+    st.markdown('<h1 class="centered-title">40週乖離率分析 (TSE 40W Bias Dashboard)</h1>', unsafe_allow_html=True)
     
     with st.spinner('連線抓取最新市場資料中...'):
         df = load_data()
@@ -209,18 +210,16 @@ def page_bias_analysis():
         st.markdown(f"""
         <div class="danger-zone">
             <h2>🚨 風險預警：極端乖離</h2>
-            <p>目前乖離率：<b>{latest_bias:.2f}%</b> <span style="font-size:14px; opacity:0.6;">(閾值 20%)</span></p>
-            <p style="margin-top:10px; font-size:15px; opacity:0.8;">
-                指數：{latest_close:,.2f} | 40W 均線：{latest_sma:,.2f}
-            </p>
+            <span class="bias-value">{latest_bias:.2f}%</span>
+            <p style="margin-top:10px; font-size:18px; color: #4B5563;">目前指數：{latest_close:,.2f} | 40W 線：{latest_sma:,.2f}</p>
         </div>
         """, unsafe_allow_html=True)
     else:
         st.markdown(f"""
         <div class="normal-zone">
-            <h2 style="color: #10B981 !important; border:none; margin:0; font-size:24px;">✅ 目前狀態：安全</h2>
-            <p style="font-size: 18px; margin:12px 0;">目前乖離率：<b>{latest_bias:.2f}%</b></p>
-            <p style="font-size:14px; opacity:0.7;">指數：{latest_close:,.2f} | 40W 均線：{latest_sma:,.2f}</p>
+            <h2 style="color: #059669 !important; border:none; margin:0; font-size:32px;">✅ 目前狀態：安全範圍</h2>
+            <p style="font-size: 20px; margin:15px 0; color: #4B5563;">目前乖離率：<b>{latest_bias:.2f}%</b></p>
+            <p style="font-size:16px; opacity:0.8; color: #6B7280;">指數：{latest_close:,.2f} | 40W 線：{latest_sma:,.2f}</p>
         </div>
         """, unsafe_allow_html=True)
         
