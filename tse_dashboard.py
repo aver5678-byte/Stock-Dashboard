@@ -381,55 +381,57 @@ def page_bias_analysis():
             recover_val_str = f"{recover_val:,.0f}" if recover_val > 0 else "--"
             days_str = str(int(days_total)) if pd.notna(days_total) else "--"
             
-            st.markdown(f'''
-<div class="log-item" style="padding: 25px;">
-    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-        <div class="log-date">📅 {r['觸發日期']}</div>
-        <div style="text-align:right;">
-            <div style="font-size:11px; color:#9CA3AF;">修復耗時</div>
-            <div style="font-family:'JetBrains Mono'; font-weight:800; color:#4B5563;">{days_str}天</div>
-        </div>
-    </div>
-    
-    <div style="margin-top:15px;">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <span class="log-type-tag" style="color:{tag_color}; background:{tag_bg}; margin:0;">{type_tag}</span>
-            <span style="font-size:12px; color:#9CA3AF;">(前波回檔: {r['前12月最大回檔(%)']:.1f}%)</span>
-        </div>
-        
-        <div style="display:flex; gap:30px; margin-top:15px;">
-            <div style="flex:1;">
-                <div style="display:flex; justify-content:space-between; font-size:12px; color:#6B7280;">
-                    <span>最高噴出漲幅</span><span>{max_surge:+.1f}%</span>
-                </div>
-                <div class="energy-bar-container"><div class="energy-bar-fill-up" style="width:{surge_w}%;"></div></div>
-            </div>
-            <div style="flex:1;">
-                <div style="display:flex; justify-content:space-between; font-size:12px; color:#6B7280;">
-                    <span>回歸 0% 跌幅</span><span>{max_drop:+.1f}%</span>
-                </div>
-                <div class="energy-bar-container"><div class="energy-bar-fill-down" style="width:{drop_w}%;"></div></div>
-            </div>
-        </div>
-        
-        <!-- 點位細節 Ticker Strip -->
-        <div style="display:flex; gap:15px; margin-top:20px; padding:12px; background:rgba(0,0,0,0.02); border-radius:10px; border:1px solid #EDEDF0;">
-            <div style="flex:1; border-right:1px solid #E5E7EB; border-style:dashed;">
-                <div style="font-size:10px; color:#9CA3AF;">📍 22% 觸發價</div>
-                <div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#4B5563;">{line_22_str}</div>
-            </div>
-            <div style="flex:1; border-right:1px solid #E5E7EB; border-style:dashed;">
-                <div style="font-size:10px; color:#9CA3AF;">🚀 期間最高價</div>
-                <div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#3B82F6;">{peak_val_str}</div>
-            </div>
-            <div style="flex:1;">
-                <div style="font-size:10px; color:#9CA3AF;">🎯 回穩目標價</div>
-                <div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#10B981;">{recover_val_str}</div>
-            </div>
-        </div>
-    </div>
+            # 建構完全左對齊的 HTML，徹底防範 Markdown 程式碼區塊誤判
+            html_code = f"""
+<div class="log-item" style="padding:25px; margin-bottom:20px; border:1px solid #EDEDF0; border-radius:15px; background:white;">
+<div style="display:flex; justify-content:space-between; align-items:flex-start;">
+<div class="log-date" style="font-weight:700; color:#111827;">📅 {r["觸發日期"]}</div>
+<div style="text-align:right;">
+<div style="font-size:11px; color:#9CA3AF;">修復耗時</div>
+<div style="font-family:'JetBrains Mono'; font-weight:800; color:#4B5563;">{days_str}天</div>
 </div>
-''', unsafe_allow_html=True)
+</div>
+<div style="margin-top:15px;">
+<div style="display:flex; align-items:center; gap:10px;">
+<span class="log-type-tag" style="color:{tag_color}; background:{tag_bg}; padding:4px 12px; border-radius:100px; font-size:12px; font-weight:600;">{type_tag}</span>
+<span style="font-size:12px; color:#9CA3AF;">(前波回檔: {r['前12月最大回檔(%)']:.1f}%)</span>
+</div>
+<div style="display:flex; gap:30px; margin-top:15px;">
+<div style="flex:1;">
+<div style="display:flex; justify-content:space-between; font-size:12px; color:#6B7280;">
+<span>最高噴出漲幅</span><span style="font-weight:700; color:#EF4444;">{max_surge:+.1f}%</span>
+</div>
+<div class="energy-bar-container" style="height:6px; background:#F3F4F6; border-radius:3px; margin-top:5px; overflow:hidden;">
+<div class="energy-bar-fill-up" style="width:{surge_w}%; height:100%; background:linear-gradient(90deg, #FCA5A5, #EF4444); border-radius:3px;"></div>
+</div>
+</div>
+<div style="flex:1;">
+<div style="display:flex; justify-content:space-between; font-size:12px; color:#6B7280;">
+<span>回歸 0% 跌幅</span><span style="font-weight:700; color:#10B981;">{max_drop:+.1f}%</span>
+</div>
+<div class="energy-bar-container" style="height:6px; background:#F3F4F6; border-radius:3px; margin-top:5px; overflow:hidden;">
+<div class="energy-bar-fill-down" style="width:{drop_w}%; height:100%; background:linear-gradient(90deg, #6EE7B7, #10B981); border-radius:3px;"></div>
+</div>
+</div>
+</div>
+<div style="display:flex; gap:15px; margin-top:20px; padding:12px; background:#F9FAFB; border-radius:10px; border:1px solid #EDEDF0;">
+<div style="flex:1; border-right:1px solid #E5E7EB; border-style:dashed;">
+<div style="font-size:10px; color:#9CA3AF;">📍 22% 觸發價</div>
+<div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#4B5563;">{line_22_str}</div>
+</div>
+<div style="flex:1; border-right:1px solid #E5E7EB; border-style:dashed;">
+<div style="font-size:10px; color:#9CA3AF;">🚀 期間最高價</div>
+<div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#3B82F6;">{peak_val_str}</div>
+</div>
+<div style="flex:1;">
+<div style="font-size:10px; color:#9CA3AF;">🎯 回穩目標價</div>
+<div style="font-family:'JetBrains Mono'; font-size:14px; font-weight:700; color:#10B981;">{recover_val_str}</div>
+</div>
+</div>
+</div>
+</div>
+""".strip()
+            st.markdown(html_code, unsafe_allow_html=True)
 
         st.markdown('<div style="margin-top:50px; text-align:center;"></div>', unsafe_allow_html=True)
         
