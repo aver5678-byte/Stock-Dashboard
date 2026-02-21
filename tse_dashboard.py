@@ -198,7 +198,6 @@ def simulate_sma(df, weeks=18):
 def page_bias_analysis():
     log_visit("40週乖離率分析")
     st.title("40週乖離率分析 (TSE 40W Bias Dashboard)")
-    st.markdown("加上 **時空背景過濾器 (Market Regime Filter)** 的台股大數據監控框架。")
     
     with st.spinner('連線抓取最新市場資料中...'):
         df = load_data()
@@ -225,7 +224,9 @@ def page_bias_analysis():
         st.markdown(f"""
         <div class="danger-zone">
             <h2>🚨 警告：已進入極端乖離風險區 (Danger Zone)</h2>
-            <p style="font-size: 22px;">目前乖離率：<b>{latest_bias:.2f}%</b> (超過 20% 警戒線)</p>
+            <br/>
+            <p>目前乖離率：<b>{latest_bias:.2f}%</b> (超過 20% 警戒線)</p>
+            <br/>
             <p>目前指數：{latest_close:,.2f} | 40週均線：{latest_sma:,.2f}</p>
         </div>
         """, unsafe_allow_html=True)

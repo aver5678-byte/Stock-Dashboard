@@ -156,27 +156,28 @@ def apply_global_theme():
             background-color: #ffffff;
             border: 1px solid #ff0000;
             border-radius: 12px;
-            padding: 20px;
+            padding: 24px;
             text-align: center;
             color: #000000;
-            margin-bottom: 24px;
+            margin-bottom: 32px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         
         .danger-zone h2 {
             color: #ff0000 !important;
-            font-size: 28px !important;
+            font-size: 32px !important;
             border-bottom: none;
             margin-top: 0;
-            margin-bottom: 10px;
+            margin-bottom: 16px;
             text-align: center;
         }
         
         .danger-zone p {
             color: #000000 !important;
-            font-size: 20px !important;
-            font-weight: 500 !important;
+            font-size: 24px !important;
+            font-weight: 600 !important;
             text-align: center;
+            margin: 12px 0;
         }
         
         /* 一般安全 / 中立區塊 */
