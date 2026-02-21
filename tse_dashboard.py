@@ -9,8 +9,6 @@ import altair as alt
 from data_fetcher import fetch_data
 from strategy_7pct import analyze_7pct_strategy, calculate_7pct_statistics
 from wave_analyzer import analyze_waves
-from page_portfolio import page_portfolio_visualizer
-from page_ai_sentiment import page_ai_sentiment
 from ui_theme import apply_global_theme
 import datetime
 
@@ -53,28 +51,29 @@ st.markdown("""
 .danger-zone {
   animation: blink 1.5s infinite;
   padding: 20px;
-  background-color: #0b0b0b;
+  background-color: #ffffff;
   border-radius: 4px;
   border: 1px solid #ff0000;
   text-align: center;
-  color: white;
+  color: #000000;
   margin-bottom: 20px;
 }
 .normal-zone {
   padding: 20px;
   border-radius: 4px;
-  background-color: #0b0b0b;
-  border: 1px solid #555555;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
   text-align: center;
-  color: white;
+  color: #000000;
   margin-bottom: 20px;
 }
 .warning-box {
-  background-color: #0d0d0d;
+  background-color: #fce4e4;
   border-left: 3px solid #ff0000;
   padding: 15px;
   margin: 10px 0;
   border-radius: 2px;
+  color: #000000;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -234,7 +233,7 @@ def simulate_sma(df, weeks=18):
 
 def page_bias_analysis():
     log_visit("40週乖離率分析")
-    st.title("📈 台股預警儀表板 (TSE 40W Bias Dashboard)")
+    st.title("40週乖離率分析 (TSE 40W Bias Dashboard)")
     st.markdown("加上 **時空背景過濾器 (Market Regime Filter)** 的台股大數據監控框架。")
     
     with st.spinner('連線抓取最新市場資料中...'):
@@ -279,8 +278,8 @@ def page_bias_analysis():
     if latest_bias > 20 and "類型 B" in current_regime_label:
         st.markdown(f"""
         <div class="warning-box">
-            <h4>🎯 時空背景定位：{current_regime_label}</h4>
-            <p style="font-size: 16px; color: #ffcccc;">
+            <h4>時空背景定位：{current_regime_label}</h4>
+            <p style="font-size: 16px; color: #ff0000;">
                <b>系統警告：</b> 本次回檔判定為高位噴出。歷史數據顯示，此類型背景下的回歸通常更為劇烈，請密切注意移動停利以及風險控管。
             </p>
         </div>
@@ -300,7 +299,7 @@ def page_bias_analysis():
                         name='K線'), row=1, col=1)
                         
         fig.add_trace(go.Scatter(x=df.index, y=df['SMA40'], 
-                                 line=dict(color='white', width=2), 
+                                 line=dict(color='black', width=2), 
                                  name='40週均線'), row=1, col=1)
                                  
         fig.add_trace(go.Scatter(x=df.index, y=df['Bias'], 
@@ -316,18 +315,20 @@ def page_bias_analysis():
             type_b_points = df.loc[df.index.intersection(type_b_dates)]
             
             fig.add_trace(go.Scatter(x=type_a_points.index, y=type_a_points['Bias'],
-                                     mode='markers', marker=dict(color='white', size=8, symbol='circle', line=dict(width=1, color='gray')),
+                                     mode='markers', marker=dict(color='white', size=8, symbol='circle', line=dict(width=1, color='black')),
                                      name='類型 A (低基期)'), row=2, col=1)
                                      
             fig.add_trace(go.Scatter(x=type_b_points.index, y=type_b_points['Bias'],
                                      mode='markers', marker=dict(color='red', size=8, symbol='circle', line=dict(width=1, color='darkred')),
                                      name='類型 B (高位段)'), row=2, col=1)
 
-        fig.add_hline(y=0, line_dash="solid", line_color="#333333", row=2, col=1)
-        fig.add_hline(y=20, line_dash="dash", line_color="white", row=2, col=1, annotation_text="20% 警戒線")
+        fig.add_hline(y=0, line_dash="solid", line_color="#cccccc", row=2, col=1)
+        fig.add_hline(y=20, line_dash="dash", line_color="black", row=2, col=1, annotation_text="20% 警戒線")
         fig.add_hline(y=22, line_dash="solid", line_color="red", row=2, col=1, annotation_text="22% 極端線")
         
-        fig.update_layout(height=650, template="plotly_dark", xaxis_rangeslider_visible=False,
+        fig.update_layout(height=650, xaxis_rangeslider_visible=False,
+                          plot_bgcolor="rgba(0,0,0,0)",
+                          paper_bgcolor="rgba(0,0,0,0)",
                           margin=dict(l=0, r=0, t=30, b=0))
         st.plotly_chart(fig, use_container_width=True)
         
@@ -386,14 +387,14 @@ def page_bias_analysis():
                                  name='假設維持現價不變的指數路徑'))
     
     fig_pred.add_trace(go.Scatter(x=past_d, y=past_sma, 
-                                 line=dict(color='white', width=2), 
+                                 line=dict(color='black', width=2), 
                                  name='過去 SMA40'))
                                  
     fig_pred.add_trace(go.Scatter(x=f_dates, y=f_smas, 
                                  line=dict(color='red', width=2, dash='dot'), 
                                  name='預測的 SMA40 上升路徑'))
                                  
-    fig_pred.update_layout(height=450, template="plotly_dark", 
+    fig_pred.update_layout(height=450, 
                            plot_bgcolor="rgba(0,0,0,0)",
                            paper_bgcolor="rgba(0,0,0,0)",
                            title=f"未來 {future_weeks} 週 40 週均線扣抵預測圖",
@@ -421,8 +422,8 @@ def page_bias_analysis():
         st.success("歷史上沒有發生過大於 22% 乖離率的事件。")
 
 def page_upward_bias():
-    log_visit("乖離上漲模組")
-    st.title("📈 乖離底部反彈上漲模組")
+    log_visit("股市上漲統計表")
+    st.title("股市上漲統計表 (Bottom Bounce Analysis)")
     st.write("這是一個獨立的分析頁面！\\n計算每一次從低點起漲（經過前波大於 7% 的修正洗盤），一直抱到「下一次再發生 7% 大回檔」前的小波段/大波段真正漲幅。")
 
     @st.cache_data(ttl=3600)
@@ -545,7 +546,7 @@ def page_upward_bias():
             align='center',
             baseline='bottom',
             dy=-5,
-            color='white'
+            color='black'
         ).encode(
             text=alt.Text('機率(%):Q', format='.1f')
         )
@@ -558,8 +559,8 @@ def page_upward_bias():
     st.dataframe(up_df.sort_values(by='起漲日期 (前波破底)', ascending=False), height=400)
 
 def page_downward_bias():
-    log_visit("7% 回檔進場分析")
-    st.title("📉 股市 7% 回檔進場分析儀表板")
+    log_visit("股市回檔統計表")
+    st.title("股市回檔統計表 (7% DD Entry)")
     st.write("即時監測與歷史回測：針對標普 500 (SPX)、那斯達克 (IXIC) 及台股加權指數 (TWII)，分析自歷史高點跌破 7% 後的剩餘跌幅與反彈機率。")
     
     tickers = {
@@ -650,7 +651,7 @@ def page_downward_bias():
             align='center',
             baseline='bottom',
             dy=-5,
-            color='white'
+            color='black'
         ).encode(
             text=alt.Text('Probability (%):Q', format='.1f')
         )
@@ -690,7 +691,10 @@ def page_admin_dashboard():
             page_counts = logs_df['瀏覽模組'].value_counts().reset_index()
             page_counts.columns = ['模組', '次數']
             fig_pie = go.Figure(data=[go.Pie(labels=page_counts['模組'], values=page_counts['次數'], hole=.3)])
-            fig_pie.update_layout(template="plotly_dark", height=300, margin=dict(l=0, r=0, t=30, b=0))
+            fig_pie.update_layout(height=300, 
+                                  margin=dict(l=0, r=0, t=30, b=0),
+                                  paper_bgcolor="rgba(0,0,0,0)",
+                                  plot_bgcolor="rgba(0,0,0,0)")
             st.plotly_chart(fig_pie, use_container_width=True)
             
     else:
@@ -733,7 +737,7 @@ def login_simulator():
                 st.sidebar.error("請輸入信箱！")
     else:
         st.sidebar.success(f"✅ 您好，{st.session_state['user_email']}")
-        st.sidebar.write(f"身分：{'👑 站長' if st.session_state['user_role'] == 'admin' else '👤 一般會員'}")
+        st.sidebar.write(f"身分：{'站長' if st.session_state['user_role'] == 'admin' else '一般會員'}")
         
         if st.sidebar.button("登出 (Logout)"):
             st.session_state['user_role'] = 'guest'
@@ -741,23 +745,21 @@ def login_simulator():
             st.rerun()
 
 def main():
-    st.sidebar.title("📊 股市分析系統")
+    st.sidebar.title("股市分析系統")
     st.sidebar.markdown("請選擇您要查看的功能：")
     
     # 掛載登入模擬器
     login_simulator()
     
     pages = {
-        "📊 40週乖離率分析": page_bias_analysis,
-        "📉 股市 7% 回檔進場分析": page_downward_bias,
-        "📈 乖離底部反彈上漲模組": page_upward_bias,
-        "💼 資產配置回測 (Portfolio)": page_portfolio_visualizer,
-        "🧠 AI 全球情緒雷達": page_ai_sentiment
+        "40週乖離率分析": page_bias_analysis,
+        "股市回檔統計表": page_downward_bias,
+        "股市上漲統計表": page_upward_bias
     }
     
     # 如果是站長登入，就可以看到私密的後台
     if st.session_state['user_role'] == 'admin':
-        pages["🛡️ 管理員後台 (專屬)"] = page_admin_dashboard
+        pages["管理員後台"] = page_admin_dashboard
         
     selection = st.sidebar.radio("功能導覽", list(pages.keys()))
     
