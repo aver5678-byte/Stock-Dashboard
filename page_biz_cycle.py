@@ -61,9 +61,9 @@ def page_biz_cycle():
     
     simulation_html = f"""
     <div style="background:#0F172A; border:4px solid #334155; border-radius:12px; overflow:hidden; box-shadow:0 20px 40px rgba(0,0,0,0.5); margin-bottom:40px;">
-        <div style="background:#1E293B; padding:15px 30px; border-bottom:2px solid #334155; display:flex; justify-content:space-between; align-items:center;">
-            <div style="color:white; font-size:20px; font-weight:900; letter-spacing:1px;">🛡️ 歷史過熱週期演算系統</div>
-            <div style="font-family:'JetBrains Mono'; font-size:12px; color:#64748B;">SCENARIO_ANALYZER_v3.2</div>
+        <div style="background:#1E293B; padding:20px 35px; border-bottom:2px solid #334155; display:flex; justify-content:space-between; align-items:center;">
+            <div style="color:white; font-size:32px; font-weight:950; letter-spacing:1px; text-shadow:0 0 20px rgba(56, 189, 248, 0.3);">🛡️ 歷史過熱週期演算系統</div>
+            <div style="font-family:'JetBrains Mono'; font-size:14px; color:#64748B; font-weight:800;">SCENARIO_ANALYZER_v4.2</div>
         </div>
         <div style="padding:40px; display:flex; gap:40px; align-items:stretch;">
             <div style="flex:1.2; background:rgba(255,255,255,0.02); padding:30px; border-radius:12px; border:1px solid rgba(255,255,255,0.05); text-align:left;">
@@ -90,7 +90,7 @@ def page_biz_cycle():
     # --- 4.5 劇本操作導讀 (Scenario Strategy Guide) ---
     scenario_onboarding_html = f"""
     <div style="background:linear-gradient(135deg, #0F172A 0%, #1E293B 100%); border:2px solid #334155; border-radius:12px; padding:35px; margin-bottom:80px; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
-        <h2 style="color:#F1F5F9; font-size:24px; font-weight:900; margin-top:0; margin-bottom:25px; display:flex; align-items:center; gap:12px;">📋 戰術導讀：面對「雙劇本」的進退法則</h2>
+        <h2 style="color:#F1F5F9; font-size:22px; font-weight:900; margin-top:0; margin-bottom:25px; display:flex; align-items:center; gap:12px;">📋 戰術導讀：面對「雙劇本」的進退法則</h2>
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:30px;">
             <div style="padding:15px; border-right:1px solid rgba(255,255,255,0.05);">
                 <div style="color:#7DD3FC; font-weight:900; font-size:16px; margin-bottom:10px;">🚩 識別路徑：32 分生死線</div>
