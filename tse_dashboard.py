@@ -719,7 +719,7 @@ def page_downward_bias():
         "台灣加權指數 (^TWII)": "^TWII"
     }
 
-    @st.cache_data(ttl=3600)
+    @st.cache_data(ttl=3456, show_spinner=False)
     def get_analysis(ticker_symbol):
         df = fetch_data(ticker_symbol, start_date="2000-01-01")
         if df.empty:
