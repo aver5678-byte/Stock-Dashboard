@@ -382,28 +382,28 @@ def page_bias_analysis():
             days_str = str(int(days_total)) if pd.notna(days_total) else "--"
             
             # 建構「作戰中心：終極數據牆版」HTML
-            # 極限規格：52px/45px/40px，目標填充率 80%+，徹底消除視覺空虛感
+            # 極限規格：52px/45px/48px，經微調完美層級，填滿 80% 空間
             html_code = f"""
 <div style="background:#0F172A; border:5px solid #334155; border-radius:12px; margin-bottom:50px; overflow:hidden; width:100%; box-shadow:0 30px 60px rgba(0,0,0,0.5);">
-  <!-- 頂部區：巨星標題磚 (52px/45px) -->
+  <!-- 頂部區：巨星標題磚 -->
   <div style="display:flex; justify-content:space-between; align-items:stretch; background:#1E293B; border-bottom:4px solid #475569;">
     <div style="flex:2; padding:40px 30px; border-right:4px solid #475569;">
       <div style="font-size:52px; color:white; font-weight:950; letter-spacing:-2px; line-height:1;">📅 {r["觸發日期"]}</div>
-      <div style="margin-top:25px; display:flex; flex-wrap:nowrap; align-items:center; gap:30px;">
-        <span style="color:#FFF; background:{tag_color}; padding:10px 30px; border-radius:12px; font-size:45px; font-weight:900; white-space:nowrap; border:2px solid rgba(255,255,255,0.3);">{type_tag}</span>
-        <span style="font-size:45px; color:#94A3B8; font-weight:800; white-space:nowrap;">回檔: <span style="color:#F1F5F9;">{r['前12月最大回檔(%)']:.1f}%</span></span>
+      <div style="margin-top:25px; display:flex; flex-wrap:nowrap; align-items:center; gap:25px;">
+        <span style="color:#FFF; background:{tag_color}; padding:8px 25px; border-radius:10px; font-size:38px; font-weight:900; white-space:nowrap; border:2px solid rgba(255,255,255,0.3);">{type_tag}</span>
+        <span style="font-size:38px; color:#94A3B8; font-weight:800; white-space:nowrap;">回檔: <span style="color:#F1F5F9;">{r['前12月最大回檔(%)']:.1f}%</span></span>
       </div>
     </div>
     <div style="flex:1; text-align:center; background:rgba(56, 189, 248, 0.1); padding:40px 20px; display:flex; flex-direction:column; justify-content:center; min-width:300px;">
-      <div style="font-size:30px; color:#7DD3FC; font-weight:900; text-transform:uppercase; margin-bottom:10px; letter-spacing:2px;">修復耗時</div>
-      <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:#38BDF8; line-height:1;">{days_str}<span style="font-size:30px; font-weight:800; margin-left:10px; color:#7DD3FC;">天</span></div>
+      <div style="font-size:24px; color:#7DD3FC; font-weight:900; text-transform:uppercase; margin-bottom:12px; letter-spacing:2px;">修復耗時</div>
+      <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:#38BDF8; line-height:1;">{days_str}<span style="font-size:25px; font-weight:800; margin-left:10px; color:#7DD3FC;">天</span></div>
     </div>
   </div>
 
-  <!-- 中間區：巨型能量磁磚 (45px) -->
+  <!-- 中間區：巨型能量磁磚 -->
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
     <div style="background:#7F1D1D; padding:50px 30px; border-right:2px solid #991B1B;">
-      <div style="display:flex; justify-content:space-between; font-size:45px; color:#FCA5A5; margin-bottom:25px; font-weight:950; white-space:nowrap;">
+      <div style="display:flex; justify-content:space-between; align-items:center; font-size:45px; color:#FCA5A5; margin-bottom:25px; font-weight:950; white-space:nowrap;">
         <span>🔥 最高噴出</span><span>{max_surge:+.1f}%</span>
       </div>
       <div style="height:45px; background:#450A0A; border-radius:8px; overflow:hidden; border:3px solid #B91C1C;">
@@ -411,7 +411,7 @@ def page_bias_analysis():
       </div>
     </div>
     <div style="background:#064E3B; padding:50px 30px;">
-      <div style="display:flex; justify-content:space-between; font-size:45px; color:#6EE7B7; margin-bottom:25px; font-weight:950; white-space:nowrap;">
+      <div style="display:flex; justify-content:space-between; align-items:center; font-size:45px; color:#6EE7B7; margin-bottom:25px; font-weight:950; white-space:nowrap;">
         <span>🛡️ 回歸跌幅</span><span>{max_drop:+.1f}%</span>
       </div>
       <div style="height:45px; background:#022C22; border-radius:8px; overflow:hidden; border:3px solid #059669;">
@@ -420,19 +420,19 @@ def page_bias_analysis():
     </div>
   </div>
 
-  <!-- 底部區：重型數據基座 (30px/40px) -->
+  <!-- 底部區：重型數據基座 -->
   <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0; background:#1E293B; border-top:4px solid #475569;">
-    <div style="background:#450A0A; padding:40px 10px; text-align:center; border-right:4px solid #334155;">
-      <div style="font-size:30px; color:#F87171; font-weight:900; margin-bottom:15px; white-space:nowrap; letter-spacing:2px;">📍 22% 觸發價</div>
-      <div style="font-family:'JetBrains Mono'; font-size:40px; font-weight:950; color:white;">{line_22_str}</div>
+    <div style="background:#450A0A; padding:45px 10px; text-align:center; border-right:4px solid #334155;">
+      <div style="font-size:30px; color:#F87171; font-weight:900; margin-bottom:18px; white-space:nowrap; letter-spacing:2px;">📍 22% 觸發價</div>
+      <div style="font-family:'JetBrains Mono'; font-size:48px; font-weight:950; color:white;">{line_22_str}</div>
     </div>
-    <div style="background:#450A0A; padding:40px 10px; text-align:center; border-right:4px solid #334155;">
-      <div style="font-size:30px; color:#FCA5A5; font-weight:900; margin-bottom:15px; white-space:nowrap; letter-spacing:2px;">🚀 期間最高價</div>
-      <div style="font-family:'JetBrains Mono'; font-size:40px; font-weight:950; color:#FCA5A5;">{peak_val_str}</div>
+    <div style="background:#450A0A; padding:45px 10px; text-align:center; border-right:4px solid #334155;">
+      <div style="font-size:30px; color:#FCA5A5; font-weight:900; margin-bottom:18px; white-space:nowrap; letter-spacing:2px;">🚀 期間最高價</div>
+      <div style="font-family:'JetBrains Mono'; font-size:48px; font-weight:950; color:#FCA5A5;">{peak_val_str}</div>
     </div>
-    <div style="background:#064E3B; padding:40px 10px; text-align:center;">
-      <div style="font-size:30px; color:#6EE7B7; font-weight:900; margin-bottom:15px; white-space:nowrap; letter-spacing:2px;">🎯 回穩目標價</div>
-      <div style="font-family:'JetBrains Mono'; font-size:40px; font-weight:950; color:#A7F3D0;">{recover_val_str}</div>
+    <div style="background:#064E3B; padding:45px 10px; text-align:center;">
+      <div style="font-size:30px; color:#6EE7B7; font-weight:900; margin-bottom:18px; white-space:nowrap; letter-spacing:2px;">🎯 回穩目標價</div>
+      <div style="font-family:'JetBrains Mono'; font-size:48px; font-weight:950; color:#A7F3D0;">{recover_val_str}</div>
     </div>
   </div>
 </div>
