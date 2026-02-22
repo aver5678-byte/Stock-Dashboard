@@ -28,9 +28,15 @@ def apply_global_theme():
             padding: 20px 10px !important;
         }
 
-        /* 隱藏原生圓點 */
+        /* 隱藏原生圓點與 Navigation 標籤 */
         div[data-testid="stSidebarUserContent"] .stRadio div[role="radiogroup"] > label > div:first-child {
             display: none !important;
+        }
+        div[data-testid="stSidebarUserContent"] .stRadio label[data-testid="stWidgetLabel"] {
+            display: none !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
         }
 
         /* 側邊欄分類標題 (SaaS 標章) */
@@ -60,14 +66,18 @@ def apply_global_theme():
         }
 
         div[data-testid="stSidebarUserContent"] .stRadio label {
-            background: #0F172A !important;
-            border: 1px solid #1E293B !important;
-            border-radius: 16px !important;
-            padding: 20px 25px !important;
-            margin-bottom: 8px !important;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+            background: rgba(30, 41, 59, 0.4) !important;
+            border: 1px solid rgba(56, 189, 248, 0.2) !important;
+            border-radius: 12px !important;
+            padding: 22px 25px !important;
+            margin-bottom: 12px !important;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 19px !important;
+            font-family: 'JetBrains Mono', monospace !important;
             opacity: 1 !important;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6) !important;
             display: flex !important;
             align-items: center !important;
             cursor: pointer !important;
@@ -80,7 +90,8 @@ def apply_global_theme():
             color: #FFFFFF !important;
             opacity: 1 !important;
             font-size: 19px !important;
-            font-weight: 900 !important;
+            font-weight: 800 !important;
+            font-family: 'JetBrains Mono', monospace !important;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5) !important;
         }
 
@@ -97,13 +108,15 @@ def apply_global_theme():
 
         /* Active 選中項：霓虹指示燈效果 */
         div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
-            background: #1E293B !important;
-            border: 2px solid #38BDF8 !important;
-            box-shadow: 0 0 40px rgba(56, 189, 248, 0.4), inset 8px 0 0 #38BDF8 !important;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.25) 0%, rgba(56, 189, 248, 0.05) 100%) !important;
+            border: 1px solid #38BDF8 !important;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.3), inset 6px 0 0 #38BDF8 !important;
+            transform: scale(1.02) !important;
         }
         div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] p {
             color: #FFFFFF !important;
-            text-shadow: 0 0 15px rgba(56, 189, 248, 0.8) !important;
+            font-weight: 950 !important;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5) !important;
         }
 
         /* 4. 側邊面板光束邊緣 */
