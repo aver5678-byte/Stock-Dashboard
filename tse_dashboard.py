@@ -795,7 +795,12 @@ def page_downward_bias():
     st.markdown('<h2 style="text-align:center; margin-top:80px;">📊 觸發 7% 後的「剩餘跌幅」機率分布</h2>', unsafe_allow_html=True)
 
     if not dist_df.empty:
-        chart = alt.Chart(dist_df).mark_bar(
+        dist_df_cn = dist_df.rename(columns={
+            'Range': '跌幅區間',
+            'Count': '發生次數',
+            'Probability (%)': '機率 (%)'
+        })
+        chart = alt.Chart(dist_df_cn).mark_bar(
             color=alt.Gradient(
                 gradient='linear',
                 stops=[alt.GradientStop(color='#EF4444', offset=0),
@@ -804,13 +809,9 @@ def page_downward_bias():
             ),
             cornerRadiusTopLeft=8, cornerRadiusTopRight=8
         ).encode(
-            x=alt.X('Range:N', title='剩餘跌幅區間 (%)', sort=None, axis=alt.Axis(labelAngle=0, labelFontSize=13, labelColor='#94A3B8', titleColor='#F1F5F9', titleFontSize=15)),
-            y=alt.Y('Probability (%):Q', title='發生機率 (%)', axis=alt.Axis(labelFontSize=13, gridColor='#334155', gridDash=[2,4], labelColor='#94A3B8', titleColor='#F1F5F9', titleFontSize=15)),
-            tooltip=[
-                alt.Tooltip('Range:N', title='跌幅區間'),
-                alt.Tooltip('Count:Q', title='發生次數'),
-                alt.Tooltip('Probability (%):Q', title='機率 (%)')
-            ]
+            x=alt.X('跌幅區間:N', title='', sort=None, axis=alt.Axis(labelAngle=0, labelFontSize=13, labelColor='#94A3B8')),
+            y=alt.Y('機率 (%):Q', title='發生機率 (%)', axis=alt.Axis(labelFontSize=13, gridColor='#334155', gridDash=[2,4], labelColor='#94A3B8', titleColor='#F1F5F9', titleFontSize=15)),
+            tooltip=['跌幅區間:N', '發生次數:Q', '機率 (%):Q']
         ).properties(
             height=350,
             background='transparent'
@@ -828,52 +829,85 @@ def page_downward_bias():
             total_dd = float(r['最大跌幅(%)'])
             resid_dd = float(r['剩餘跌幅(%)'])
             days_to_bottom = int(r['破底花費天數'])
+            days_to_rec = r['解套花費天數']
             status = r['狀態']
             
-            w = min(100.0, (abs(total_dd) / 30) * 100) # 修正為 30% 滿版，較符合常態
+            trigger_date = r['觸發日期']
+            peak_date = r['前高日期']
+            bottom_date = r['破底日期']
+            rec_date = r['解套日期']
+            
+            trigger_price = float(r['觸發價格'])
+            peak_price = float(r['前高價格'])
+            bottom_price = float(r['破底最低價'])
+            
+            w = min(100.0, (abs(total_dd) / 30) * 100) # 修正為 30% 滿版
             
             if status == '已解套':
                 status_icon = "✅"
                 tag_color = "#10B981"
                 card_border = "#064E3B"
+                tag_bg = "rgba(16, 185, 129, 0.1)"
+                period_str = f"{trigger_date} ➔ {rec_date}"
+                rec_days_str = f"總耗時 {days_to_rec} 天" if str(days_to_rec).isdigit() or isinstance(days_to_rec, (int, float)) else f"耗時 {days_to_rec} 天"
+                state_3_val = f"{peak_price:,.0f}"
+                state_3_sub = "完全收復前高"
             else:
                 status_icon = "🚨"
                 tag_color = "#EF4444"
                 card_border = "#450A0A"
+                tag_bg = "rgba(239, 68, 68, 0.1)"
+                period_str = f"{trigger_date} ➔ 至今未解套"
+                rec_days_str = f"已耗時 {days_to_rec} 天"
+                state_3_val = "等待收復"
+                state_3_sub = "套牢中"
 
             card_html = f"""
-            <div style="background:#0F172A; border:2px solid {card_border}; border-left:6px solid {tag_color}; border-radius:12px; margin-bottom:20px; box-shadow:0 10px 20px rgba(0,0,0,0.3); overflow:hidden;">
-                <div style="display:flex; justify-content:space-between; align-items:center; background:#1E293B; padding:15px 25px; border-bottom:1px solid #334155;">
-                    <div style="display:flex; align-items:center; gap:15px;">
-                        <span style="font-family:'JetBrains Mono'; font-size:16px; color:#F1F5F9; font-weight:900;">📅 觸發日 {r['觸發日期']}</span>
-                        <span style="background:rgba(255,255,255,0.05); color:{tag_color}; padding:4px 12px; border-radius:6px; font-size:12px; font-weight:800; border:1px solid {tag_color};">{status_icon} {status}</span>
+            <div style="background:#0F172A; border:5px solid #334155; border-radius:12px; margin-bottom:50px; overflow:hidden; width:100%; box-shadow:0 30px 60px rgba(0,0,0,0.5);">
+                <div style="display:flex; justify-content:space-between; align-items:stretch; background:#1E293B; border-bottom:4px solid #475569;">
+                    <div style="flex:2.5; padding:35px 30px; border-right:4px solid #475569;">
+                        <div style="display:flex; align-items:center; gap:20px; margin-bottom:15px;">
+                            <span style="color:{tag_color}; background:{tag_bg}; padding:6px 16px; border-radius:8px; font-size:20px; font-weight:900; border:2px solid {tag_color};">{status_icon} {status}</span>
+                            <span style="font-size:24px; color:#94A3B8; font-weight:800; letter-spacing:1px;">波段回檔紀錄：</span>
+                        </div>
+                        <div style="font-size:42px; color:white; font-weight:950; letter-spacing:-1px; line-height:1;">📅 {period_str}</div>
                     </div>
-                    <div style="text-align:right;">
-                        <div style="font-size:11px; color:#94A3B8; font-weight:800;">解套日期</div>
-                        <div style="font-family:'JetBrains Mono'; font-size:14px; color:{'#10B981' if status == '已解套' else '#64748B'}; font-weight:900;">{r['解套日期'] if pd.notna(r['解套日期']) else "尚未解套"}</div>
+                    <div style="flex:1; text-align:center; background:rgba(239, 68, 68, 0.05); padding:40px 20px; display:flex; flex-direction:column; justify-content:center; min-width:300px;">
+                        <div style="font-size:20px; color:#FCA5A5; font-weight:900; text-transform:uppercase; margin-bottom:12px; letter-spacing:2px;">最大破壞力道</div>
+                        <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:#EF4444; line-height:1;">-{abs(total_dd):.1f}<span style="font-size:25px; font-weight:800; margin-left:10px; color:#FCA5A5;">%</span></div>
                     </div>
                 </div>
-                <div style="padding:25px;">
-                    <div style="display:flex; align-items:center; gap:30px; margin-bottom:15px;">
-                        <div style="flex:1;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                                <span style="font-size:13px; color:#FCA5A5; font-weight:800; letter-spacing:1px;">總跌幅破壞力道 (Max Drawdown)</span>
-                                <span style="font-family:'JetBrains Mono'; font-size:24px; font-weight:950; color:#EF4444;">-{abs(total_dd):.1f}%</span>
-                            </div>
-                            <div style="height:14px; background:#020617; border-radius:6px; border:1px solid #334155; overflow:hidden;">
-                                <div style="width:{w}%; height:100%; background:linear-gradient(90deg, #991B1B, #EF4444); box-shadow:0 0 15px #EF4444;"></div>
-                            </div>
+                <div style="background:#0F172A; padding:35px; border-bottom:4px solid #334155;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; font-size:28px; color:#FCA5A5; margin-bottom:15px; font-weight:950; white-space:nowrap;">
+                        <span>📉 總跌幅能量展開 (對比 -30% 極端值)</span>
+                        <span>-{abs(total_dd):.1f} / -30.0 %</span>
+                    </div>
+                    <div style="height:20px; background:#020617; border-radius:10px; overflow:hidden; border:2px solid #334155;">
+                        <div style="width:{w}%; height:100%; background:linear-gradient(90deg, #1E293B, #EF4444); box-shadow:0 0 30px #EF4444;"></div>
+                    </div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1.2fr 1fr; gap:0; background:#1E293B;">
+                    <div style="background:#1E293B; padding:30px; text-align:left; border-right:4px solid #334155;">
+                        <div style="font-size:18px; color:#94A3B8; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[階段一] 觸發 -7% 警戒</div>
+                        <div style="font-size:14px; color:#64748B; font-weight:800; margin-bottom:5px;">(發生於 {trigger_date})</div>
+                        <div style="display:flex; align-items:baseline; gap:12px;">
+                            <div style="font-size:36px; font-family:'JetBrains Mono'; font-weight:950; color:white;">{trigger_price:,.0f}</div>
+                            <div style="font-size:16px; font-weight:900; color:#94A3B8;">(前高 {peak_price:,.0f})</div>
                         </div>
-                        <div style="flex:0.8; background:rgba(255,255,255,0.02); padding:15px; border-radius:8px; border:1px solid rgba(255,255,255,0.05); display:flex; gap:20px;">
-                            <div style="flex:1;">
-                                <div style="font-size:11px; color:#94A3B8; margin-bottom:5px;">進場後承受壓力</div>
-                                <div style="font-family:'JetBrains Mono'; font-size:18px; color:#FCA5A5; font-weight:900;">-{abs(resid_dd):.1f}%</div>
-                            </div>
-                            <div style="flex:1; border-left:1px solid #334155; padding-left:20px;">
-                                <div style="font-size:11px; color:#94A3B8; margin-bottom:5px;">尋底煎熬時間</div>
-                                <div style="font-family:'JetBrains Mono'; font-size:18px; color:#FDE68A; font-weight:900;">{days_to_bottom} 天</div>
-                            </div>
+                    </div>
+                    <div style="background:rgba(239, 68, 68, 0.05); padding:30px; text-align:left; border-right:4px solid #334155;">
+                        <div style="font-size:18px; color:#EF4444; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[階段二] 承受剩餘跌幅</div>
+                        <div style="font-size:14px; color:#FCA5A5; font-weight:800; margin-bottom:5px;">(見底於 {bottom_date}，耗時 {days_to_bottom} 天)</div>
+                        <div style="display:flex; align-items:baseline; gap:12px;">
+                            <div style="font-size:36px; font-family:'JetBrains Mono'; font-weight:950; color:white;">{bottom_price:,.0f}</div>
+                            <div style="font-size:22px; font-family:'JetBrains Mono'; font-weight:900; color:#EF4444;">再跌 -{abs(resid_dd):.1f}%</div>
                         </div>
+                    </div>
+                    <div style="background:#1E293B; padding:30px; text-align:left;">
+                        <div style="font-size:18px; color:#38BDF8; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[階段三] 波段解套狀態</div>
+                        <div style="font-size:14px; color:#64748B; font-weight:800; margin-bottom:5px;">({rec_days_str})</div>
+                        <div style="font-size:24px; font-family:'JetBrains Mono'; font-weight:950; color:#7DD3FC; line-height:1.3;">{state_3_val}</div>
+                        <div style="font-size:14px; color:#94A3B8; font-weight:800; margin-top:5px;">{state_3_sub}</div>
                     </div>
                 </div>
             </div>
