@@ -84,26 +84,67 @@ def page_biz_cycle():
     ]
 
     for item in history_data:
-        w = min(100.0, (item['months'] / 16) * 100)
+        months = item['months']
+        w = min(100.0, (months / 16) * 100)
+        
+        # 動態戰術判定
+        if months >= 12:
+            tactical_eval = "⚠️ 長循環警告：風險大於機會"
+            risk_level = "極高"
+            strategy_node = "分批獲利 / 回收資金"
+        elif months >= 8:
+            tactical_eval = "🚩 進入魚尾行情：嚴禁加碼"
+            risk_level = "高"
+            strategy_node = "停止投入 / 觀察指標"
+        else:
+            tactical_eval = "🟢 早期擴張：仍有噴出空間"
+            risk_level = "中"
+            strategy_node = "持有待變 / 追蹤燈號"
+
         card_html = f"""
-        <div style="background:#0F172A; border:5px solid #334155; border-radius:12px; margin-bottom:40px; overflow:hidden; box-shadow:0 25px 50px rgba(0,0,0,0.5);">
-            <!-- 頂部資訊區 -->
-            <div style="background:#1E293B; padding:30px 35px; border-bottom:3px solid #334155; display:flex; justify-content:space-between; align-items:center;">
-                <div style="font-family:'JetBrains Mono'; font-size:32px; font-weight:950; color:white; letter-spacing:-1px;">📅 {item['period']}</div>
-                <div style="color:{item['color']}; background:{item['bg']}; padding:8px 25px; border-radius:10px; font-size:24px; font-weight:900; border:2px solid {item['color']}; box-shadow:0 0 15px {item['color']}44;">{item['status_icon']} {item['type']}</div>
-            </div>
-            <!-- 底部能量條區 -->
-            <div style="padding:35px; background:rgba(255,255,255,0.01);">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; font-size:20px; color:#F1F5F9; font-weight:800;">
-                    <span>⏳ 週期熱度佔比 (最高對標 16 個月)</span>
-                    <span style="font-family:'JetBrains Mono'; font-size:36px; font-weight:950; color:{item['color']}; text-shadow:0 0 15px {item['color']}88;">{item['months']:.1f} <span style="font-size:18px;">M</span></span>
-                </div>
-                <div style="height:25px; background:#020617; border-radius:15px; overflow:hidden; border:2px solid #334155;">
-                    <div style="width:{w}%; height:100%; background:linear-gradient(90deg, #1E293B, {item['color']}); box-shadow:0 0 30px {item['color']}CC;"></div>
-                </div>
-            </div>
-        </div>
+<div style="background:#0F172A; border:5px solid #334155; border-radius:12px; margin-bottom:50px; overflow:hidden; width:100%; box-shadow:0 30px 60px rgba(0,0,0,0.5);">
+  <!-- 頂部區：巨星標題磚 (War Overview) -->
+  <div style="display:flex; justify-content:space-between; align-items:stretch; background:#1E293B; border-bottom:4px solid #475569;">
+    <div style="flex:2.5; padding:35px 30px; border-right:4px solid #475569;">
+      <div style="display:flex; align-items:center; gap:20px; margin-bottom:15px;">
+        <span style="color:{item['color']}; background:{item['bg']}; padding:6px 16px; border-radius:8px; font-size:20px; font-weight:900; border:2px solid {item['color']};">{item['status_icon']} {item['type']}</span>
+        <span style="font-size:24px; color:#94A3B8; font-weight:800; letter-spacing:1px;">景氣過熱監視區間：</span>
+      </div>
+      <div style="font-size:48px; color:white; font-weight:950; letter-spacing:-1px; line-height:1;">📅 {item['period']}</div>
+    </div>
+    <div style="flex:1; text-align:center; background:rgba(56, 189, 248, 0.1); padding:40px 20px; display:flex; flex-direction:column; justify-content:center; min-width:300px;">
+      <div style="font-size:20px; color:#7DD3FC; font-weight:900; text-transform:uppercase; margin-bottom:12px; letter-spacing:2px;">總持續月數</div>
+      <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:#38BDF8; line-height:1;">{months:.1f}<span style="font-size:25px; font-weight:800; margin-left:10px; color:#7DD3FC;">M</span></div>
+    </div>
+  </div>
+
+  <!-- 中間區：巨型能量核心 (Energy Rail) -->
+  <div style="background:#0F172A; padding:45px 35px; border-bottom:4px solid #334155;">
+    <div style="display:flex; justify-content:space-between; align-items:center; font-size:32px; color:#FCA5A5; margin-bottom:20px; font-weight:950; white-space:nowrap;">
+      <span>🔥 景氣擴張時間引力 (對標 16 個月)</span><span>{months:.1f} / 16 M</span>
+    </div>
+    <div style="height:30px; background:#020617; border-radius:15px; overflow:hidden; border:2px solid #334155;">
+        <div style="width:{w}%; height:100%; background:linear-gradient(90deg, #1E293B, {item['color']}); box-shadow:0 0 40px {item['color']};"></div>
+    </div>
+  </div>
+
+  <!-- 底部區：戰術註解底座 (Pedestal) -->
+  <div style="display:grid; grid-template-columns:1fr 1.2fr 1fr; gap:0; background:#1E293B;">
+    <div style="background:#1E293B; padding:30px; text-align:left; border-right:4px solid #334155;">
+      <div style="font-size:22px; color:#94A3B8; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[週期類別]</div>
+      <div style="font-size:32px; font-weight:950; color:white;">{item['type'].split('(')[0].strip()}</div>
+    </div>
+    <div style="background:rgba(239, 68, 68, 0.05); padding:30px; text-align:left; border-right:4px solid #334155;">
+      <div style="font-size:22px; color:#EF4444; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[戰術判定]</div>
+      <div style="font-size:28px; font-weight:950; color:#FCA5A5;">{tactical_eval}</div>
+    </div>
+    <div style="background:#1E293B; padding:30px; text-align:left;">
+      <div style="font-size:22px; color:#38BDF8; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[戰略建議]</div>
+      <div style="font-size:26px; font-weight:950; color:#7DD3FC;">{strategy_node}</div>
+    </div>
+  </div>
+</div>
         """
         st.markdown(card_html, unsafe_allow_html=True)
 
-    st.write("<p style='text-align:center; color:#64748B; font-size:14px; margin-top:100px; font-weight:600; letter-spacing:1px;'>系統由 aver5678 量化模組驅動 | 視覺化引擎: Command-Center v4.2 // FLAGSHIP_SYNC</p>", unsafe_allow_html=True)
+    st.write("<p style='text-align:center; color:#64748B; font-size:14px; margin-top:100px; font-weight:600; letter-spacing:1px;'>系統由 aver5678 量化模組驅動 | 視覺化引擎: Command-Center v4.5 // FLAGSHIP_X_CORE</p>", unsafe_allow_html=True)
