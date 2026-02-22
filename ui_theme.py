@@ -20,6 +20,12 @@ section[data-testid="stSidebar"] {
     background-color: #0F172A !important; 
     width: 320px !important;
     border-right: 1px solid #1E293B !important;
+    box-shadow: 10px 0 30px rgba(0,0,0,0.5) !important;
+}
+
+/* 徹底隱藏 Radio 圓點與原初樣式 */
+div[data-testid="stSidebarUserContent"] .stRadio div[role="radiogroup"] > label > div:first-child {
+    display: none !important;
 }
 
 /* 隱藏預設導覽標籤 */
@@ -58,10 +64,10 @@ div[data-testid="stSidebarUserContent"] .stRadio label:hover {
 }
 
 div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
-    background-color: rgba(239, 68, 68, 0.1) !important;
-    color: #EF4444 !important;
-    font-weight: 700 !important;
-    box-shadow: inset 4px 0 0 #EF4444 !important;
+    background-color: rgba(56, 189, 248, 0.1) !important;
+    color: #38BDF8 !important;
+    font-weight: 800 !important;
+    box-shadow: inset 4px 0 0 #38BDF8 !important;
 }
 
 /* 2. 主標題文字 (ChatGPT 大標風格) */
@@ -224,7 +230,9 @@ div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px;
+    padding: 15px;
+    background: rgba(30, 41, 59, 0.5) !important;
+    border: 1px solid #334155 !important;
     border-radius: 16px;
     margin-top: 10px;
 }
@@ -255,6 +263,22 @@ div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
 .user-role {
     font-size: 11px;
     color: #94A3B8;
+}
+
+/* 修正按鈕樣貌 */
+.stButton button {
+    background-color: #1E293B !important;
+    color: #94A3B8 !important;
+    border: 1px solid #334155 !important;
+    border-radius: 10px !important;
+    width: 100% !important;
+    transition: all 0.2s ease !important;
+}
+
+.stButton button:hover {
+    background-color: #334155 !important;
+    color: #F8FAFC !important;
+    border-color: #38BDF8 !important;
 }
         </style>
     """, unsafe_allow_html=True)
