@@ -231,22 +231,24 @@ def page_bias_analysis():
         
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
                         vertical_spacing=0.05, 
-                        subplot_titles=('<b style="font-size:24px;">台股加權指數40週乖離率</b>', '40週乖離率 (%)'),
+                        subplot_titles=('<b style="font-size:24px; color:#F1F5F9; font-family:\'JetBrains Mono\';">📡 歷史雷達觀測圖 (K線 vs 乖離率同步掃描)</b>', '<b style="color:#94A3B8; font-family:\'JetBrains Mono\';">40週乖離率 (%)</b>'),
                         row_width=[0.3, 0.7])
 
     fig.add_trace(go.Candlestick(x=df.index,
                     open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'],
                     name='加權指數',
-                    hovertemplate='時間: %{x|%Y/%m/%d}<br>開: %{open:.2f}<br>高: %{high:.2f}<br>低: %{low:.2f}<br>收: %{close:.2f}<extra></extra>'), row=1, col=1)
+                    increasing_line_color='#10B981', decreasing_line_color='#EF4444',
+                    hovertemplate='開: %{open:.2f} | 高: %{high:.2f} | 低: %{low:.2f} | 收: %{close:.2f}<extra></extra>'), row=1, col=1)
                     
     fig.add_trace(go.Scatter(x=df.index, y=df['SMA40'], 
-                             line={'color': '#A1A1AA', 'width': 2}, 
+                             line={'color': '#94A3B8', 'width': 2}, 
                              name='40週均線',
-                             hovertemplate='40週均線: %{y:.2f}<extra></extra>'), row=1, col=1)
+                             hovertemplate='均線點位: %{y:.2f}<extra></extra>'), row=1, col=1)
                              
     fig.add_trace(go.Scatter(x=df.index, y=df['Bias'], 
-                             line={'color': '#60A5FA', 'width': 1.5}, 
+                             line={'color': '#38BDF8', 'width': 2}, 
                              name='乖離率',
+                             fill='tozeroy', fillcolor='rgba(56, 189, 248, 0.1)',
                              hovertemplate='乖離率: %{y:.2f}%<extra></extra>'), row=2, col=1)
                              
     if not b_df.empty:
@@ -258,26 +260,28 @@ def page_bias_analysis():
         type_b_points = df.loc[df.index.intersection(type_b_dates)]
         
         fig.add_trace(go.Scatter(x=type_a_points.index, y=type_a_points['Bias'],
-                                 mode='markers', marker={'color': '#ECECEC', 'size': 8, 'symbol': 'circle', 'line': {'width': 1, 'color': '#3F3F46'}},
-                                 name='類型 A (低基期)'), row=2, col=1)
+                                 mode='markers', marker={'color': '#10B981', 'size': 10, 'symbol': 'circle', 'line': {'width': 2, 'color': '#047857'}},
+                                 name='類型 A (歷史低點)'), row=2, col=1)
                                  
         fig.add_trace(go.Scatter(x=type_b_points.index, y=type_b_points['Bias'],
-                                 mode='markers', marker={'color': 'red', 'size': 8, 'symbol': 'circle', 'line': {'width': 1, 'color': 'darkred'}},
-                                 name='類型 B (高位段)'), row=2, col=1)
+                                 mode='markers', marker={'color': '#EF4444', 'size': 10, 'symbol': 'circle', 'line': {'width': 2, 'color': '#B91C1C'}},
+                                 name='類型 B (歷史極端)'), row=2, col=1)
 
-    fig.add_hline(y=0, line_dash="solid", line_color="#3F3F46", row=2, col=1)
-    fig.add_hline(y=20, line_dash="dash", line_color="#A1A1AA", row=2, col=1, annotation_text="20% 警戒線")
-    fig.add_hline(y=22, line_dash="solid", line_color="#F87171", row=2, col=1, annotation_text="22% 極端線")
+    fig.add_hline(y=0, line_dash="solid", line_color="#475569", row=2, col=1)
+    fig.add_hline(y=20, line_dash="dash", line_color="#FBBF24", row=2, col=1, annotation_text="20% 警戒線", annotation_font_color="#FBBF24", annotation_position="top right")
+    fig.add_hline(y=22, line_dash="solid", line_color="#EF4444", row=2, col=1, annotation_text="22% 極端線", annotation_font_color="#EF4444", annotation_position="top right")
     
-    fig.update_layout(height=650, xaxis_rangeslider_visible=False,
-                      plot_bgcolor="rgba(0,0,0,0)",
-                      paper_bgcolor="rgba(0,0,0,0)",
-                      font=dict(color="#111827"),
+    fig.update_layout(height=700, xaxis_rangeslider_visible=False,
+                      plot_bgcolor="#0F172A",
+                      paper_bgcolor="#0F172A",
+                      font=dict(color="#F1F5F9", family="JetBrains Mono"),
                       hovermode="x unified",
-                      margin=dict(l=0, r=0, t=30, b=0))
+                      hoverlabel=dict(bgcolor="#1E293B", font_size=16, font_family="JetBrains Mono", bordercolor="#475569"),
+                      margin=dict(l=40, r=40, t=60, b=40),
+                      legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
                       
-    fig.update_xaxes(showspikes=True, spikemode="across", spikesnap="cursor", showline=True, spikedash="solid", spikethickness=1, spikecolor="#ECECEC")
-    fig.update_yaxes(showspikes=True, spikemode="across", spikesnap="cursor", showline=True, spikedash="solid", spikethickness=1, spikecolor="#ECECEC")
+    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', showspikes=True, spikemode="across", spikesnap="cursor", showline=False, spikedash="solid", spikethickness=1, spikecolor="#94A3B8")
+    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', showline=False)
     
     st.plotly_chart(fig, use_container_width=True)
 
