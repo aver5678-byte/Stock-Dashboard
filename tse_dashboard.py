@@ -229,6 +229,9 @@ def page_bias_analysis():
     """
     st.markdown(hud_html, unsafe_allow_html=True)
         
+    # 準備 K 線圖的動態警告文字
+    df['WarningText'] = df['Bias'].apply(lambda x: f'<br><br><b style="color:#EF4444;">🚨 偵測到極端乖離: {x:.1f}%</b><br><b style="color:#EF4444;">市場過熱，注意修正風險！</b>' if x >= 22 else '')
+    
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
                         vertical_spacing=0.05, 
                         subplot_titles=('<b style="font-size:24px; color:#F1F5F9; font-family:\'JetBrains Mono\';">📡 歷史雷達觀測圖 (K線 vs 乖離率同步掃描)</b>', '<b style="color:#94A3B8; font-family:\'JetBrains Mono\';">40週乖離率 (%)</b>'),
@@ -236,7 +239,7 @@ def page_bias_analysis():
 
     fig.add_trace(go.Candlestick(x=df.index,
                     open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'],
-                    customdata=df['Bias'],
+                    customdata=np.stack((df['Bias'], df['WarningText']), axis=-1),
                     name='加權指數',
                     increasing_line_color='#10B981', decreasing_line_color='#EF4444',
                     hovertemplate='<b style="color:#F8FAFC;">時間: %{x|%Y/%m/%d}</b><br><br>' +
@@ -244,7 +247,8 @@ def page_bias_analysis():
                                   '高: %{high:,.2f}<br>' +
                                   '低: %{low:,.2f}<br>' +
                                   '收: %{close:,.2f}<br><br>' +
-                                  '<b style="color:#38BDF8;">👉 乖離率同步: %{customdata:.2f}%</b><extra></extra>'), row=1, col=1)
+                                  '<b style="color:#38BDF8;">👉 乖離率同步: %{customdata[0]:.2f}%</b>' +
+                                  '%{customdata[1]}<extra></extra>'), row=1, col=1)
                     
     fig.add_trace(go.Scatter(x=df.index, y=df['SMA40'], 
                              line={'color': '#94A3B8', 'width': 2}, 
@@ -266,8 +270,7 @@ def page_bias_analysis():
                 symbol='circle',
                 line=dict(width=2, color='rgba(239, 68, 68, 0.5)') # 呼吸燈暈影感
             ),
-            hovertemplate='🚨 偵測到極端乖離: %{customdata:.1f}%<br>市場過熱，注意修正風險！<extra></extra>',
-            customdata=danger_points['Bias']
+            hoverinfo='skip' # 點球點不可被選中，避開數據誤抓 Bug
         ), row=1, col=1)
                              
     fig.add_trace(go.Scatter(x=df.index, y=df['Bias'], 
