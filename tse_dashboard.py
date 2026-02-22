@@ -827,8 +827,8 @@ def page_downward_bias():
         for _, r in events_df.sort_values(by='觸發日期', ascending=False).iterrows():
             total_dd = float(r['最大跌幅(%)'])
             resid_dd = float(r['剩餘跌幅(%)'])
-            days_to_bottom = int(r['破底花費天數'])
-            days_to_rec = r['解套花費天數']
+            days_to_bottom = int(r['前高到破底天數'])
+            days_to_rec = r['解套總耗時']
             status = r['狀態']
             
             trigger_date = r['觸發日期']
