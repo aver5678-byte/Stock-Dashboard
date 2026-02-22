@@ -61,16 +61,21 @@ def apply_global_theme():
 
         /* 3. 導覽項目：模組化卡片系統 (同步右側風格) */
         div[data-testid="stSidebarUserContent"] .stRadio > div {
-            gap: 12px !important;
-            padding: 10px !important;
+            gap: 15px !important;
+            padding: 15px !important;
+            width: 100% !important;
+            display: flex;
+            flex-direction: column;
         }
 
         div[data-testid="stSidebarUserContent"] .stRadio label {
+            width: 100% !important;
+            box-sizing: border-box !important;
             background: rgba(30, 41, 59, 0.4) !important;
             border: 1px solid rgba(56, 189, 248, 0.2) !important;
             border-radius: 12px !important;
-            padding: 22px 25px !important;
-            margin-bottom: 12px !important;
+            padding: 22px 20px !important;
+            margin-bottom: 0px !important;
             transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
             color: #FFFFFF !important;
             font-weight: 800 !important;
@@ -80,10 +85,11 @@ def apply_global_theme():
             box-shadow: 0 4px 15px rgba(0,0,0,0.6) !important;
             display: flex !important;
             align-items: center !important;
+            justify-content: flex-start !important;
             cursor: pointer !important;
         }
 
-        /* 暴力強制所有狀態文字純白高亮 */
+        /* 暴力強制所有狀態文字純白高亮與左對齊 */
         div[data-testid="stSidebarUserContent"] .stRadio label p,
         div[data-testid="stSidebarUserContent"] .stRadio label span,
         div[data-testid="stSidebarUserContent"] .stRadio label div {
@@ -93,6 +99,8 @@ def apply_global_theme():
             font-weight: 800 !important;
             font-family: 'JetBrains Mono', monospace !important;
             text-shadow: 0 2px 4px rgba(0,0,0,0.5) !important;
+            width: 100% !important;
+            text-align: left !important;
         }
 
         /* Hover 時微浮起與發光 */
@@ -108,9 +116,10 @@ def apply_global_theme():
 
         /* Active 選中項：霓虹指示燈效果 */
         div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
-            background: linear-gradient(135deg, rgba(56, 189, 248, 0.25) 0%, rgba(56, 189, 248, 0.05) 100%) !important;
+            background: linear-gradient(90deg, rgba(56, 189, 248, 0.3) 0%, rgba(56, 189, 248, 0.05) 100%) !important;
             border: 1px solid #38BDF8 !important;
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.3), inset 6px 0 0 #38BDF8 !important;
+            border-left: 8px solid #38BDF8 !important;
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.3) !important;
             transform: scale(1.02) !important;
         }
         div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] p {
