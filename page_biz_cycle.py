@@ -72,8 +72,8 @@ def page_biz_cycle():
         {
             "period": "2025.09 - 進行中", "months": float(months_ongoing), "type": "登頂倒數中", 
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.15)", "status_icon": "🚨",
-            "start_date": "2025/09/01", "start_idx": "24,143",
-            "peak_date": "2026/02/11", "peak_idx": "33,606", "gain_pct": "39.2%"
+            "start_date": "2025/11/03 (09月燈號發布後首日)", "start_idx": "28,334",
+            "peak_date": "2026/02/11", "peak_idx": "33,606", "gain_pct": "18.6%"
         },
         {
             "period": "2024.04-2024.07 登頂", "months": 3.0, "type": "脈衝型 (見高 24,416)", 
