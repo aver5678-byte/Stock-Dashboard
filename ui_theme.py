@@ -9,17 +9,17 @@ def apply_global_theme():
         <style>
         /* 1. 核心字體與背景 */
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;800&family=Inter:wght@400;700;900&display=swap');
-    /* 1. 全站背景 (徹底白色化，消除白邊) */
-.stApp, .stAppViewContainer, .stMain, [data-testid="stHeader"], [data-testid="stSidebar"], .block-container {
-    background-color: #FFFFFF !important;
-    color: #1A1A1A !important;
+    /* 1. 全站背景 (徹底黑暗化，消除白邊) */
+.stApp, .stAppViewContainer, .stMain, [data-testid="stHeader"], .block-container {
+    background-color: #020617 !important;
+    color: #F1F5F9 !important;
 }
 
-/* 側邊欄 (Sidebar) 大師級設計 */
+/* 側邊欄 (Sidebar) 核心設計 */
 section[data-testid="stSidebar"] {
-    background-color: #F9F9FB !important; /* 冷淺灰 */
+    background-color: #0F172A !important; 
     width: 320px !important;
-    border-right: 1px solid #E5E7EB !important;
+    border-right: 1px solid #1E293B !important;
 }
 
 /* 隱藏預設導覽標籤 */
@@ -32,7 +32,7 @@ section[data-testid="stSidebar"] {
     font-size: 11px !important;
     text-transform: uppercase !important;
     letter-spacing: 1.5px !important;
-    color: #9CA3AF !important;
+    color: #64748B !important;
     margin: 20px 0 10px 10px !important;
     font-weight: 700 !important;
 }
@@ -48,17 +48,17 @@ div[data-testid="stSidebarUserContent"] .stRadio label {
     padding: 10px 15px !important;
     transition: all 0.2s ease !important;
     border: none !important;
-    color: #4B5563 !important;
+    color: #94A3B8 !important;
     font-weight: 500 !important;
 }
 
 div[data-testid="stSidebarUserContent"] .stRadio label:hover {
-    background-color: #F3F4F6 !important;
-    color: #111827 !important;
+    background-color: rgba(255,255,255,0.05) !important;
+    color: #F1F5F9 !important;
 }
 
 div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
-    background-color: #F3F4F6 !important;
+    background-color: rgba(239, 68, 68, 0.1) !important;
     color: #EF4444 !important;
     font-weight: 700 !important;
     box-shadow: inset 4px 0 0 #EF4444 !important;
@@ -80,11 +80,11 @@ div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
 /* 3. 數位指揮中心卡片 (Digital Command Card) */
 .tech-card {
     position: relative;
-    background: #FFFFFF !important;
-    border: 1px solid #E5E7EB !important;
+    background: #0F172A !important;
+    border: 1px solid #1E293B !important;
     border-radius: 20px !important;
     padding: 30px !important;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.03) !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -109,15 +109,15 @@ div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
 /* 數據摘要卡片 (Summary Card) */
 .summary-card {
     text-align: center;
-    background: #F9FAFB !important;
+    background: #1E293B !important;
     padding: 25px !important;
     border-radius: 16px !important;
-    border: 1px solid #EDEDF0 !important;
+    border: 1px solid #334155 !important;
 }
 
 .summary-label {
     font-size: 13px !important;
-    color: #6B7280 !important;
+    color: #94A3B8 !important;
     font-weight: 600 !important;
     letter-spacing: 0.5px !important;
     margin-bottom: 8px !important;
@@ -128,7 +128,7 @@ div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
     font-family: 'JetBrains Mono', monospace !important;
     font-size: 38px !important;
     font-weight: 800 !important;
-    color: #111827 !important;
+    color: #F1F5F9 !important;
     line-height: 1 !important;
 }
 
@@ -158,7 +158,7 @@ div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
     font-family: 'JetBrains Mono', monospace !important;
     font-size: 64px !important;
     font-weight: 900 !important;
-    color: #111827 !important;
+    color: #F1F5F9 !important;
     display: block;
     margin: 15px 0;
 }
@@ -168,8 +168,8 @@ div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
     display: flex;
     align-items: center;
     gap: 20px;
-    background: #FFFFFF !important;
-    border: 1px solid #F3F4F6 !important;
+    background: #0F172A !important;
+    border: 1px solid #1E293B !important;
     padding: 20px 25px !important;
     border-radius: 16px !important;
     margin-bottom: 12px !important;
@@ -177,15 +177,15 @@ div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
 }
 
 .log-item:hover {
-    border-color: #E5E7EB !important;
-    background: #F9FAFB !important;
+    border-color: #334155 !important;
+    background: #1E293B !important;
     transform: scale(1.005);
 }
 
 .log-date {
     font-family: 'JetBrains Mono', monospace !important;
     font-weight: 800 !important;
-    color: #374151 !important;
+    color: #F8FAFC !important;
     min-width: 130px;
 }
 
@@ -249,12 +249,12 @@ div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
 .user-name {
     font-size: 14px;
     font-weight: 700;
-    color: #1F2937;
+    color: #F1F5F9;
 }
 
 .user-role {
     font-size: 11px;
-    color: #6B7280;
+    color: #94A3B8;
 }
         </style>
     """, unsafe_allow_html=True)

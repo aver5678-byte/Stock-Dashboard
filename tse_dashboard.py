@@ -465,10 +465,10 @@ def page_bias_analysis():
             
             # 狀態標籤與耗時標題
             if is_ongoing:
-                status_badge = '<span style="color:#EF4444; background:#FEF2F2; padding:6px 16px; border-radius:8px; font-size:20px; font-weight:900; border:2px solid #FECACA;">🚨 警報持續中</span>'
+                status_badge = '<span style="color:#EF4444; background:rgba(239, 68, 68, 0.1); padding:6px 16px; border-radius:8px; font-size:20px; font-weight:900; border:2px solid rgba(239, 68, 68, 0.3);">🚨 警報持續中</span>'
                 days_label = "警報已持續"
             else:
-                status_badge = '<span style="color:#10B981; background:#F0FDF4; padding:6px 16px; border-radius:8px; font-size:20px; font-weight:900; border:2px solid #A7F3D0;">✅ 歷史結案</span>'
+                status_badge = '<span style="color:#10B981; background:rgba(16, 185, 129, 0.1); padding:6px 16px; border-radius:8px; font-size:20px; font-weight:900; border:2px solid rgba(16, 185, 129, 0.3);">✅ 歷史結案</span>'
                 days_label = "完整修復耗時"
                 
             # 日期轉白話文輔助函數 (例如 '2026-01-05' -> '2026/01/05')
