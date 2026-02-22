@@ -283,16 +283,14 @@ def page_bias_analysis():
                       font=dict(color="#F1F5F9", family="JetBrains Mono"),
                       hovermode="x unified",
                       hoverlabel=dict(bgcolor="#1E293B", font_size=16, font_family="JetBrains Mono", bordercolor="#475569"),
-                      margin=dict(l=40, r=40, t=60, b=60),
-                      legend=dict(orientation="h", yanchor="top", y=-0.1, xanchor="center", x=0.5, font=dict(color="#E2E8F0", size=13)),
-                      dragmode="pan")
+                      margin=dict(l=40, r=40, t=60, b=40),
+                      showlegend=False)
                       
     fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', showspikes=True, spikemode="across", spikesnap="cursor", showline=False, spikedash="solid", spikethickness=1, spikecolor="#94A3B8")
     fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', showline=False)
     
-    # 圖表設定 (工具列客製化與滾輪縮放)
+    # 圖表設定 (工具列客製化)
     chart_config = {
-        'scrollZoom': True,
         'displaylogo': False,
         'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian', 'toggleSpikelines'],
         'toImageButtonOptions': {'format': 'png', 'filename': 'TSE_40W_Bias_Radar'}
