@@ -25,7 +25,14 @@ def apply_global_theme():
 
         section[data-testid="stSidebar"] > div {
             background-color: #020617 !important;
-            padding: 20px 10px !important;
+            padding-top: 20px !important;
+        }
+
+        /* 解除 Streamlit 預設的大量左右留白，允許卡片擴張 */
+        div[data-testid="stSidebarUserContent"] {
+            padding-left: 20px !important;
+            padding-right: 5px !important;
+            padding-top: 0px !important;
         }
 
         /* 隱藏原生圓點與 Navigation 標籤 */
