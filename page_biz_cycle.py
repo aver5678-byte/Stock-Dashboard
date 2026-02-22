@@ -78,44 +78,44 @@ def page_biz_cycle():
         {
             "period": "2024.04-2024.07 登頂", "months": 3.0, "type": "脈衝型 (見高 24,416)", 
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
-            "start_date": "2024/04/01", "start_idx": "20,222",
-            "peak_date": "2024/07/11", "peak_idx": "24,416", "gain_pct": "20.7%"
+            "start_date": "2024/06/03 (04月燈號發布後首日)", "start_idx": "21,537",
+            "peak_date": "2024/07/11", "peak_idx": "24,416", "gain_pct": "13.4%"
         },
         {
             "period": "2020.12-2022.01 登頂", "months": 13.0, "type": "長線型 (見高 18,619)", 
             "color": "#10B981", "bg": "rgba(16, 185, 129, 0.1)", "status_icon": "✅",
-            "start_date": "2020/12/01", "start_idx": "13,886",
-            "peak_date": "2022/01/05", "peak_idx": "18,619", "gain_pct": "34.1%"
+            "start_date": "2021/02/01 (12月燈號發布後首日)", "start_idx": "15,410",
+            "peak_date": "2022/01/05", "peak_idx": "18,619", "gain_pct": "20.8%"
         },
         {
             "period": "2009.11-2011.01 登頂", "months": 14.0, "type": "長線型 (見高 9,220)", 
             "color": "#10B981", "bg": "rgba(16, 185, 129, 0.1)", "status_icon": "✅",
-            "start_date": "2009/11/02", "start_idx": "7,335",
-            "peak_date": "2011/01/28", "peak_idx": "9,220", "gain_pct": "25.7%"
+            "start_date": "2010/01/04 (11月燈號發布後首日)", "start_idx": "8,208",
+            "peak_date": "2011/01/28", "peak_idx": "9,220", "gain_pct": "12.3%"
         },
         {
             "period": "2007.09-2007.10 登頂", "months": 1.0, "type": "快閃型 (見高 9,859)", 
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
-            "start_date": "2007/09/03", "start_idx": "8,980",
-            "peak_date": "2007/10/30", "peak_idx": "9,859", "gain_pct": "9.8%"
+            "start_date": "2007/11/01 (09月燈號發布後首日)", "start_idx": "9,598",
+            "peak_date": "2007/10/30", "peak_idx": "9,859", "gain_pct": "2.7%"
         },
         {
             "period": "2003.12-2004.03 登頂", "months": 3.0, "type": "脈衝型 (見高 7,135)", 
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
-            "start_date": "2003/12/01", "start_idx": "5,870",
-            "peak_date": "2004/03/05", "peak_idx": "7,135", "gain_pct": "21.6%"
+            "start_date": "2004/02/02 (12月燈號發布後首日)", "start_idx": "6,320",
+            "peak_date": "2004/03/05", "peak_idx": "7,135", "gain_pct": "12.9%"
         },
         {
             "period": "2000.01-2000.02 登頂", "months": 1.0, "type": "快閃型 (見高 10,393)", 
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
-            "start_date": "2000/01/04", "start_idx": "8,757",
-            "peak_date": "2000/02/18", "peak_idx": "10,393", "gain_pct": "18.7%"
+            "start_date": "2000/03/01 (01月燈號發布後首日)", "start_idx": "9,689",
+            "peak_date": "2000/02/18", "peak_idx": "10,393", "gain_pct": "7.3%"
         },
         {
             "period": "1994.06-1994.10 登頂", "months": 4.0, "type": "脈衝型 (見高 7,228)", 
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
-            "start_date": "1994/06/01", "start_idx": "6,001",
-            "peak_date": "1994/10/03", "peak_idx": "7,228", "gain_pct": "20.4%"
+            "start_date": "1994/08/01 (06月燈號發布後首日)", "start_idx": "6,744",
+            "peak_date": "1994/10/03", "peak_idx": "7,228", "gain_pct": "7.2%"
         },
     ]
 
