@@ -496,7 +496,7 @@ def page_bias_analysis():
         <div style="flex:1;">
           <div style="font-size:14px; color:#7DD3FC; font-weight:800; margin-bottom:5px;">🛡️ 最終：乖離修正</div>
           <div style="font-family:'JetBrains Mono'; font-size:42px; font-weight:950; color:#38BDF8; line-height:1;">{days_correction}<span style="font-size:18px; margin-left:4px;">天</span></div>
-          <div style="font-size:15px; color:#7DD3FC; font-weight:800; margin-top:12px;">🎯 歸位: {recover_val_str}</div>
+          <div style="font-size:15px; color:#7DD3FC; font-weight:800; margin-top:12px;">🎯 修正目標: {recover_val_str}</div>
         </div>
       </div>
     </div>
