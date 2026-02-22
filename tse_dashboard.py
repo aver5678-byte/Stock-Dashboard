@@ -182,8 +182,7 @@ def calc_win_rate(df, current_bias):
 
 def page_bias_analysis():
     log_visit("40週乖離率分析")
-    # 使用置中大標題
-    st.markdown('<h1 class="centered-title">40週乖離率分析 (TSE 40W Bias Dashboard)</h1>', unsafe_allow_html=True)
+    # 標題將移動到資料載入後，以便顯示動態燈號
     
     with st.spinner('連線抓取最新市場資料中...'):
         df = load_data()
@@ -195,6 +194,13 @@ def page_bias_analysis():
     latest_close = df['Close'].iloc[-1]
     latest_sma = df['SMA40'].iloc[-1]
     latest_bias = df['Bias'].iloc[-1]
+    
+    # --- 頂部區域：一體化戰情標頭 (Hero Header) ---
+    status_pill_color = "#EF4444" if latest_bias >= 22 else "#FBBF24" if latest_bias >= 15 else "#10B981"
+    status_pill_text = "HIGH RISK" if latest_bias >= 22 else "WARNING" if latest_bias >= 15 else "STABLE"
+    
+    hero_header_html = f"""<div style="background:#0F172A; border:4px solid #475569; border-radius:12px; padding:35px; margin-bottom:30px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><div style="font-family:'JetBrains Mono'; font-size:12px; color:#64748B; letter-spacing:2px; font-weight:800;">SYSTEM LIVE // TSE_BIAS_MONITOR_v4.2</div><div style="background:{status_pill_color}; color:white; padding:4px 12px; border-radius:6px; font-family:'JetBrains Mono'; font-size:12px; font-weight:900; box-shadow:0 0 15px {status_pill_color};">● {status_pill_text}</div></div><h1 style="color:white; font-size:48px; font-weight:950; margin:0; letter-spacing:-1.5px; line-height:1.2;">🛰️ 40週乖離率：市場引力觀測儀</h1><div style="margin-top:20px; color:#94A3B8; font-size:17px; font-weight:600; line-height:1.6; max-width:900px; border-left:4px solid #334155; padding-left:20px;">旨在偵測指數與 40 週均線的「極端偏差」。當乖離進入 > 22% 極端區時，代表動能已消耗殆盡，市場即將啟動「回歸引力」修復漲程，這是大後波段最核心的防禦指標。</div></div>"""
+    st.markdown(hero_header_html, unsafe_allow_html=True)
     
     # 執行回測以獲取所有標籤
     b_df = backtest(df)
