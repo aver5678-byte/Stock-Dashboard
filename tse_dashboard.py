@@ -282,17 +282,24 @@ def page_bias_analysis():
                       paper_bgcolor="#0F172A",
                       font=dict(color="#F1F5F9", family="JetBrains Mono"),
                       hovermode="x unified",
-                      hoverlabel=dict(bgcolor="#1E293B", font_size=16, font_family="JetBrains Mono", bordercolor="#475569"),
-                      margin=dict(l=40, r=40, t=60, b=40),
-                      showlegend=False)
+                      hoverlabel=dict(bgcolor="rgba(30, 41, 59, 0.8)", font_size=15, font_family="JetBrains Mono", bordercolor="#475569"),
+                      margin=dict(l=50, r=50, t=60, b=40),
+                      showlegend=False,
+                      dragmode="pan") # 預設平移，配合滾輪縮放
                       
-    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', showspikes=True, spikemode="across", spikesnap="cursor", showline=False, spikedash="solid", spikethickness=1, spikecolor="#94A3B8")
-    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', showline=False)
+    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', 
+                     showspikes=True, spikemode="across", spikesnap="cursor", 
+                     showline=False, spikedash="solid", spikethickness=1, spikecolor="#38BDF8",
+                     range=[df.index[-100], df.index[-1] + pd.Timedelta(days=14)]) # 預設看最近100週，多留2週空白
+                     
+    fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', showline=False,
+                     fixedrange=False) # 允許 Y 軸隨縮放調整固定比例
     
-    # 圖表設定 (工具列客製化)
+    # 圖表設定 (仿專業操盤軟體配置)
     chart_config = {
+        'scrollZoom': True, # 恢復滾輪，搭配平移模式
         'displaylogo': False,
-        'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian', 'toggleSpikelines'],
+        'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoScale2d', 'toggleSpikelines'],
         'toImageButtonOptions': {'format': 'png', 'filename': 'TSE_40W_Bias_Radar'}
     }
     
