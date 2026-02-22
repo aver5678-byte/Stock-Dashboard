@@ -342,8 +342,13 @@ def page_bias_analysis():
     st.plotly_chart(fig, use_container_width=True, config=chart_config)
 
 
-    # --- 戰情樞紐：歷史回測決策建議 (白話文版) ---
-    st.markdown('<h2 style="text-align:left; font-size:36px; margin-top:80px; margin-bottom:15px;">🛡️ 戰略模擬：歷史極端事件數據回測</h2>', unsafe_allow_html=True)
+    # --- 戰情樞紐：歷史回測決策建議 (旗艦比例重構版) ---
+    st.markdown(f"""
+    <div style="background:linear-gradient(90deg, #1E293B, #0F172A); padding:30px 45px; border:4px solid #334155; border-radius:12px; margin-top:80px; margin-bottom:30px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+        <div style="color:white; font-size:48px; font-weight:950; letter-spacing:-1.5px; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">🛡️ 戰略模擬：歷史極端數據回測</div>
+        <div style="font-family:'JetBrains Mono'; font-size:16px; color:#64748B; font-weight:800; border:1px solid #334155; padding:5px 15px; border-radius:6px;">ENGINE // BACKTEST_v4.2</div>
+    </div>
+    """, unsafe_allow_html=True)
     
     win_rate, total_cases = calc_win_rate(df, latest_bias)
     win_rate_val = float(win_rate) if isinstance(win_rate, (int, float)) else 0
@@ -373,23 +378,39 @@ def page_bias_analysis():
     decision_html = f"""<div style="background:#1E293B; border:4px solid #475569; border-radius:12px; padding:40px; display:flex; flex-direction:column; gap:30px; margin-bottom:40px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; gap:40px;"><div style="flex:1.2; background:#0F172A; padding:35px; border-radius:12px; border-left:8px solid {prob_color}; text-align:center; display:flex; flex-direction:column; justify-content:center;"><div style="font-size:24px; color:#94A3B8; font-weight:800; margin-bottom:15px; letter-spacing:1px;">⚠️ 歷史高溫閃跌風險</div><div style="font-family:'JetBrains Mono'; font-size:72px; font-weight:950; color:{prob_color}; line-height:1;">{win_rate_val:.1f}%</div><div style="font-size:18px; color:#F1F5F9; font-weight:700; margin-top:20px; line-height:1.6;">「歷史上有近五成的機率，在達到目前過熱程度後，會伴隨短期閃落。」</div><div style="font-size:14px; color:#64748B; font-weight:600; margin-top:10px;">(參考史上相似 {total_cases} 次樣本)</div></div><div style="flex:1; display:flex; flex-direction:column; justify-content:center; background:rgba(255,255,255,0.03); padding:30px; border-radius:12px;"><div style="font-size:24px; color:#E2E8F0; font-weight:800; margin-bottom:25px; border-bottom:2px solid #334155; padding-bottom:15px;">❱ 測距模擬：若開始修正...</div><div style="display:flex; flex-direction:column; gap:25px;"><div><div style="color:#94A3B8; font-size:16px; font-weight:800; margin-bottom:8px;">{sc1_label}</div><div style="display:flex; align-items:baseline; gap:10px;"><div style="font-family:'JetBrains Mono'; font-size:32px; font-weight:950; color:{sc1_color};">{sc1_val:+.1f}%</div><div style="color:#F1F5F9; font-size:18px; font-weight:700;">目標約 {sc1_target:,.0f} 點</div></div></div><div><div style="color:#94A3B8; font-size:16px; font-weight:800; margin-bottom:8px;">{sc2_label}</div><div style="display:flex; align-items:baseline; gap:10px;"><div style="font-family:'JetBrains Mono'; font-size:32px; font-weight:950; color:{sc2_color};">{sc2_val:+.1f}%</div><div style="color:#F1F5F9; font-size:18px; font-weight:700;">目標約 {sc2_target:,.0f} 點</div></div></div></div></div></div><div style="text-align:left; border-top:1px solid #334155; padding-top:15px;"><div style="font-size:14px; color:#64748B; line-height:1.6;">💡 <b>數據怎麼算的？</b> 此百分比為歷史上「最高點跌回均線」的平均降幅。為了計算壓力測試點位，我們直接從「現價」套用此降幅計算，模擬「若現在即見頂，預期會撤退的防守目標位」。</div></div></div>"""
     st.markdown(decision_html, unsafe_allow_html=True)
 
-    # --- 數位流水日誌 (Timeline Logs) ---
-    st.markdown('<h2 style="text-align:left; font-size:36px; margin-top:80px; margin-bottom:15px;">📜 歷史極端乖離：全紀錄電子日誌</h2>', unsafe_allow_html=True)
+    # --- 數位流水日誌 (旗艦比例重構版) ---
+    st.markdown(f"""
+    <div style="background:linear-gradient(90deg, #1E293B, #0F172A); padding:30px 45px; border:4px solid #334155; border-radius:12px; margin-top:80px; margin-bottom:30px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+        <div style="color:white; font-size:48px; font-weight:950; letter-spacing:-1.5px; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">📜 歷史極端乖離：全紀錄電子日誌</div>
+        <div style="font-family:'JetBrains Mono'; font-size:16px; color:#64748B; font-weight:800; border:1px solid #334155; padding:5px 15px; border-radius:6px;">LOG_SYSTEM // BIAS_RECORDS_v4.2</div>
+    </div>
+    """, unsafe_allow_html=True)
     
-    # 新增：情報摘要 (Onboarding) 解說區塊
-    onboarding_html = """
-    <div style="background:#F8FAFC; border-left:6px solid #3B82F6; padding:25px; margin-bottom:50px; border-radius:8px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
-        <div style="font-size:20px; font-weight:800; color:#1E293B; margin-bottom:15px;">📋 數據解讀指南：當大盤乖離率突破 22% 警戒線時...</div>
-        <ul style="font-size:16px; color:#475569; line-height:1.7; margin:0; padding-left:20px;">
-            <li><strong style="color:#B91C1C;">🔥 噴出階段：</strong> 歷史經驗顯示，指數並不會馬上崩跌，通常還會伴隨最後一段「瘋狂噴出」的誘多行情。</li>
-            <li><strong style="color:#047857;">🛡️ 修復階段：</strong> 市場終將回歸理性。過去每次極端乖離，最終都會以「指數大幅回砍」直到觸碰 40 週均線才算修復完畢。</li>
-            <li><strong style="color:#2563EB;">🧬 劇本分類 (A vs B)：</strong> 
-                <br>• 🔵 <b>類型 A (強勢反彈)：</b> 代表發生前一年大盤曾重摔過 (跌幅 > 20%)，這通常是「大病初癒」的起漲過熱，後勁較強。
-                <br>• 🔴 <b>類型 B (末升終結)：</b> 代表發生前一年大盤走得太順 (跌幅 < 20%)，意味著「悶著頭漲太久」，籌碼極不穩，風險最高。</li>
-        </ul>
+    # 新增：戰術導讀 (Dark Onboarding Guide)
+    onboarding_html = f"""
+    <div style="background:linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border:2px solid #334155; border-radius:12px; padding:35px; margin-bottom:50px; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+        <h2 style="color:#F1F5F9; font-size:26px; font-weight:900; margin-top:0; margin-bottom:25px; display:flex; align-items:center; gap:12px;">📋 數據解讀指南：當大盤乖離率突破 22% 警戒線時...</h2>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:30px;">
+            <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #EF4444;">
+                <div style="color:#FCA5A5; font-weight:800; font-size:17px; margin-bottom:12px;">🔥 噴出階段</div>
+                <div style="color:#94A3B8; font-size:15px; line-height:1.7;">歷史經驗顯示，指數並不會馬上崩跌，通常還會伴隨最後一段<b>「瘋狂噴出」</b>的誘多行情。此時追價風險極高。</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #10B981;">
+                <div style="color:#A7F3D0; font-weight:800; font-size:17px; margin-bottom:12px;">🛡️ 修復階段</div>
+                <div style="color:#94A3B8; font-size:15px; line-height:1.7;">市場終將回歸理性。過去每次極端乖離，最終都會以<b>「指數大幅回砍」</b>直到觸碰 40 週均線才算修復完畢。均線是唯一的最終歸宿。</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #3B82F6;">
+                <div style="color:#7DD3FC; font-weight:800; font-size:17px; margin-bottom:12px;">🧬 劇劇分類 (A vs B)</div>
+                <div style="color:#94A3B8; font-size:14px; line-height:1.6;">
+                    <b>🔵 類型 A (強勢反彈)：</b> 前一年曾重摔(跌幅>20%)，屬「大病初癒」起漲過熱，後勁較強。<br>
+                    <b>🔴 類型 B (末升終結)：</b> 前一年走勢順遂(跌幅<20%)，屬「悶著頭漲太久」，籌碼極不穩。
+                </div>
+            </div>
+        </div>
     </div>
     """
     st.markdown(onboarding_html, unsafe_allow_html=True)
+
 
     if not b_df.empty:
         # 建立流水日誌介面
