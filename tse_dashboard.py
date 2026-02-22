@@ -492,7 +492,7 @@ def page_bias_analysis():
       <div style="font-size:18px; color:#94A3B8; font-weight:900; text-transform:uppercase; margin-bottom:15px; letter-spacing:2px; border-bottom:1px solid #334155; padding-bottom:10px;">📊 完整波段時程量化 (共 {days_str} 天)</div>
       <div style="display:flex; justify-content:space-around; align-items:flex-start;">
         <div style="flex:1; border-right:1px solid #334155;">
-          <div style="font-size:14px; color:#FCA5A5; font-weight:800; margin-bottom:5px;">⚡ 警報後：剩餘漲幅</div>
+          <div style="font-size:14px; color:#FCA5A5; font-weight:800; margin-bottom:5px;">⚡ 末升段漲幅</div>
           <div style="font-family:'JetBrains Mono'; font-size:42px; font-weight:950; color:#EF4444; line-height:1;">{days_spurt}<span style="font-size:18px; margin-left:4px;">天</span></div>
           <div style="font-size:15px; color:#FCA5A5; font-weight:800; margin-top:12px;">▲ 點數: +{point_diff:,} 點</div>
         </div>
