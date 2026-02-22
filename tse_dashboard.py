@@ -930,7 +930,7 @@ def main():
     
     pages = {
         "📉 40週乖離率分析": page_bias_analysis,
-        "🌡️ 景氣信號監控": page_biz_cycle
+        "🌡️ 攻頂逃命窗口監控": page_biz_cycle
     }
     
     st.sidebar.markdown('<p class="sidebar-section-header">策略回測</p>', unsafe_allow_html=True)
