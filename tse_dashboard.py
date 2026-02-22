@@ -250,6 +250,25 @@ def page_bias_analysis():
                              line={'color': '#94A3B8', 'width': 2}, 
                              name='40週均線',
                              hovertemplate='均線點位: %{y:.2f}<extra></extra>'), row=1, col=1)
+
+    # --- 新增：K線下方高壓地雷紅球 (Bias >= 22%) ---
+    danger_mask = df['Bias'] >= 22
+    if danger_mask.any():
+        danger_points = df[danger_mask]
+        fig.add_trace(go.Scatter(
+            x=danger_points.index,
+            y=danger_points['Low'] * 0.97, # 放在最低點下方 3%
+            mode='markers',
+            name='高壓警報',
+            marker=dict(
+                color='#EF4444', 
+                size=10, 
+                symbol='circle',
+                line=dict(width=2, color='rgba(239, 68, 68, 0.5)') # 呼吸燈暈影感
+            ),
+            hovertemplate='🚨 偵測到極端乖離: %{customdata:.1f}%<br>市場過熱，注意修正風險！<extra></extra>',
+            customdata=danger_points['Bias']
+        ), row=1, col=1)
                              
     fig.add_trace(go.Scatter(x=df.index, y=df['Bias'], 
                              line={'color': '#38BDF8', 'width': 2}, 
