@@ -763,67 +763,27 @@ def page_downward_bias():
         st.warning("目前尚無足夠歷史數據可供分析。")
         return
 
-    # --- 1. 頂部狀態：目前回檔監控 ---
-    st.markdown(f'<h1 class="centered-title">🩸 股市回檔統計監控 (7% DD Analysis)</h1>', unsafe_allow_html=True)
-    st.markdown(f"<p style='text-align:center; color:#9CA3AF; margin-bottom:40px;'>監控標普 500、那斯達克及台股：當自高點跌破 7% 時的勝率與剩餘風險分析。</p>", unsafe_allow_html=True)
-
-    col_gauge, col_info = st.columns([1, 1.2])
+    # --- 1. 頂部狀態：Hero Header ---
+    status_pill_color = "#EF4444" if current_dd >= 7.0 else "#10B981"
+    status_pill_text = "DANGER: HIGH RISK" if current_dd >= 7.0 else "SAFE: CRUISING"
     
-    with col_gauge:
-        fig_dd = go.Figure(go.Indicator(
-            mode = "gauge+number",
-            value = float(max(0, current_dd)),
-            title = {'text': "目前距離前高跌幅", 'font': {'size': 18, 'color': '#6B7280'}},
-            gauge = {
-                'axis': {'range': [0, 25], 'tickcolor': "#E5E7EB"},
-                'bar': {'color': "#EF4444" if current_dd >= 7.0 else "#FBBF24"},
-                'steps': [
-                    {'range': [0, 7], 'color': '#F0FDF4'},
-                    {'range': [7, 15], 'color': '#FFFBEB'},
-                    {'range': [15, 25], 'color': '#FFF1F2'}
-                ],
-                'threshold': {
-                    'line': {'color': "red", 'width': 4},
-                    'thickness': 0.75,
-                    'value': 7.0
-                }
-            },
-            number = {'suffix': "%", 'font': {'family': 'JetBrains Mono', 'size': 42}}
-        ))
-        fig_dd.update_layout(height=300, margin=dict(l=20, r=20, t=40, b=20), paper_bgcolor='rgba(0,0,0,0)')
-        st.plotly_chart(fig_dd, use_container_width=True)
+    hero_header_html = f"""<div style="background:#0F172A; border:4px solid #475569; border-radius:12px; padding:35px; margin-bottom:30px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><div style="font-family:'JetBrains Mono'; font-size:12px; color:#64748B; letter-spacing:2px; font-weight:800;">SYSTEM LIVE // 7PCT_DRAWDOWN_ENGINE_v4.2</div><div style="background:{status_pill_color}; color:white; padding:4px 12px; border-radius:6px; font-family:'JetBrains Mono'; font-size:12px; font-weight:900; box-shadow:0 0 15px {status_pill_color};">● {status_pill_text}</div></div><h1 style="color:white; font-size:48px; font-weight:950; margin:0; letter-spacing:-1.5px; line-height:1.2; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">📉 大盤規律：7% 回檔監控樞紐</h1><div style="margin-top:20px; color:#94A3B8; font-size:17px; font-weight:600; line-height:1.8; max-width:1100px; border-left:4px solid #334155; padding-left:20px;">監控 {symbol}：精準定位歷史級跌幅。當大盤自前高跌破 7% 時，往往是市場非理性拋售的起點，也是長線勝率極高的戰略進場區。</div></div>"""
+    st.markdown(hero_header_html, unsafe_allow_html=True)
 
-    with col_info:
-        status_html = ""
-        if current_dd >= 7.0:
-            prob_worse = metrics.get('Prob Residual DD > 10%', 0)
-            status_html = f'''
-                <div class="danger-zone" style="padding:25px; margin-top:30px;">
-                    <h3 style="color:#B91C1C; margin:0;">🚨 已觸發進場標準</h3>
-                    <p style="font-size:14px; margin-top:10px;">目前已進入 7% 劇烈回檔區間。歷史上此後再跌破 10% 的機率為 <b>{prob_worse:.1f}%</b>。請嚴格執行分批進場計畫。</p>
-                </div>
-            '''
-        else:
-            status_html = f'''
-                <div class="normal-zone" style="padding:25px; margin-top:30px;">
-                    <h3 style="color:#047857; margin:0;">✅ 處於安全區間</h3>
-                    <p style="font-size:14px; margin-top:10px;">目前回檔幅度未達 7% 指標，不建議啟動劇烈回檔波段策略。</p>
-                </div>
-            '''
-        st.markdown(status_html, unsafe_allow_html=True)
+    # --- 2. 戰術解說：Onboarding Guide ---
+    onboarding_html = f"""<div style="background:linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border:2px solid #334155; border-radius:12px; padding:35px; margin-bottom:30px; box-shadow:0 10px 30px rgba(0,0,0,0.3);"><h2 style="color:#F1F5F9; font-size:26px; font-weight:900; margin-top:0; margin-bottom:25px; display:flex; align-items:center; gap:12px;">📋 戰術導讀：為何選擇「-7%」作為狙擊點？</h2><div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:30px;"><div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #3B82F6;"><div style="color:#7DD3FC; font-weight:800; font-size:17px; margin-bottom:12px;">🔹 觸發原理：機構停損線</div><div style="color:#94A3B8; font-size:15px; line-height:1.6;">當大盤回檔達到 7%，通常意味著量化基金與機構法人的停損機制被觸發，產生不計成本的拋售。這正是<b>「流動性恐慌」</b>的起點。</div></div><div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #EF4444;"><div style="color:#FCA5A5; font-weight:800; font-size:17px; margin-bottom:12px;">🔸 歷史規律：向下壓力預期</div><div style="color:#94A3B8; font-size:15px; line-height:1.6;">歷史數據表明，觸發 -7% 後，大盤平均還會承受一段時間的<b>向下壓力 (剩餘跌幅)</b>。了解這個均值，能防止單次重押而心態崩潰。</div></div><div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #FBBF24;"><div style="color:#FDE68A; font-weight:800; font-size:17px; margin-bottom:12px;">🔹 實戰對策：網格分批接刀</div><div style="color:#94A3B8; font-size:15px; line-height:1.6;">不要試圖猜測最低點在哪。一旦進入 -7% 獵殺區，應堅決捨棄單筆重注，改採<b>「資金分批、網格承接」</b>戰術，耐心度過震盪尋底期。</div></div></div></div>"""
+    st.markdown(onboarding_html, unsafe_allow_html=True)
 
-    # --- 2. KPI 統計卡片 ---
-    st.markdown('<div style="margin-top:50px;"></div>', unsafe_allow_html=True)
-    k1, k2, k3, k4 = st.columns(4)
-    with k1:
-        st.markdown(f'''<div class="tech-card"><div class="summary-label">歷史觸發次數</div><div class="summary-value">{metrics.get('Recovered Events', 0)}<span style="font-size:14px;">次</span></div></div>''', unsafe_allow_html=True)
-    with k2:
-        st.markdown(f'''<div class="tech-card"><div class="summary-label">平均剩餘跌幅</div><div class="summary-value" style="color:#EF4444;">-{metrics.get('Avg Residual Drawdown (%)', 0):.1f}%</div></div>''', unsafe_allow_html=True)
-    with k3:
-        st.markdown(f'''<div class="tech-card"><div class="summary-label">平均見底天數</div><div class="summary-value" style="color:#3B82F6;">{metrics.get('Avg Days to Bottom', 0)}<span style="font-size:14px;">天</span></div></div>''', unsafe_allow_html=True)
-    with k4:
-        st.markdown(f'''<div class="tech-card"><div class="summary-label">平均解套天數</div><div class="summary-value" style="color:#6B7280;">{metrics.get('Avg Days to Recovery', 0)}<span style="font-size:14px;">天</span></div></div>''', unsafe_allow_html=True)
+    # --- 3. 戰鬥控制台：Macro HUD ---
+    score_color = status_pill_color
+    score_label = f"🚨 進入獵殺區 (已跌破 7%)" if current_dd >= 7.0 else "✅ 安全巡航 (未達 7%)"
+    avg_resid = f"-{metrics.get('Avg Residual Drawdown (%)', 0):.1f}%"
+    avg_bt_days = metrics.get('Avg Days to Bottom', 0)
+    avg_rec_days = metrics.get('Avg Days to Recovery', 0)
+    recover_events = metrics.get('Recovered Events', 0)
 
+    hud_html = f"""<div style="background:#0F172A; border:4px solid #334155; border-radius:12px; padding:45px; margin-bottom:40px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; justify-content:space-between; align-items:center; gap:35px;"><div style="flex:1;"><div style="font-size:18px; color:#94A3B8; font-weight:800; margin-bottom:15px; display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:{score_color}; border-radius:50%; box-shadow:0 0 10px {score_color};"></span>目前距離前高跌幅 (Live Drawdown)</div><div style="display:flex; align-items:center; gap:25px;"><div style="font-family:'JetBrains Mono'; font-size:82px; font-weight:950; color:{score_color}; line-height:1; letter-spacing:-4px;">{current_dd:.1f}%</div><div style="display:flex; flex-direction:column; gap:8px;"><div style="font-family:'JetBrains Mono'; font-size:24px; font-weight:900; color:#EF4444; background:rgba(255,255,255,0.05); padding:2px 10px; border-radius:6px;">閾值: -7.0%</div><div style="background:rgba(255,255,255,0.1); color:white; padding:10px 20px; border-radius:10px; font-size:22px; font-weight:950; border:2px solid {score_color}; box-shadow:0 0 20px rgba(239, 68, 68, 0.4);">{score_label}</div></div></div></div><div style="flex:0.8; background:rgba(255,255,255,0.02); border-left:4px solid #EF4444; padding:25px; border-radius:12px; border:1px solid rgba(239, 68, 68, 0.1);"><div style="font-size:15px; color:#FCA5A5; font-weight:950; margin-bottom:15px; display:flex; align-items:center; gap:8px; border-bottom:1px solid rgba(239, 68, 68, 0.2); padding-bottom:10px;">🎯 歷史下殺壓力 (Residual Drop)</div><div style="display:flex; flex-direction:column; gap:10px;"><div><div style="font-size:12px; color:#94A3B8; font-weight:900; margin-bottom:5px; display:flex; align-items:center; gap:8px;"><span>進場後平均還會再跌</span></div><div style="font-family:'JetBrains Mono'; font-size:42px; color:#EF4444; font-weight:950; letter-spacing:-1px; text-shadow:0 0 15px rgba(239,68,68,0.5);">{avg_resid}</div></div></div></div><div style="flex:1.4; display:flex; flex-direction:column; gap:20px; align-self:stretch; justify-content:center;"><div style="background:rgba(255,255,255,0.03); padding:20px 25px; border-radius:12px; border:1px solid #1E293B;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><div style="font-size:16px; color:#38BDF8; font-weight:900; letter-spacing:1px;">⏳ 歷史反彈時程推演 (樣本數 {recover_events} 次)</div></div><div style="height:28px; background:#0F172A; border-radius:6px; overflow:hidden; border:1px solid #334155; display:flex;"><div style="width:40%; height:100%; background:linear-gradient(90deg, #F59E0B, #EF4444); display:flex; align-items:center; justify-content:center; color:white; font-size:12px; font-weight:900;">觸發 -> 見底 ({avg_bt_days}天)</div><div style="width:60%; height:100%; background:linear-gradient(90deg, #3B82F6, #10B981); display:flex; align-items:center; justify-content:center; color:white; font-size:12px; font-weight:900;">見底 -> 完全解套 ({avg_rec_days}天)</div></div><div style="display:flex; justify-content:space-between; margin-top:10px; font-size:12px; color:#94A3B8; font-weight:800; font-family:'JetBrains Mono';"><span>-7% 觸發日</span><span>市場落底</span><span>創新高解套</span></div></div></div></div></div>"""
+    st.markdown(hud_html, unsafe_allow_html=True)
     # --- 3. 歷史分佈圖 ---
     st.markdown('<h2 style="text-align:center; margin-top:80px;">📊 觸發 7% 後的「剩餘跌幅」機率分布</h2>', unsafe_allow_html=True)
 
