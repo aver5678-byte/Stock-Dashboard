@@ -433,6 +433,12 @@ def page_bias_analysis():
             peak_val = r['波段最高指數']
             recover_val = r['回歸0%指數'] if pd.notna(r['回歸0%指數']) else 0
             
+            # --- 新增：階段耗時演算 (P1->P2, P2->P3) ---
+            t1 = pd.to_datetime(r['觸發日期'])
+            t2 = pd.to_datetime(r['波段最高日期'])
+            days_spurt = (t2 - t1).days
+            days_correction = int(days_total - days_spurt)
+            
             # --- 新增：故事線與狀態判定邏輯 ---
             is_ongoing = pd.isna(r['回歸0%日期'])
             
@@ -476,9 +482,18 @@ def page_bias_analysis():
         <span style="font-size:38px; color:#94A3B8; font-weight:800; white-space:nowrap;">前期回撤: <span style="color:#F1F5F9;">{r['前12月最大回檔(%)']:.1f}%</span></span>
       </div>
     </div>
-    <div style="flex:1; text-align:center; background:rgba(56, 189, 248, 0.1); padding:40px 20px; display:flex; flex-direction:column; justify-content:center; min-width:300px;">
-      <div style="font-size:24px; color:#7DD3FC; font-weight:900; text-transform:uppercase; margin-bottom:12px; letter-spacing:2px;">{days_label}</div>
-      <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:#38BDF8; line-height:1;">{days_str}<span style="font-size:25px; font-weight:800; margin-left:10px; color:#7DD3FC;">天</span></div>
+    <div style="flex:1.2; text-align:center; background:rgba(56, 189, 248, 0.05); padding:25px 20px; display:flex; flex-direction:column; justify-content:center; min-width:350px;">
+      <div style="font-size:18px; color:#94A3B8; font-weight:900; text-transform:uppercase; margin-bottom:15px; letter-spacing:2px; border-bottom:1px solid #334155; padding-bottom:10px;">📊 完整波段時程量化 (共 {days_str} 天)</div>
+      <div style="display:flex; justify-content:space-around; align-items:center;">
+        <div style="flex:1; border-right:1px solid #334155;">
+          <div style="font-size:14px; color:#FCA5A5; font-weight:800; margin-bottom:5px;">⚡ 噴出攻頂 (P1-P2)</div>
+          <div style="font-family:'JetBrains Mono'; font-size:38px; font-weight:950; color:#EF4444; line-height:1;">{days_spurt}<span style="font-size:16px; margin-left:4px;">D</span></div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:14px; color:#7DD3FC; font-weight:800; margin-bottom:5px;">🛡️ 修正回穩 (P2-P3)</div>
+          <div style="font-family:'JetBrains Mono'; font-size:38px; font-weight:950; color:#38BDF8; line-height:1;">{days_correction}<span style="font-size:16px; margin-left:4px;">D</span></div>
+        </div>
+      </div>
     </div>
   </div>
 
