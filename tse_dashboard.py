@@ -375,9 +375,11 @@ def page_bias_analysis():
     <div style="background:#F8FAFC; border-left:6px solid #3B82F6; padding:25px; margin-bottom:50px; border-radius:8px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
         <div style="font-size:20px; font-weight:800; color:#1E293B; margin-bottom:15px;">📋 數據解讀指南：當大盤乖離率突破 22% 警戒線時...</div>
         <ul style="font-size:16px; color:#475569; line-height:1.7; margin:0; padding-left:20px;">
-            <li><strong style="color:#B91C1C;">🔥 噴出階段：</strong> 歷史經驗顯示，指數並不會馬上崩跌，通常還會伴隨最後一段「瘋狂噴出」的誘多行情（見下方中層紅色能量條）。</li>
-            <li><strong style="color:#047857;">🛡️ 修復階段：</strong> 市場終將回歸理性。過去的每一次極端乖離，最終都會以「指數大幅回調」，直到乖離率<strong>「回歸 0% (觸碰 40 週均線)」</strong>才算修復完畢（見中層綠色能量條與階段三點位）。</li>
-            <li><strong style="color:#0369A1;">⏳ 時間考驗：</strong> 這個降溫過程是漫長的，藉由對照過去的戰報，更能推測本次風險可能帶來的回檔深度與等待期。</li>
+            <li><strong style="color:#B91C1C;">🔥 噴出階段：</strong> 歷史經驗顯示，指數並不會馬上崩跌，通常還會伴隨最後一段「瘋狂噴出」的誘多行情。</li>
+            <li><strong style="color:#047857;">🛡️ 修復階段：</strong> 市場終將回歸理性。過去每次極端乖離，最終都會以「指數大幅回砍」直到觸碰 40 週均線才算修復完畢。</li>
+            <li><strong style="color:#2563EB;">🧬 劇本分類 (A vs B)：</strong> 
+                <br>• 🔵 <b>類型 A (強勢反彈)：</b> 代表發生前一年大盤曾重摔過 (跌幅 > 20%)，這通常是「大病初癒」的起漲過熱，後勁較強。
+                <br>• 🔴 <b>類型 B (末升終結)：</b> 代表發生前一年大盤走得太順 (跌幅 < 20%)，意味著「悶著頭漲太久」，籌碼極不穩，風險最高。</li>
         </ul>
     </div>
     """
@@ -444,7 +446,7 @@ def page_bias_analysis():
       <div style="font-size:52px; color:white; font-weight:950; letter-spacing:-2px; line-height:1;">📅 {r["觸發日期"]}</div>
       <div style="margin-top:25px; display:flex; flex-wrap:nowrap; align-items:center; gap:25px;">
         <span style="color:#FFF; background:{tag_color}; padding:8px 25px; border-radius:10px; font-size:38px; font-weight:900; white-space:nowrap; border:2px solid rgba(255,255,255,0.3);">{type_tag}</span>
-        <span style="font-size:38px; color:#94A3B8; font-weight:800; white-space:nowrap;">回檔: <span style="color:#F1F5F9;">{r['前12月最大回檔(%)']:.1f}%</span></span>
+        <span style="font-size:38px; color:#94A3B8; font-weight:800; white-space:nowrap;">前期回撤: <span style="color:#F1F5F9;">{r['前12月最大回檔(%)']:.1f}%</span></span>
       </div>
     </div>
     <div style="flex:1; text-align:center; background:rgba(56, 189, 248, 0.1); padding:40px 20px; display:flex; flex-direction:column; justify-content:center; min-width:300px;">
