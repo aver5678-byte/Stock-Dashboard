@@ -297,8 +297,12 @@ def page_bias_analysis():
                              hovertemplate='乖離率: %{y:.2f}%<extra></extra>'), row=2, col=1)
                              
     if not b_df.empty:
-        type_a_dates = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 A')]['觸發日期']).strftime('%Y-%m-%d')
-        type_b_dates = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 B')]['觸發日期']).strftime('%Y-%m-%d')
+        # 修正：Series 需要透過 .dt 才能呼叫 strftime
+        type_a_series = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 A')]['觸發日期'])
+        type_b_series = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 B')]['觸發日期'])
+        
+        type_a_dates = type_a_series.dt.strftime('%Y-%m-%d').tolist()
+        type_b_dates = type_b_series.dt.strftime('%Y-%m-%d').tolist()
         
         # 篩選存在於 df 中的點
         valid_a = [d for d in type_a_dates if d in df.index.strftime('%Y-%m-%d')]
