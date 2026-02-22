@@ -815,7 +815,7 @@ def page_downward_bias():
     # --- 戰術說明卡片 ---
     guide_html = f"""
     <div style="background:linear-gradient(135deg, #0F172A 0%, #1E293B 100%); border:2px solid #38BDF8; border-radius:12px; padding:30px; margin-bottom:50px; box-shadow:0 10px 30px rgba(56,189,248,0.1);">
-        <h2 style="color:#38BDF8; font-size:24px; font-weight:900; margin-top:0; margin-bottom:20px; display:flex; align-items:center; gap:12px;">📋 戰術導讀 (二)：如何解讀時程推演？</h2>
+        <h2 style="color:#F1F5F9; font-size:24px; font-weight:900; margin-top:0; margin-bottom:20px; display:flex; align-items:center; gap:12px;">📋 戰術導讀 (二)：如何解讀時程推演？</h2>
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:25px;">
             <div style="background:rgba(255,255,255,0.03); padding:18px; border-radius:10px; border-left:4px solid #F59E0B;">
                 <div style="color:#F59E0B; font-weight:800; font-size:16px; margin-bottom:10px;">🟠 埋伏預備期 (觸發➔落底)</div>
