@@ -259,7 +259,7 @@ def page_bias_analysis():
                     customdata=np.stack((df['Bias'], df['WarningText']), axis=-1),
                     name='加權指數',
                     increasing_line_color='#10B981', decreasing_line_color='#EF4444',
-                    width=1000*60*60*24*5, # 強制設定 K 線寬度為 5 天，解決縮放後變細的問題
+                    width=5, # 強制設定 K 線寬度為 5 天 (週線圖)，解決縮放後變細的問題
                     hovertemplate='<b style="color:#F8FAFC;">時間: %{x|%Y/%m/%d}</b><br><br>' +
                                   '開: %{open:,.2f}<br>' +
                                   '高: %{high:,.2f}<br>' +
