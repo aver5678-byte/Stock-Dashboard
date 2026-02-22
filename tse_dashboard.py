@@ -394,11 +394,11 @@ def page_bias_analysis():
         <h2 style="color:#F1F5F9; font-size:26px; font-weight:900; margin-top:0; margin-bottom:25px; display:flex; align-items:center; gap:12px;">📋 數據解讀指南：當大盤乖離率突破 22% 警戒線時...</h2>
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:30px;">
             <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #EF4444;">
-                <div style="color:#FCA5A5; font-weight:800; font-size:17px; margin-bottom:12px;">🔥 噴出階段</div>
+                <div style="color:#FCA5A5; font-weight:800; font-size:17px; margin-bottom:12px;">🔥 末升段</div>
                 <div style="color:#94A3B8; font-size:15px; line-height:1.7;">歷史經驗顯示，指數並不會馬上崩跌，通常還會伴隨最後一段<b>「瘋狂噴出」</b>的誘多行情。此時追價風險極高。</div>
             </div>
             <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #10B981;">
-                <div style="color:#A7F3D0; font-weight:800; font-size:17px; margin-bottom:12px;">🛡️ 修復階段</div>
+                <div style="color:#A7F3D0; font-weight:800; font-size:17px; margin-bottom:12px;">🛡️ 泡沫修復</div>
                 <div style="color:#94A3B8; font-size:15px; line-height:1.7;">市場終將回歸理性。過去每次極端乖離，最終都會以<b>「指數大幅回砍」</b>直到觸碰 40 週均線才算修復完畢。均線是唯一的最終歸宿。</div>
             </div>
             <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #3B82F6;">
@@ -509,7 +509,7 @@ def page_bias_analysis():
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
     <div style="background:#7F1D1D; padding:40px 30px; border-right:2px solid #991B1B;">
       <div style="display:flex; justify-content:space-between; align-items:center; font-size:40px; color:#FCA5A5; margin-bottom:20px; font-weight:950; white-space:nowrap;">
-        <span>🔥 最高噴出漲幅</span><span>{max_surge:+.1f}%</span>
+        <span>🔥 末升段漲幅</span><span>{max_surge:+.1f}%</span>
       </div>
       <div style="height:40px; background:#450A0A; border-radius:8px; overflow:hidden; border:2px solid #B91C1C;">
         <div style="width:{surge_w}%; height:100%; background:linear-gradient(90deg, #F87171, #EF4444); box-shadow:0 0 40px rgba(239, 68, 68, 0.8);"></div>
@@ -517,7 +517,7 @@ def page_bias_analysis():
     </div>
     <div style="background:#064E3B; padding:40px 30px;">
       <div style="display:flex; justify-content:space-between; align-items:center; font-size:40px; color:#6EE7B7; margin-bottom:20px; font-weight:950; white-space:nowrap;">
-        <span>🛡️ 乖離修復跌幅</span><span>{max_drop:+.1f}%</span>
+        <span>🛡️ 泡沫收斂</span><span>{max_drop:+.1f}%</span>
       </div>
       <div style="height:40px; background:#022C22; border-radius:8px; overflow:hidden; border:2px solid #059669;">
         <div style="width:{drop_w}%; height:100%; background:linear-gradient(90deg, #34D399, #10B981); box-shadow:0 0 40px rgba(16, 185, 129, 0.8);"></div>
