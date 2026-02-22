@@ -52,8 +52,8 @@ def analyze_7pct_strategy(df, trigger_pct=7.0):
                 lowest_since_trigger = low
                 lowest_date = date
                 
-            # Check for recovery (解套：只要漲回當初觸發買進的價格，即算本波段解套結案)
-            if high >= trigger_price:
+            # Check for recovery (解套：必須重新站回最原始的起跌前高，才算整個空頭/回檔波段結束)
+            if high >= current_high:
                 # Event concluded
                 max_drawdown = (current_high - lowest_since_trigger) / current_high * 100
                 residual_drawdown = (trigger_price - lowest_since_trigger) / trigger_price * 100
@@ -76,7 +76,7 @@ def analyze_7pct_strategy(df, trigger_pct=7.0):
                     '狀態': '已解套'
                 })
                 
-                # Reset for next event
+                # Reset for next event - current_high is now updated to this new high
                 in_drawdown = False
                 current_high = high
                 current_high_date = date
