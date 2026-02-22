@@ -283,8 +283,9 @@ def page_bias_analysis():
                       font=dict(color="#F1F5F9", family="JetBrains Mono"),
                       hovermode="x unified",
                       hoverlabel=dict(bgcolor="#1E293B", font_size=16, font_family="JetBrains Mono", bordercolor="#475569"),
-                      margin=dict(l=40, r=40, t=60, b=40),
-                      legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0))
+                      margin=dict(l=40, r=40, t=60, b=60),
+                      legend=dict(orientation="h", yanchor="top", y=-0.1, xanchor="center", x=0.5, font=dict(color="#E2E8F0", size=13)),
+                      dragmode="pan")
                       
     fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', showspikes=True, spikemode="across", spikesnap="cursor", showline=False, spikedash="solid", spikethickness=1, spikecolor="#94A3B8")
     fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', showline=False)
