@@ -351,46 +351,8 @@ def page_bias_analysis():
     target_a = float(latest_close * (1 + avg_a/100))
     target_b = float(latest_close * (1 + avg_b/100))
 
-    # 這裡移除縮進，防止 Streamlit 將其判斷為 Markdown Code Block
-    decision_html = f"""
-<div style="background:#1E293B; border:4px solid #475569; border-radius:12px; padding:40px; display:flex; flex-direction:column; gap:30px; margin-bottom:40px; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
-    <div style="display:flex; gap:40px;">
-        <div style="flex:1.2; background:#0F172A; padding:35px; border-radius:12px; border-left:8px solid {prob_color}; text-align:center; display:flex; flex-direction:column; justify-content:center;">
-            <div style="font-size:24px; color:#94A3B8; font-weight:800; margin-bottom:15px; letter-spacing:1px;">⚠️ 市場過熱警報</div>
-            <div style="font-family:'JetBrains Mono'; font-size:72px; font-weight:950; color:{prob_color}; line-height:1;">{win_rate_val:.1f}%</div>
-            <div style="font-size:18px; color:#F1F5F9; font-weight:700; margin-top:20px; line-height:1.6;">
-                「歷史上近五成的案例顯示，達到此高溫乖離後，常伴隨短期修正。」
-            </div>
-            <div style="font-size:14px; color:#64748B; font-weight:600; margin-top:10px;">(參考史上相似 {total_cases} 次樣本)</div>
-        </div>
-        
-        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; background:rgba(255,255,255,0.03); padding:30px; border-radius:12px;">
-            <div style="font-size:24px; color:#E2E8F0; font-weight:800; margin-bottom:25px; border-bottom:2px solid #334155; padding-bottom:15px;">📊 潛在修正空間模擬</div>
-            <div style="display:flex; flex-direction:column; gap:25px;">
-                <div>
-                    <div style="color:#94A3B8; font-size:16px; font-weight:800; margin-bottom:8px;">🚩 若進入高位結案修正 (類 B 流向)</div>
-                    <div style="display:flex; align-items:baseline; gap:10px;">
-                        <div style="font-family:'JetBrains Mono'; font-size:32px; font-weight:950; color:#EF4444;">{avg_b:+.1f}%</div>
-                        <div style="color:#F1F5F9; font-size:18px; font-weight:700;">目標約 {target_b:,.0f} 點</div>
-                    </div>
-                </div>
-                <div>
-                    <div style="color:#94A3B8; font-size:16px; font-weight:800; margin-bottom:8px;">🛡️ 若為低基期強勢修正 (類 A 流向)</div>
-                    <div style="display:flex; align-items:baseline; gap:10px;">
-                        <div style="font-family:'JetBrains Mono'; font-size:32px; font-weight:950; color:#10B981;">{avg_a:+.1f}%</div>
-                        <div style="color:#F1F5F9; font-size:18px; font-weight:700;">目標約 {target_a:,.0f} 點</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div style="text-align:left; border-top:1px solid #334155; padding-top:15px;">
-        <div style="font-size:14px; color:#64748B; line-height:1.6;">
-            💡 <b>數據註解：</b>此模塊基於過去 30 年台股 40 週乖離率回測。旨在提供「極端時點」後的風險心理準備，不構成投資建議。
-        </div>
-    </div>
-</div>
-"""
+    # 這裡徹底移除所有縮進與空行，防止 Streamlit Markdown 誤判
+    decision_html = f"""<div style="background:#1E293B; border:4px solid #475569; border-radius:12px; padding:40px; display:flex; flex-direction:column; gap:30px; margin-bottom:40px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; gap:40px;"><div style="flex:1.2; background:#0F172A; padding:35px; border-radius:12px; border-left:8px solid {prob_color}; text-align:center; display:flex; flex-direction:column; justify-content:center;"><div style="font-size:24px; color:#94A3B8; font-weight:800; margin-bottom:15px; letter-spacing:1px;">⚠️ 市場過熱警報</div><div style="font-family:'JetBrains Mono'; font-size:72px; font-weight:950; color:{prob_color}; line-height:1;">{win_rate_val:.1f}%</div><div style="font-size:18px; color:#F1F5F9; font-weight:700; margin-top:20px; line-height:1.6;">「歷史上近五成的案例顯示，達到此高溫乖離後，常伴隨短期修正。」</div><div style="font-size:14px; color:#64748B; font-weight:600; margin-top:10px;">(參考史上相似 {total_cases} 次樣本)</div></div><div style="flex:1; display:flex; flex-direction:column; justify-content:center; background:rgba(255,255,255,0.03); padding:30px; border-radius:12px;"><div style="font-size:24px; color:#E2E8F0; font-weight:800; margin-bottom:25px; border-bottom:2px solid #334155; padding-bottom:15px;">📊 潛在修正空間模擬</div><div style="display:flex; flex-direction:column; gap:25px;"><div><div style="color:#94A3B8; font-size:16px; font-weight:800; margin-bottom:8px;">🚩 若進入高位結案修正 (類 B 流向)</div><div style="display:flex; align-items:baseline; gap:10px;"><div style="font-family:'JetBrains Mono'; font-size:32px; font-weight:950; color:#EF4444;">{avg_b:+.1f}%</div><div style="color:#F1F5F9; font-size:18px; font-weight:700;">目標約 {target_b:,.0f} 點</div></div></div><div><div style="color:#94A3B8; font-size:16px; font-weight:800; margin-bottom:8px;">🛡️ 若為低基期強勢修正 (類 A 流向)</div><div style="display:flex; align-items:baseline; gap:10px;"><div style="font-family:'JetBrains Mono'; font-size:32px; font-weight:950; color:#10B981;">{avg_a:+.1f}%</div><div style="color:#F1F5F9; font-size:18px; font-weight:700;">目標約 {target_a:,.0f} 點</div></div></div></div></div></div><div style="text-align:left; border-top:1px solid #334155; padding-top:15px;"><div style="font-size:14px; color:#64748B; line-height:1.6;">💡 <b>數據註解：</b>此模塊基於過去 30 年台股 40 週乖離率回測。旨在提供「極端時點」後的風險心理準備，不構成投資建議。</div></div></div>"""
     st.markdown(decision_html, unsafe_allow_html=True)
 
     # --- 數位流水日誌 (Timeline Logs) ---
