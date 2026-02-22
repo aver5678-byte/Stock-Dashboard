@@ -714,8 +714,6 @@ def page_downward_bias():
     log_visit("股市回檔統計表")
     
     tickers = {
-        "S&P 500 (^GSPC)": "^GSPC",
-        "NASDAQ (^IXIC)": "^IXIC",
         "台灣加權指數 (^TWII)": "^TWII"
     }
 
