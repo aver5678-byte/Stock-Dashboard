@@ -17,10 +17,15 @@ def apply_global_theme():
 
 /* 側邊欄 (Sidebar) 核心設計：獨立控制面板面板層 */
 section[data-testid="stSidebar"] {
-    background: #0F172A !important; 
+    background-color: #020617 !important; 
     width: 380px !important;
     border-right: 1px solid #1E293B !important;
+}
+
+section[data-testid="stSidebar"] > div {
+    background-color: #0F172A !important;
     padding-top: 20px !important;
+    box-shadow: inset -10px 0 30px rgba(0,0,0,0.5) !important;
 }
 
 /* 徹底隱藏 Radio 圓點與原初樣式 */
@@ -33,24 +38,26 @@ div[data-testid="stSidebarUserContent"] .stRadio div[role="radiogroup"] > label 
     display: none !important;
 }
 
-/* 側邊欄分組標題：SaaS 專業標籤 */
+/* 側邊欄分組標題：高亮度 SaaS 標誌 */
 .sidebar-section-header {
-    font-size: 13px !important;
+    font-size: 15px !important;
     text-transform: uppercase !important;
     letter-spacing: 3px !important;
-    color: #64748B !important;
-    margin: 40px 0 20px 15px !important;
-    font-weight: 800 !important;
+    color: #FFFFFF !important;
+    margin: 40px 0 25px 20px !important;
+    font-weight: 900 !important;
     display: flex;
     align-items: center;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
 }
 
 .sidebar-section-header::after {
     content: "";
     flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, rgba(56, 189, 248, 0.3), transparent);
-    margin-left: 15px;
+    height: 2px;
+    background: linear-gradient(90deg, #38BDF8, transparent);
+    margin-left: 20px;
+    opacity: 0.5;
 }
 
 /* 導覽按鈕 (Radio 模擬)：模組化卡片系統 */
@@ -66,11 +73,23 @@ div[data-testid="stSidebarUserContent"] .stRadio label {
     padding: 20px 25px !important;
     margin-bottom: 5px !important;
     transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-    color: #94A3B8 !important;
-    font-weight: 700 !important;
+    color: #FFFFFF !important;
+    font-weight: 800 !important;
     font-size: 19px !important;
     opacity: 1 !important;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.4) !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+/* 暴力鎖死內部文字顏色，解決看不清的問題 */
+div[data-testid="stSidebarUserContent"] .stRadio label p,
+div[data-testid="stSidebarUserContent"] .stRadio label div,
+div[data-testid="stSidebarUserContent"] .stRadio label span {
+    color: #FFFFFF !important;
+    opacity: 1 !important;
+    font-weight: 900 !important;
+    font-size: 19px !important;
 }
 
 div[data-testid="stSidebarUserContent"] .stRadio label:hover {
@@ -81,24 +100,34 @@ div[data-testid="stSidebarUserContent"] .stRadio label:hover {
     box-shadow: 0 10px 25px rgba(56, 189, 248, 0.2) !important;
 }
 
+div[data-testid="stSidebarUserContent"] .stRadio label:hover * {
+    color: #38BDF8 !important;
+}
+
 div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
     background: #2D3748 !important;
     color: #FFFFFF !important;
-    font-weight: 900 !important;
+    font-weight: 950 !important;
     border: 1px solid #38BDF8 !important;
-    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4), inset 5px 0 0 #38BDF8 !important;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 25px rgba(56, 189, 248, 0.4), inset 6px 0 0 #38BDF8 !important;
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
 }
 
-/* 添加右側玻璃邊緣光 */
+div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] * {
+    color: #FFFFFF !important;
+    font-weight: 950 !important;
+}
+
+/* 側邊面板光束邊緣 */
 section[data-testid="stSidebar"]::after {
     content: "";
     position: absolute;
     right: 0;
-    top: 0;
-    width: 1px;
-    height: 100%;
-    background: linear-gradient(180deg, transparent, rgba(56, 189, 248, 0.5), transparent);
+    top: 5%;
+    width: 2px;
+    height: 90%;
+    background: linear-gradient(180deg, transparent, #38BDF8, transparent);
+    box-shadow: 0 0 15px #38BDF8;
 }
 
 /* 2. 主標題文字 (ChatGPT 大標風格) */
