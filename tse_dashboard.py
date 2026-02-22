@@ -395,11 +395,11 @@ def page_bias_analysis():
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:30px;">
             <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #EF4444;">
                 <div style="color:#FCA5A5; font-weight:800; font-size:17px; margin-bottom:12px;">🔥 末升段</div>
-                <div style="color:#94A3B8; font-size:15px; line-height:1.7;">歷史經驗顯示，指數並不會馬上崩跌，通常還會伴隨最後一段<b>「瘋狂噴出」</b>的誘多行情。此時追價風險極高。</div>
+                <div style="color:#94A3B8; font-size:15px; line-height:1.7;">歷史經驗顯示，當台股指數碰上 22% 警戒線，並不會馬上崩跌，通常還會伴隨最後一段<b>「瘋狂噴出」</b>的誘多行情。此時追價風險極高。</div>
             </div>
             <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #10B981;">
                 <div style="color:#A7F3D0; font-weight:800; font-size:17px; margin-bottom:12px;">🛡️ 泡沫修復</div>
-                <div style="color:#94A3B8; font-size:15px; line-height:1.7;">市場終將回歸理性。過去每次極端乖離，最終都會以<b>「指數大幅回砍」</b>直到觸碰 40 週均線才算修復完畢。均線是唯一的最終歸宿。</div>
+                <div style="color:#94A3B8; font-size:15px; line-height:1.7;">市場終將回歸理性。過去每次極端乖離，最終都會以<b>「指數整理或是回檔」</b>直到觸碰 40 週均線才算修復完畢。均線是唯一的最終歸宿。</div>
             </div>
             <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #3B82F6;">
                 <div style="color:#7DD3FC; font-weight:800; font-size:17px; margin-bottom:12px;">🧬 劇劇分類 (A vs B)</div>
