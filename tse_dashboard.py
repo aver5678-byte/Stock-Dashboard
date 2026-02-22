@@ -804,9 +804,13 @@ def page_downward_bias():
             ),
             cornerRadiusTopLeft=8, cornerRadiusTopRight=8
         ).encode(
-            x=alt.X('Range:N', title='剩餘跌幅區間 (%)', sort=None, axis=alt.Axis(labelColor='#94A3B8', titleColor='#F1F5F9')),
-            y=alt.Y('Probability (%):Q', title='發生機率 (%)', axis=alt.Axis(gridColor='#334155', gridDash=[2,4], labelColor='#94A3B8', titleColor='#F1F5F9')),
-            tooltip=['Range:N', 'Count:Q', 'Probability (%):Q']
+            x=alt.X('Range:N', title='剩餘跌幅區間 (%)', sort=None, axis=alt.Axis(labelAngle=0, labelFontSize=13, labelColor='#94A3B8', titleColor='#F1F5F9', titleFontSize=15)),
+            y=alt.Y('Probability (%):Q', title='發生機率 (%)', axis=alt.Axis(labelFontSize=13, gridColor='#334155', gridDash=[2,4], labelColor='#94A3B8', titleColor='#F1F5F9', titleFontSize=15)),
+            tooltip=[
+                alt.Tooltip('Range:N', title='跌幅區間'),
+                alt.Tooltip('Count:Q', title='發生次數'),
+                alt.Tooltip('Probability (%):Q', title='機率 (%)')
+            ]
         ).properties(
             height=350,
             background='transparent'
