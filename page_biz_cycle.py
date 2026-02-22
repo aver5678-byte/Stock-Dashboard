@@ -67,19 +67,43 @@ def page_biz_cycle():
 
     st.markdown(scenario_onboarding_html, unsafe_allow_html=True)
 
-    # --- 5. 數位流水日誌 ---
-    st.markdown('<h2 style="text-align:left; font-size:32px; margin-bottom:30px; color:#1E293B;">📜 景氣對策：歷史過熱週期全紀錄</h2>', unsafe_allow_html=True)
+    # --- 5. 數位流水日誌 (旗艦比例同步重構版) ---
+    st.markdown(f"""
+    <div style="background:linear-gradient(90deg, #1E293B, #0F172A); padding:30px 45px; border:4px solid #334155; border-radius:12px; margin-top:80px; margin-bottom:40px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+        <div style="color:white; font-size:48px; font-weight:950; letter-spacing:-1.5px; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">📜 景氣對策：歷史過熱週期全紀錄</div>
+        <div style="font-family:'JetBrains Mono'; font-size:16px; color:#64748B; font-weight:800; border:1px solid #334155; padding:5px 15px; border-radius:6px;">LOG_SYSTEM // RECORDS_v4.2</div>
+    </div>
+    """, unsafe_allow_html=True)
     
     history_data = [
-        {"period": "2025.09 - 進行中", "months": float(months_ongoing), "type": "長延續型 (預估)", "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.15)"},
-        {"period": "2024.04 - 2025.04", "months": 13.0, "type": "長延續型", "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)"},
-        {"period": "2020.12 - 2022.02", "months": 15.0, "type": "長延續型", "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)"},
-        {"period": "2009.12 - 2011.02", "months": 15.0, "type": "長延續型", "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)"},
-        {"period": "1995.02 - 1995.02", "months": 1.0, "type": "短促型", "color": "#FBBF24", "bg": "rgba(251, 191, 36, 0.1)"},
+        {"period": "2025.09 - 進行中", "months": float(months_ongoing), "type": "進行中 (預估)", "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.15)", "status_icon": "🚨"},
+        {"period": "2024.04 - 2025.04", "months": 13.0, "type": "長延續型 (已結)", "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "✅"},
+        {"period": "2020.12 - 2022.02", "months": 15.0, "type": "長延續型 (已結)", "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "✅"},
+        {"period": "2009.12 - 2011.02", "months": 15.0, "type": "長延續型 (已結)", "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "✅"},
+        {"period": "1995.02 - 1995.02", "months": 1.0, "type": "短促型 (已結)", "color": "#FBBF24", "bg": "rgba(251, 191, 36, 0.1)", "status_icon": "✅"},
     ]
 
     for item in history_data:
         w = min(100.0, (item['months'] / 16) * 100)
-        st.markdown(f"""<div style="background:#0F172A; border:2px solid #334155; border-radius:12px; padding:25px; margin-bottom:15px; display:flex; align-items:center; gap:30px; box-shadow:0 10px 20px rgba(0,0,0,0.2);"><div style="font-family:'JetBrains Mono'; font-size:20px; font-weight:800; color:#F1F5F9; min-width:220px;">📅 {item['period']}</div><div style="flex:1;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><span style="color:{item['color']}; background:{item['bg']}; padding:4px 12px; border-radius:6px; font-size:14px; font-weight:800; border:1px solid {item['color']};">{item['type']}</span><span style="font-family:'JetBrains Mono'; font-size:20px; font-weight:950; color:{item['color']};">{item['months']} <span style="font-size:14px;">M</span></span></div><div style="height:12px; background:#1E293B; border-radius:6px; overflow:hidden; border:1px solid #334155;"><div style="width:{w}%; height:100%; background:{item['color']}; box-shadow:0 0 15px {item['color']};"></div></div></div></div>""", unsafe_allow_html=True)
+        card_html = f"""
+        <div style="background:#0F172A; border:5px solid #334155; border-radius:12px; margin-bottom:40px; overflow:hidden; box-shadow:0 25px 50px rgba(0,0,0,0.5);">
+            <!-- 頂部資訊區 -->
+            <div style="background:#1E293B; padding:30px 35px; border-bottom:3px solid #334155; display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-family:'JetBrains Mono'; font-size:32px; font-weight:950; color:white; letter-spacing:-1px;">📅 {item['period']}</div>
+                <div style="color:{item['color']}; background:{item['bg']}; padding:8px 25px; border-radius:10px; font-size:24px; font-weight:900; border:2px solid {item['color']}; box-shadow:0 0 15px {item['color']}44;">{item['status_icon']} {item['type']}</div>
+            </div>
+            <!-- 底部能量條區 -->
+            <div style="padding:35px; background:rgba(255,255,255,0.01);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; font-size:20px; color:#F1F5F9; font-weight:800;">
+                    <span>⏳ 週期熱度佔比 (最高對標 16 個月)</span>
+                    <span style="font-family:'JetBrains Mono'; font-size:36px; font-weight:950; color:{item['color']}; text-shadow:0 0 15px {item['color']}88;">{item['months']:.1f} <span style="font-size:18px;">M</span></span>
+                </div>
+                <div style="height:25px; background:#020617; border-radius:15px; overflow:hidden; border:2px solid #334155;">
+                    <div style="width:{w}%; height:100%; background:linear-gradient(90deg, #1E293B, {item['color']}); box-shadow:0 0 30px {item['color']}CC;"></div>
+                </div>
+            </div>
+        </div>
+        """
+        st.markdown(card_html, unsafe_allow_html=True)
 
-    st.write("<p style='text-align:center; color:#94A3B8; font-size:13px; margin-top:100px; font-weight:600; letter-spacing:1px;'>系統由 aver5678 量化模組驅動 | 視覺化引擎: Command-Center v3.2</p>", unsafe_allow_html=True)
+    st.write("<p style='text-align:center; color:#64748B; font-size:14px; margin-top:100px; font-weight:600; letter-spacing:1px;'>系統由 aver5678 量化模組驅動 | 視覺化引擎: Command-Center v4.2 // FLAGSHIP_SYNC</p>", unsafe_allow_html=True)
