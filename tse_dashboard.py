@@ -375,19 +375,43 @@ def page_bias_analysis():
             peak_val = r['波段最高指數']
             recover_val = r['回歸0%指數'] if pd.notna(r['回歸0%指數']) else 0
             
+            # --- 新增：故事線與狀態判定邏輯 ---
+            is_ongoing = pd.isna(r['回歸0%日期'])
+            
+            # 狀態標籤與耗時標題
+            if is_ongoing:
+                status_badge = '<span style="color:#EF4444; background:#FEF2F2; padding:6px 16px; border-radius:8px; font-size:20px; font-weight:900; border:2px solid #FECACA;">🚨 警報持續中</span>'
+                days_label = "警報已持續"
+            else:
+                status_badge = '<span style="color:#10B981; background:#F0FDF4; padding:6px 16px; border-radius:8px; font-size:20px; font-weight:900; border:2px solid #A7F3D0;">✅ 歷史結案</span>'
+                days_label = "完整修復耗時"
+                
+            # 日期轉白話文輔助函數 (例如 '2026-01-05' -> '01/05')
+            def format_short_date(d_str):
+                if pd.isna(d_str) or not d_str or d_str == "N/A" or d_str == "None": 
+                    return ""
+                return f"(發生於 {str(d_str)[5:10].replace('-', '/')})"
+                
+            trigger_date_str = format_short_date(r.get('觸發日期'))
+            peak_date_str = format_short_date(r.get('波段最高日期'))
+            recover_date_str = format_short_date(r.get('回歸0%日期')) if not is_ongoing else "(等待均線跟上)"
+            
             # 預處理顯示文字，避免 f-string 語法錯誤
             line_22_str = f"{line_22:,.0f}" if pd.notna(line_22) else "--"
             peak_val_str = f"{peak_val:,.0f}" if pd.notna(peak_val) else "--"
             recover_val_str = f"{recover_val:,.0f}" if recover_val > 0 else "--"
             days_str = str(int(days_total)) if pd.notna(days_total) else "--"
             
-            # 建構「作戰中心：終極數據牆版」HTML
-            # 極限規格：52px/45px/48px，經微調完美層級，填滿 80% 空間
+            # 建構「作戰中心：終極數據牆版 (完整故事線)」HTML
             html_code = f"""
 <div style="background:#0F172A; border:5px solid #334155; border-radius:12px; margin-bottom:50px; overflow:hidden; width:100%; box-shadow:0 30px 60px rgba(0,0,0,0.5);">
   <!-- 頂部區：巨星標題磚 -->
   <div style="display:flex; justify-content:space-between; align-items:stretch; background:#1E293B; border-bottom:4px solid #475569;">
-    <div style="flex:2; padding:40px 30px; border-right:4px solid #475569;">
+    <div style="flex:2; padding:35px 30px; border-right:4px solid #475569;">
+      <div style="display:flex; align-items:center; gap:20px; margin-bottom:15px;">
+        {status_badge}
+        <span style="font-size:24px; color:#94A3B8; font-weight:800; letter-spacing:1px;">異常乖離發生日：</span>
+      </div>
       <div style="font-size:52px; color:white; font-weight:950; letter-spacing:-2px; line-height:1;">📅 {r["觸發日期"]}</div>
       <div style="margin-top:25px; display:flex; flex-wrap:nowrap; align-items:center; gap:25px;">
         <span style="color:#FFF; background:{tag_color}; padding:8px 25px; border-radius:10px; font-size:38px; font-weight:900; white-space:nowrap; border:2px solid rgba(255,255,255,0.3);">{type_tag}</span>
@@ -395,43 +419,46 @@ def page_bias_analysis():
       </div>
     </div>
     <div style="flex:1; text-align:center; background:rgba(56, 189, 248, 0.1); padding:40px 20px; display:flex; flex-direction:column; justify-content:center; min-width:300px;">
-      <div style="font-size:24px; color:#7DD3FC; font-weight:900; text-transform:uppercase; margin-bottom:12px; letter-spacing:2px;">修復耗時</div>
+      <div style="font-size:24px; color:#7DD3FC; font-weight:900; text-transform:uppercase; margin-bottom:12px; letter-spacing:2px;">{days_label}</div>
       <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:#38BDF8; line-height:1;">{days_str}<span style="font-size:25px; font-weight:800; margin-left:10px; color:#7DD3FC;">天</span></div>
     </div>
   </div>
 
   <!-- 中間區：巨型能量磁磚 -->
   <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
-    <div style="background:#7F1D1D; padding:50px 30px; border-right:2px solid #991B1B;">
-      <div style="display:flex; justify-content:space-between; align-items:center; font-size:45px; color:#FCA5A5; margin-bottom:25px; font-weight:950; white-space:nowrap;">
-        <span>🔥 最高噴出</span><span>{max_surge:+.1f}%</span>
+    <div style="background:#7F1D1D; padding:40px 30px; border-right:2px solid #991B1B;">
+      <div style="display:flex; justify-content:space-between; align-items:center; font-size:40px; color:#FCA5A5; margin-bottom:20px; font-weight:950; white-space:nowrap;">
+        <span>🔥 最高噴出漲幅</span><span>{max_surge:+.1f}%</span>
       </div>
-      <div style="height:45px; background:#450A0A; border-radius:8px; overflow:hidden; border:3px solid #B91C1C;">
+      <div style="height:40px; background:#450A0A; border-radius:8px; overflow:hidden; border:2px solid #B91C1C;">
         <div style="width:{surge_w}%; height:100%; background:linear-gradient(90deg, #F87171, #EF4444); box-shadow:0 0 40px rgba(239, 68, 68, 0.8);"></div>
       </div>
     </div>
-    <div style="background:#064E3B; padding:50px 30px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; font-size:45px; color:#6EE7B7; margin-bottom:25px; font-weight:950; white-space:nowrap;">
-        <span>🛡️ 回歸跌幅</span><span>{max_drop:+.1f}%</span>
+    <div style="background:#064E3B; padding:40px 30px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; font-size:40px; color:#6EE7B7; margin-bottom:20px; font-weight:950; white-space:nowrap;">
+        <span>🛡️ 乖離修復跌幅</span><span>{max_drop:+.1f}%</span>
       </div>
-      <div style="height:45px; background:#022C22; border-radius:8px; overflow:hidden; border:3px solid #059669;">
+      <div style="height:40px; background:#022C22; border-radius:8px; overflow:hidden; border:2px solid #059669;">
         <div style="width:{drop_w}%; height:100%; background:linear-gradient(90deg, #34D399, #10B981); box-shadow:0 0 40px rgba(16, 185, 129, 0.8);"></div>
       </div>
     </div>
   </div>
 
-  <!-- 底部區：重型數據基座 -->
+  <!-- 底部區：故事線底座 -->
   <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0; background:#1E293B; border-top:4px solid #475569;">
-    <div style="background:#450A0A; padding:45px 10px; text-align:center; border-right:4px solid #334155;">
-      <div style="font-size:30px; color:#F87171; font-weight:900; margin-bottom:18px; white-space:nowrap; letter-spacing:2px;">📍 22% 觸發價</div>
+    <div style="background:#450A0A; padding:35px 10px; text-align:center; border-right:4px solid #334155;">
+      <div style="font-size:26px; color:#F87171; font-weight:900; margin-bottom:5px; white-space:nowrap; letter-spacing:1px;">[階段一] 觸發22%警戒</div>
+      <div style="font-size:18px; color:#FCA5A5; font-weight:800; margin-bottom:15px; white-space:nowrap;">{trigger_date_str}</div>
       <div style="font-family:'JetBrains Mono'; font-size:48px; font-weight:950; color:white;">{line_22_str}</div>
     </div>
-    <div style="background:#450A0A; padding:45px 10px; text-align:center; border-right:4px solid #334155;">
-      <div style="font-size:30px; color:#FCA5A5; font-weight:900; margin-bottom:18px; white-space:nowrap; letter-spacing:2px;">🚀 期間最高價</div>
+    <div style="background:#450A0A; padding:35px 10px; text-align:center; border-right:4px solid #334155;">
+      <div style="font-size:26px; color:#FCA5A5; font-weight:900; margin-bottom:5px; white-space:nowrap; letter-spacing:1px;">[階段二] 波段見高點</div>
+      <div style="font-size:18px; color:#FECACA; font-weight:800; margin-bottom:15px; white-space:nowrap;">{peak_date_str}</div>
       <div style="font-family:'JetBrains Mono'; font-size:48px; font-weight:950; color:#FCA5A5;">{peak_val_str}</div>
     </div>
-    <div style="background:#064E3B; padding:45px 10px; text-align:center;">
-      <div style="font-size:30px; color:#6EE7B7; font-weight:900; margin-bottom:18px; white-space:nowrap; letter-spacing:2px;">🎯 回穩目標價</div>
+    <div style="background:#064E3B; padding:35px 10px; text-align:center;">
+      <div style="font-size:26px; color:#6EE7B7; font-weight:900; margin-bottom:5px; white-space:nowrap; letter-spacing:1px;">[階段三] 乖離回穩目標</div>
+      <div style="font-size:18px; color:#A7F3D0; font-weight:800; margin-bottom:15px; white-space:nowrap;">{recover_date_str}</div>
       <div style="font-family:'JetBrains Mono'; font-size:48px; font-weight:950; color:#A7F3D0;">{recover_val_str}</div>
     </div>
   </div>
