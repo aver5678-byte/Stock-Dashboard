@@ -254,12 +254,11 @@ def page_bias_analysis():
                         subplot_titles=('<b style="font-size:24px; color:#F1F5F9; font-family:\'JetBrains Mono\';">📡 歷史雷達觀測圖 (K線 vs 乖離率同步掃描)</b>', '<b style="color:#94A3B8; font-family:\'JetBrains Mono\';">40週乖離率 (%)</b>'),
                         row_width=[0.3, 0.7])
 
-    fig.add_trace(go.Candlestick(x=df.index,
+    fig.add_trace(go.Candlestick(x=df.index.strftime('%Y-%m-%d'),
                     open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'],
                     customdata=np.stack((df['Bias'], df['WarningText']), axis=-1),
                     name='加權指數',
                     increasing_line_color='#10B981', decreasing_line_color='#EF4444',
-                    width=5, # 強制設定 K 線寬度為 5 天 (週線圖)，解決縮放後變細的問題
                     hovertemplate='<b style="color:#F8FAFC;">時間: %{x|%Y/%m/%d}</b><br><br>' +
                                   '開: %{open:,.2f}<br>' +
                                   '高: %{high:,.2f}<br>' +
@@ -268,17 +267,17 @@ def page_bias_analysis():
                                   '<b style="color:#38BDF8;">👉 乖離率同步: %{customdata[0]:.2f}%</b>' +
                                   '%{customdata[1]}<extra></extra>'), row=1, col=1)
                     
-    fig.add_trace(go.Scatter(x=df.index, y=df['SMA40'], 
+    fig.add_trace(go.Scatter(x=df.index.strftime('%Y-%m-%d'), y=df['SMA40'], 
                              line={'color': '#94A3B8', 'width': 2}, 
                              name='40週均線',
                              hovertemplate='均線點位: %{y:.2f}<extra></extra>'), row=1, col=1)
 
-    # --- 新增：K線下方高壓地雷紅球 (Bias >= 22%) ---
+    # --- 新裝：K線下方高壓地雷紅球 (Bias >= 22%) ---
     danger_mask = df['Bias'] >= 22
     if danger_mask.any():
         danger_points = df[danger_mask]
         fig.add_trace(go.Scatter(
-            x=danger_points.index,
+            x=danger_points.index.strftime('%Y-%m-%d'),
             y=danger_points['Low'] * 0.97, # 放在最低點下方 3%
             mode='markers',
             name='高壓警報',
@@ -288,28 +287,28 @@ def page_bias_analysis():
                 symbol='circle',
                 line=dict(width=2, color='rgba(239, 68, 68, 0.5)') # 呼吸燈暈影感
             ),
-            hoverinfo='skip' # 點球點不可被選中，避開數據誤抓 Bug
+            hoverinfo='skip' 
         ), row=1, col=1)
                              
-    fig.add_trace(go.Scatter(x=df.index, y=df['Bias'], 
+    fig.add_trace(go.Scatter(x=df.index.strftime('%Y-%m-%d'), y=df['Bias'], 
                              line={'color': '#38BDF8', 'width': 2}, 
                              name='乖離率',
                              fill='tozeroy', fillcolor='rgba(56, 189, 248, 0.1)',
                              hovertemplate='乖離率: %{y:.2f}%<extra></extra>'), row=2, col=1)
                              
     if not b_df.empty:
-        type_a_dates = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 A')]['觸發日期'])
-        type_b_dates = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 B')]['觸發日期'])
+        type_a_dates = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 A')]['觸發日期']).strftime('%Y-%m-%d')
+        type_b_dates = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 B')]['觸發日期']).strftime('%Y-%m-%d')
         
-        # 使用 get_indexer 以防日期不存在 df index
-        type_a_points = df.loc[df.index.intersection(type_a_dates)]
-        type_b_points = df.loc[df.index.intersection(type_b_dates)]
-        
-        fig.add_trace(go.Scatter(x=type_a_points.index, y=type_a_points['Bias'],
+        # 篩選存在於 df 中的點
+        valid_a = [d for d in type_a_dates if d in df.index.strftime('%Y-%m-%d')]
+        valid_b = [d for d in type_b_dates if d in df.index.strftime('%Y-%m-%d')]
+
+        fig.add_trace(go.Scatter(x=valid_a, y=df.loc[pd.to_datetime(valid_a)]['Bias'],
                                  mode='markers', marker={'color': '#10B981', 'size': 10, 'symbol': 'circle', 'line': {'width': 2, 'color': '#047857'}},
                                  name='類型 A (歷史低點)'), row=2, col=1)
                                  
-        fig.add_trace(go.Scatter(x=type_b_points.index, y=type_b_points['Bias'],
+        fig.add_trace(go.Scatter(x=valid_b, y=df.loc[pd.to_datetime(valid_b)]['Bias'],
                                  mode='markers', marker={'color': '#EF4444', 'size': 10, 'symbol': 'circle', 'line': {'width': 2, 'color': '#B91C1C'}},
                                  name='類型 B (歷史極端)'), row=2, col=1)
 
@@ -331,14 +330,11 @@ def page_bias_analysis():
                       showlegend=False,
                       dragmode="pan") # 預設平移，配合滾輪縮放
                       
-    fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', 
+    fig.update_xaxes(type='category', showgrid=True, gridwidth=1, gridcolor='#1E293B', 
                      showspikes=True, spikemode="across", spikesnap="cursor", 
                      showline=False, spikedash="solid", spikethickness=1, spikecolor="#38BDF8",
-                     # 初始顯示範圍
-                     range=[df.index[-100], df.index[-1] + pd.Timedelta(days=14)],
-                     # 物理煞車：禁止縮小到超過數據範圍
-                     minallowed=df.index[0],
-                     maxallowed=df.index[-1] + pd.Timedelta(days=30))
+                     # 初始顯示範圍 (使用索引)
+                     range=[len(df)-100, len(df)-1])
                      
     fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', showline=False,
                      autorange=True, fixedrange=True) # 禁止滾輪縮放 Y 軸，解決扁平化問題，讓它自動撐開高度
