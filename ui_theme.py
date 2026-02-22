@@ -15,11 +15,12 @@ def apply_global_theme():
     color: #F1F5F9 !important;
 }
 
-/* 側邊欄 (Sidebar) 核心設計 */
+/* 側邊欄 (Sidebar) 核心設計：加寬且邊界發光 */
 section[data-testid="stSidebar"] {
     background-color: #020617 !important; 
-    width: 320px !important;
-    border-right: 1px solid #1E293B !important;
+    width: 360px !important;
+    border-right: 2px solid #1E293B !important;
+    box-shadow: 5px 0 20px rgba(56, 189, 248, 0.05) !important;
 }
 
 /* 徹底隱藏 Radio 圓點與原初樣式 */
@@ -32,14 +33,17 @@ div[data-testid="stSidebarUserContent"] .stRadio div[role="radiogroup"] > label 
     display: none !important;
 }
 
-/* 側邊欄分組標題 */
+/* 側邊欄分組標題：高亮且有底線 */
 .sidebar-section-header {
-    font-size: 11px !important;
+    font-size: 14px !important;
     text-transform: uppercase !important;
-    letter-spacing: 1.5px !important;
-    color: #64748B !important;
-    margin: 20px 0 10px 10px !important;
-    font-weight: 700 !important;
+    letter-spacing: 2px !important;
+    color: #E2E8F0 !important;
+    margin: 30px 0 15px 10px !important;
+    font-weight: 900 !important;
+    border-bottom: 2px solid #1E293B !important;
+    padding-bottom: 8px !important;
+    width: 80% !important;
 }
 
 /* 導覽按鈕 (Radio 模擬) */
@@ -48,25 +52,30 @@ div[data-testid="stSidebarUserContent"] .stRadio > div {
 }
 
 div[data-testid="stSidebarUserContent"] .stRadio label {
-    background-color: transparent !important;
+    background-color: rgba(255,255,255,0.02) !important;
     border-radius: 12px !important;
-    padding: 10px 15px !important;
-    transition: all 0.2s ease !important;
-    border: none !important;
-    color: #94A3B8 !important;
-    font-weight: 500 !important;
+    padding: 16px 20px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: 1px solid transparent !important;
+    color: #F8FAFC !important;
+    font-weight: 800 !important;
+    font-size: 18px !important;
+    margin-bottom: 8px !important;
 }
 
 div[data-testid="stSidebarUserContent"] .stRadio label:hover {
-    background-color: rgba(255,255,255,0.05) !important;
-    color: #F1F5F9 !important;
+    background-color: rgba(56, 189, 248, 0.08) !important;
+    color: #FFFFFF !important;
+    border-color: rgba(56, 189, 248, 0.3) !important;
+    transform: translateX(5px) !important;
 }
 
 div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
-    background-color: rgba(56, 189, 248, 0.1) !important;
+    background-color: rgba(56, 189, 248, 0.15) !important;
     color: #FFFFFF !important;
-    font-weight: 900 !important;
-    box-shadow: inset 4px 0 0 #38BDF8 !important;
+    font-weight: 950 !important;
+    box-shadow: inset 6px 0 0 #38BDF8 !important;
+    border: 1px solid rgba(56, 189, 248, 0.4) !important;
 }
 
 /* 2. 主標題文字 (ChatGPT 大標風格) */
