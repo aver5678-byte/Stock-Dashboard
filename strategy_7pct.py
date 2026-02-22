@@ -125,7 +125,9 @@ def analyze_7pct_strategy(df, trigger_pct=7.0):
                 days_to_rec = (rec_date - p_date).days
                 
         # 根據長官定義: 日期皆由起跌前高起算
-        days_to_bottom = (b_date - p_date).days
+        days_to_bottom_from_peak = (b_date - p_date).days
+        days_to_bottom_from_trigger = (b_date - trigger_date).days
+        days_from_bottom_to_rec = (rec_date - b_date).days
         
         events.append({
             '觸發日期': trigger_date.strftime('%Y-%m-%d'),
@@ -138,8 +140,10 @@ def analyze_7pct_strategy(df, trigger_pct=7.0):
             '解套點位': rec_price,
             '最大跌幅(%)': round(max_drawdown, 2),
             '剩餘跌幅(%)': round(residual_drawdown, 2),
-            '破底花費天數': days_to_bottom,
-            '解套花費天數': days_to_rec,
+            '前高到破底天數': days_to_bottom_from_peak,
+            '觸發到破底天數': days_to_bottom_from_trigger,
+            '破底到解套天數': days_from_bottom_to_rec,
+            '解套總耗時': days_to_rec,
             '狀態': status,
             '解套形式': recovery_status
         })
@@ -168,8 +172,9 @@ def calculate_7pct_statistics(events_df):
     
     if len(recovered_events) > 0:
         avg_residual_dd = recovered_events['剩餘跌幅(%)'].mean()
-        avg_days_to_bottom = recovered_events['破底花費天數'].mean()
-        avg_days_to_recovery = recovered_events['解套花費天數'].mean()
+        avg_days_trigger_to_bottom = recovered_events['觸發到破底天數'].mean()
+        avg_days_bottom_to_rec = recovered_events['破底到解套天數'].mean()
+        avg_days_to_recovery = recovered_events['解套總耗時'].mean()
         prob_dd_gt_10 = len(recovered_events[recovered_events['剩餘跌幅(%)'] > 10]) / len(recovered_events) * 100
         prob_dd_gt_20 = len(recovered_events[recovered_events['剩餘跌幅(%)'] > 20]) / len(recovered_events) * 100
         
@@ -177,8 +182,9 @@ def calculate_7pct_statistics(events_df):
         'Total Events': len(events_df),
         'Recovered Events': len(recovered_events),
         'Avg Residual Drawdown (%)': round(avg_residual_dd, 2),
-        'Avg Days to Bottom': round(avg_days_to_bottom, 1),
-        'Avg Days to Recovery': round(avg_days_to_recovery, 1),
+        'Avg Days Trigger to Bottom': round(avg_days_trigger_to_bottom, 1),
+        'Avg Days Bottom to Rec': round(avg_days_bottom_to_rec, 1),
+        'Avg Days Total Recovery': round(avg_days_to_recovery, 1),
         'Prob Residual DD > 10%': round(prob_dd_gt_10, 2),
         'Prob Residual DD > 20%': round(prob_dd_gt_20, 2)
     }
