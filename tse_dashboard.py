@@ -717,7 +717,7 @@ def page_downward_bias():
         "台灣加權指數 (^TWII)": "^TWII"
     }
 
-    @st.cache_data(ttl=2, show_spinner=False)
+    @st.cache_data(ttl=1, show_spinner=False)
     def get_analysis(ticker_symbol):
         df = fetch_data(ticker_symbol, start_date="2000-01-01")
         if df.empty:
@@ -778,17 +778,35 @@ def page_downward_bias():
     avg_resid_val = metrics.get('Avg Residual Drawdown (%)', 0)
     avg_resid = f"-{avg_resid_val:.1f}%" if avg_resid_val > 0 else "0.0%"
     
-    avg_trigger_to_bt = metrics.get('Avg Days Trigger to Bottom', 0)
-    avg_bt_to_rec = metrics.get('Avg Days Bottom to Rec', 0)
-    avg_total_rec = metrics.get('Avg Days Total Recovery', 0)
-    recover_events = metrics.get('Recovered Events', 0)
+    # 方案 A: 讀取分離後的數據
+    norm = metrics.get('Normal', {})
+    crash = metrics.get('Crash', {})
 
-    # 動態計算時間比例 (畫進度條用)
-    total_timeline = avg_trigger_to_bt + avg_bt_to_rec if (avg_trigger_to_bt + avg_bt_to_rec) > 0 else 100
-    bt_pct = min(90, max(10, (avg_trigger_to_bt / total_timeline) * 100)) if total_timeline > 0 else 30
-    rec_pct = 100 - bt_pct
+    def get_bar_html(title, m_data, theme_color="#38BDF8"):
+        count = m_data.get('count', 0)
+        t_bt = m_data.get('avg_trigger_to_bt', 0)
+        bt_r = m_data.get('avg_bt_to_rec', 0)
+        total = m_data.get('avg_total', 0)
+        
+        # 比例計算
+        t_sum = t_bt + bt_r if (t_bt + bt_r) > 0 else 100
+        p1 = min(90, max(10, (t_bt / t_sum) * 100)) if t_sum > 0 else 30
+        p2 = 100 - p1
+        
+        return f"""
+        <div style="background:rgba(255,255,255,0.03); padding:18px 22px; border-radius:10px; border:1px solid rgba(255,255,255,0.05); margin-bottom:15px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <div style="font-size:15px; color:{theme_color}; font-weight:900; letter-spacing:0.5px;">{title} (樣本數 {count} 次)</div>
+                <div style="font-size:12px; color:#94A3B8; font-family:'JetBrains Mono';">平均總耗時 {total:.1f} 天</div>
+            </div>
+            <div style="height:22px; background:#0F172A; border-radius:4px; overflow:hidden; border:1px solid #334155; display:flex;">
+                <div style="width:{p1}%; height:100%; background:linear-gradient(90deg, #F59E0B, #EF4444); display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:900; overflow:hidden;">觸發➔落底({t_bt:.1f}d)</div>
+                <div style="width:{p2}%; height:100%; background:linear-gradient(90deg, #3B82F6, #10B981); display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:900; overflow:hidden;">落底➔解套({bt_r:.1f}d)</div>
+            </div>
+        </div>
+        """
 
-    hud_html = f"""<div style="background:#0F172A; border:4px solid #334155; border-radius:12px; padding:45px; margin-bottom:40px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; justify-content:space-between; align-items:center; gap:35px;"><div style="flex:1;"><div style="font-size:18px; color:#94A3B8; font-weight:800; margin-bottom:15px; display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:{score_color}; border-radius:50%; box-shadow:0 0 10px {score_color};"></span>目前距離前高跌幅 (Live Drawdown)</div><div style="display:flex; flex-direction:column; gap:15px;"><div style="font-family:'JetBrains Mono'; font-size:82px; font-weight:950; color:{score_color}; line-height:1; letter-spacing:-4px;">{current_dd:.1f}%</div><div style="display:flex; align-items:center; gap:15px;"><div style="font-family:'JetBrains Mono'; font-size:18px; font-weight:900; color:#EF4444; background:rgba(239, 68, 68, 0.1); padding:5px 15px; border-radius:6px; border:1px solid rgba(239,68,68,0.3);">閾值: -7.0%</div><div style="color:white; padding:6px 20px; border-radius:8px; font-size:16px; font-weight:950; border:2px solid {score_color}; background:rgba(255,255,255,0.05); box-shadow:0 0 15px rgba(239, 68, 68, 0.4) if current_dd >= 7.0 else 'none';">{score_label}</div></div></div></div><div style="flex:0.8; background:rgba(255,255,255,0.02); border-left:4px solid #EF4444; padding:25px; border-radius:12px; border:1px solid rgba(239, 68, 68, 0.1);"><div style="font-size:15px; color:#FCA5A5; font-weight:950; margin-bottom:15px; display:flex; align-items:center; gap:8px; border-bottom:1px solid rgba(239, 68, 68, 0.2); padding-bottom:10px;">🎯 歷史下殺壓力 (Residual Drop)</div><div style="display:flex; flex-direction:column; gap:10px;"><div><div style="font-size:12px; color:#94A3B8; font-weight:900; margin-bottom:5px; display:flex; align-items:center; gap:8px;"><span>進場後平均還會再跌</span></div><div style="font-family:'JetBrains Mono'; font-size:42px; color:#EF4444; font-weight:950; letter-spacing:-1px; text-shadow:0 0 15px rgba(239,68,68,0.5);">{avg_resid}</div></div></div></div><div style="flex:1.4; display:flex; flex-direction:column; gap:20px; align-self:stretch; justify-content:center;"><div style="background:rgba(255,255,255,0.03); padding:20px 25px; border-radius:12px; border:1px solid #1E293B;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><div style="font-size:16px; color:#38BDF8; font-weight:900; letter-spacing:1px;">⌛ 歷史反彈時程推演 (樣本數 {recover_events} 次)</div></div><div style="height:28px; background:#0F172A; border-radius:6px; overflow:hidden; border:1px solid #334155; display:flex;"><div style="width:{bt_pct}%; height:100%; background:linear-gradient(90deg, #F59E0B, #EF4444); display:flex; align-items:center; justify-content:center; color:white; font-size:12px; font-weight:900; min-width:80px;">觸發➔落底 ({avg_trigger_to_bt:.1f}天)</div><div style="width:{rec_pct}%; height:100%; background:linear-gradient(90deg, #3B82F6, #10B981); display:flex; align-items:center; justify-content:center; color:white; font-size:12px; font-weight:900; min-width:100px;">落底➔解套 ({avg_bt_to_rec:.1f}天)</div></div><div style="display:flex; justify-content:space-between; margin-top:10px; font-size:12px; color:#94A3B8; font-weight:800; font-family:'JetBrains Mono';"><span>-7% 觸發日</span><span>市場落底</span><span>創新高解套 (總耗時約 {avg_total_rec:.1f}天)</span></div></div></div></div></div>"""
+    hud_html = f"""<div style="background:#0F172A; border:4px solid #334155; border-radius:12px; padding:45px; margin-bottom:40px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; flex-direction:column; gap:30px;"><div style="display:flex; justify-content:space-between; align-items:center; gap:35px;"><div style="flex:1.2;"><div style="font-size:18px; color:#94A3B8; font-weight:800; margin-bottom:15px; display:flex; align-items:center; gap:10px;"><span style="width:10px; height:10px; background:{score_color}; border-radius:50%; box-shadow:0 0 10px {score_color};"></span>目前距離前高跌幅 (Live Drawdown)</div><div style="display:flex; flex-direction:column; gap:15px;"><div style="font-family:'JetBrains Mono'; font-size:82px; font-weight:950; color:{score_color}; line-height:1; letter-spacing:-4px;">{current_dd:.1f}%</div><div style="display:flex; align-items:center; gap:15px;"><div style="font-family:'JetBrains Mono'; font-size:18px; font-weight:900; color:#EF4444; background:rgba(239, 68, 68, 0.1); padding:5px 15px; border-radius:6px; border:1px solid rgba(239,68,68,0.3);">閾值: -7.0%</div><div style="color:white; padding:6px 20px; border-radius:8px; font-size:16px; font-weight:950; border:2px solid {score_color}; background:rgba(255,255,255,0.05);">{score_label}</div></div></div></div><div style="flex:1.8; background:rgba(255,255,255,0.02); border-left:4px solid #EF4444; padding:25px; border-radius:12px; border:1px solid rgba(239, 68, 68, 0.1);"><div style="font-size:17px; color:#38BDF8; font-weight:950; margin-bottom:20px; display:flex; align-items:center; gap:8px; border-bottom:1px solid rgba(56, 189, 248, 0.2); padding-bottom:10px;">⌛ 歷史反彈時程推演 (方案 A：分類對其)</div><div style="display:grid; grid-template-columns:1fr; gap:0px;">{get_bar_html("📊 良性回檔模式 (總跌幅 < 20%)", norm, "#10B981")}{get_bar_html("🚨 災難崩盤模式 (總跌幅 > 20%)", crash, "#EF4444")}</div></div></div></div></div>"""
     st.markdown(hud_html, unsafe_allow_html=True)
     # --- 3. 歷史分佈圖 ---
     st.markdown('<h2 style="text-align:center; margin-top:80px;">📊 觸發 7% 後的「剩餘跌幅」機率分布</h2>', unsafe_allow_html=True)

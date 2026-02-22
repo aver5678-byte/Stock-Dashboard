@@ -155,64 +155,67 @@ def analyze_7pct_strategy(df, trigger_pct=7.0):
     return result_df
 
 def calculate_7pct_statistics(events_df):
-    """
-    Calculate summary statistics and probability distribution for the residual drawdowns.
-    """
     if events_df.empty:
         return {}, pd.DataFrame()
         
     recovered_events = events_df[events_df['狀態'] == '已解套']
     
-    # Summary Metrics
-    avg_residual_dd = 0
-    avg_days_to_bottom = 0
-    avg_days_to_recovery = 0
-    prob_dd_gt_10 = 0
-    prob_dd_gt_20 = 0
-    
-    if len(recovered_events) > 0:
-        avg_residual_dd = recovered_events['剩餘跌幅(%)'].mean()
-        avg_days_trigger_to_bottom = recovered_events['觸發到破底天數'].mean()
-        avg_days_bottom_to_rec = recovered_events['破底到解套天數'].mean()
-        avg_days_to_recovery = recovered_events['解套總耗時'].mean()
-        prob_dd_gt_10 = len(recovered_events[recovered_events['剩餘跌幅(%)'] > 10]) / len(recovered_events) * 100
-        prob_dd_gt_20 = len(recovered_events[recovered_events['剩餘跌幅(%)'] > 20]) / len(recovered_events) * 100
-        
+    # 初始化
     metrics = {
         'Total Events': len(events_df),
         'Recovered Events': len(recovered_events),
-        'Avg Residual Drawdown (%)': round(avg_residual_dd, 2),
-        'Avg Days Trigger to Bottom': round(avg_days_trigger_to_bottom, 1),
-        'Avg Days Bottom to Rec': round(avg_days_bottom_to_rec, 1),
-        'Avg Days Total Recovery': round(avg_days_to_recovery, 1),
-        'Prob Residual DD > 10%': round(prob_dd_gt_10, 2),
-        'Prob Residual DD > 20%': round(prob_dd_gt_20, 2)
+        'Overall': {'avg_resid': 0, 'avg_trigger_to_bt': 0, 'avg_bt_to_rec': 0, 'avg_total': 0},
+        'Normal': {'count': 0, 'avg_trigger_to_bt': 0, 'avg_bt_to_rec': 0, 'avg_total': 0},
+        'Crash': {'count': 0, 'avg_trigger_to_bt': 0, 'avg_bt_to_rec': 0, 'avg_total': 0}
     }
     
-    # Distribution of Residual Drawdowns
-    perfs = events_df['剩餘跌幅(%)'].copy()
+    if not recovered_events.empty:
+        metrics['Overall'] = {
+            'avg_resid': round(recovered_events['剩餘跌幅(%)'].mean(), 2),
+            'avg_trigger_to_bt': round(recovered_events['觸發到破底天數'].mean(), 1),
+            'avg_bt_to_rec': round(recovered_events['破底到解套天數'].mean(), 1),
+            'avg_total': round(recovered_events['解套總耗時'].mean(), 1)
+        }
+        
+        # 分類 A: 一般回檔 (< 20%)
+        normal = recovered_events[recovered_events['最大跌幅(%)'] < 20.0]
+        if not normal.empty:
+            metrics['Normal'] = {
+                'count': len(normal),
+                'avg_trigger_to_bt': round(normal['觸發到破底天數'].mean(), 1),
+                'avg_bt_to_rec': round(normal['破底到解套天數'].mean(), 1),
+                'avg_total': round(normal['解套總耗時'].mean(), 1)
+            }
+            
+        # 分類 B: 災難崩盤 (>= 20%)
+        crash = recovered_events[recovered_events['最大跌幅(%)'] >= 20.0]
+        if not crash.empty:
+            metrics['Crash'] = {
+                'count': len(crash),
+                'avg_trigger_to_bt': round(crash['觸發到破底天數'].mean(), 1),
+                'avg_bt_to_rec': round(crash['破底到解套天數'].mean(), 1),
+                'avg_total': round(crash['解套總耗時'].mean(), 1)
+            }
+
+    # 保留舊有機率統計與 Key 供分佈圖與舊 UI 組件參考
+    metrics['Prob Residual DD > 10%'] = round(len(recovered_events[recovered_events['剩餘跌幅(%)'] > 10]) / len(recovered_events) * 100, 2) if len(recovered_events) > 0 else 0
+    metrics['Prob Residual DD > 20%'] = round(len(recovered_events[recovered_events['剩餘跌幅(%)'] > 20]) / len(recovered_events) * 100, 2) if len(recovered_events) > 0 else 0
+    metrics['Avg Residual Drawdown (%)'] = metrics['Overall']['avg_resid']
+    metrics['Avg Days Trigger to Bottom'] = metrics['Overall']['avg_trigger_to_bt']
+    metrics['Avg Days Bottom to Rec'] = metrics['Overall']['avg_bt_to_rec']
+    metrics['Avg Days Total Recovery'] = metrics['Overall']['avg_total']
     
-    # Bins for residual drawdown
-    # Use finer granularity for smaller ranges
+    # 跌幅分布統計
+    perfs = events_df['剩餘跌幅(%)'].copy()
     bins = [0, 2, 4, 6, 8, 10, 15, 20, 30, 1000]
     labels = ['0%~2%', '2%~4%', '4%~6%', '6%~8%', '8%~10%', '10%~15%', '15%~20%', '20%~30%', '>30%']
-    
-    counts = pd.cut(perfs, bins=bins, labels=labels, right=False).value_counts().sort_index()
+    counts_series = pd.cut(perfs, bins=bins, labels=labels, right=False).value_counts().sort_index()
     
     dist_results = []
     n_total = len(events_df)
-    
-    for label, count in counts.items():
-        if count == 0:
-            continue
+    for label, count in counts_series.items():
+        if count > 0:
+            prob = count / n_total * 100 if n_total > 0 else 0
+            dist_results.append({'Range': str(label), 'Count': int(count), 'Probability (%)': round(prob, 2)})
             
-        prob = count / n_total * 100 if n_total > 0 else 0
-        dist_results.append({
-            'Range': label,
-            'Count': count,
-            'Probability (%)': round(prob, 2)
-        })
-        
-    distribution_df = pd.DataFrame(dist_results)
-    
-    return metrics, distribution_df
+    return metrics, pd.DataFrame(dist_results)
