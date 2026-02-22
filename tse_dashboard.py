@@ -296,8 +296,18 @@ def page_bias_analysis():
                                  name='類型 B (歷史極端)'), row=2, col=1)
 
     fig.add_hline(y=0, line_dash="solid", line_color="#475569", row=2, col=1)
-    fig.add_hline(y=20, line_dash="dash", line_color="#FBBF24", row=2, col=1, annotation_text="20% 警戒線", annotation_font_color="#FBBF24", annotation_position="top right")
-    fig.add_hline(y=22, line_dash="solid", line_color="#EF4444", row=2, col=1, annotation_text="22% 極端線", annotation_font_color="#EF4444", annotation_position="top right")
+    
+    # 正向過熱區 (警示文字錯開排版)
+    fig.add_hline(y=20, line_dash="dash", line_color="#FBBF24", row=2, col=1, 
+                  annotation_text="20% 警戒區", annotation_font_color="#FBBF24", annotation_position="bottom left")
+    fig.add_hline(y=22, line_dash="solid", line_color="#EF4444", row=2, col=1, 
+                  annotation_text="22% 極端線", annotation_font_color="#EF4444", annotation_position="top left")
+    
+    # 負向超跌區 (同樣錯開排版)
+    fig.add_hline(y=-20, line_dash="dash", line_color="#FBBF24", row=2, col=1, 
+                  annotation_text="-20% 低基期警戒", annotation_font_color="#FBBF24", annotation_position="top left")
+    fig.add_hline(y=-22, line_dash="solid", line_color="#EF4444", row=2, col=1, 
+                  annotation_text="-22% 極端低估區", annotation_font_color="#EF4444", annotation_position="bottom left")
     
     fig.update_layout(height=700, xaxis_rangeslider_visible=False,
                       plot_bgcolor="#0F172A",
