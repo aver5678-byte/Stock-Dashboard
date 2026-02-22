@@ -984,23 +984,7 @@ def main():
         
     selection = st.sidebar.radio("Navigation", list(pages.keys()), label_visibility="collapsed")
     
-    # 3. 底部資訊與個人中心
-    st.sidebar.markdown(f'''
-        <div style="margin: 20px 0 10px 0; padding: 15px; background:rgba(0,0,0,0.02); border-radius:12px; border:1px dashed #E5E7EB;">
-            <div style="display:flex; align-items:center; gap:8px;">
-                <span style="width:8px; height:8px; background:#10B981; border-radius:50%; display:inline-block; box-shadow:0 0 8px #10B981;"></span>
-                <span style="font-size:12px; font-weight:700; color:#4B5563;">System Live: Terminal v4.0</span>
-            </div>
-            <div style="font-size:10px; color:#9CA3AF; margin-top:5px; margin-left:16px;">
-                Sync Status: Cloud Encrypted<br>
-                Latest Build: Feb 2026
-            </div>
-        </div>
-    ''', unsafe_allow_html=True)
-    
-    st.sidebar.info("這是一個整合多個股市量化分析功能的入口網站。透過左側 GPT 風格選單切換模組。")
-    
-    render_user_profile()
+    # 執行對應的頁面函數
     
     # 執行對應的頁面函數
     pages[selection]()

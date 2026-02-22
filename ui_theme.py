@@ -10,17 +10,16 @@ def apply_global_theme():
         /* 1. 核心字體與背景 */
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;800&family=Inter:wght@400;700;900&display=swap');
     /* 1. 全站背景 (徹底黑暗化，消除白邊) */
-.stApp, .stAppViewContainer, .stMain, [data-testid="stHeader"], .block-container {
+.stApp, .stAppViewContainer, .stMain, [data-testid="stHeader"], [data-testid="stSidebar"], .block-container {
     background-color: #020617 !important;
     color: #F1F5F9 !important;
 }
 
 /* 側邊欄 (Sidebar) 核心設計 */
 section[data-testid="stSidebar"] {
-    background-color: #0F172A !important; 
+    background-color: #020617 !important; 
     width: 320px !important;
     border-right: 1px solid #1E293B !important;
-    box-shadow: 10px 0 30px rgba(0,0,0,0.5) !important;
 }
 
 /* 徹底隱藏 Radio 圓點與原初樣式 */
@@ -65,8 +64,8 @@ div[data-testid="stSidebarUserContent"] .stRadio label:hover {
 
 div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
     background-color: rgba(56, 189, 248, 0.1) !important;
-    color: #38BDF8 !important;
-    font-weight: 800 !important;
+    color: #FFFFFF !important;
+    font-weight: 900 !important;
     box-shadow: inset 4px 0 0 #38BDF8 !important;
 }
 
