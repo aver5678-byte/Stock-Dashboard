@@ -106,8 +106,10 @@ def backtest(df):
             regime, max_dd = get_regime(df, date)
             
         elif in_danger:
-            if close_p > max_price:
-                max_price = close_p
+            # 使用當週最高價 (High) 作為波段頂點，反映極端壓力
+            curr_high = row['High']
+            if curr_high > max_price:
+                max_price = curr_high
                 max_date = date
                 
             if bias <= 0:
@@ -439,8 +441,9 @@ def page_bias_analysis():
             days_spurt = (t2 - t1).days
             days_correction = int(days_total - days_spurt)
             
-            # 價差演算 (對齊卡片顯示的 22% 警戒位，方便用戶肉眼驗算)
-            point_diff = int(peak_val - line_22) if pd.notna(line_22) and pd.notna(peak_val) else 0
+            # 價差演算 (對齊卡片顯示的「觸發時指數」與「波段最高指數」，確保用戶可直接驗算)
+            trigger_close = r['觸發時指數']
+            point_diff = int(peak_val - trigger_close) if pd.notna(trigger_close) and pd.notna(peak_val) else 0
             
             # --- 新增：故事線與狀態判定邏輯 ---
             is_ongoing = pd.isna(r['回歸0%日期'])
@@ -525,9 +528,9 @@ def page_bias_analysis():
   <!-- 底部區：故事線底座 -->
   <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0; background:#1E293B; border-top:4px solid #475569;">
     <div style="background:#450A0A; padding:35px 30px; text-align:left; border-right:4px solid #334155;">
-      <div style="font-size:26px; color:#F87171; font-weight:900; margin-bottom:5px; white-space:nowrap; letter-spacing:1px;">[階段一] 觸發22%警戒</div>
+      <div style="font-size:26px; color:#F87171; font-weight:900; margin-bottom:5px; white-space:nowrap; letter-spacing:1px;">[階段一] 警報觸發 (收盤)</div>
       <div style="font-size:18px; color:#FCA5A5; font-weight:800; margin-bottom:15px; white-space:nowrap;">{trigger_date_str}</div>
-      <div style="font-family:'JetBrains Mono'; font-size:48px; font-weight:950; color:white;">{line_22_str}</div>
+      <div style="font-family:'JetBrains Mono'; font-size:48px; font-weight:950; color:white;">{r['觸發時指數']:,.0f}</div>
     </div>
     <div style="background:#450A0A; padding:35px 30px; text-align:left; border-right:4px solid #334155;">
       <div style="font-size:26px; color:#FCA5A5; font-weight:900; margin-bottom:5px; white-space:nowrap; letter-spacing:1px;">[階段二] 波段見高點</div>
