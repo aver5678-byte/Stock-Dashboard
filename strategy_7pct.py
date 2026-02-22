@@ -52,14 +52,21 @@ def analyze_7pct_strategy(df, trigger_pct=7.0):
                 lowest_since_trigger = low
                 lowest_date = date
                 
-            # Check for recovery (解套：必須重新站回最原始的起跌前高，才算整個空頭/回檔波段結束)
-            if high >= current_high:
+            # Check for recovery
+            # 解套條件 1：完全收復當初起跌的前高
+            # 解套條件 2：從最低點強力反彈超過 15% (視為空頭波段徹底終結，開啟新行情，避免與下一年黏在一起)
+            bounce_from_bottom = (close - lowest_since_trigger) / lowest_since_trigger * 100
+            
+            if high >= current_high or bounce_from_bottom >= 15.0:
                 # Event concluded
                 max_drawdown = (current_high - lowest_since_trigger) / current_high * 100
                 residual_drawdown = (trigger_price - lowest_since_trigger) / trigger_price * 100
                 
-                days_to_bottom = (lowest_date - trigger_date).days
-                days_to_recovery = (date - trigger_date).days
+                # 使用者邏輯：天數一律從「前高起跌日」開始算
+                days_to_bottom = (lowest_date - current_high_date).days
+                days_to_recovery = (date - current_high_date).days
+                
+                recovery_status = "完全收復" if high >= current_high else "反彈結案"
                 
                 events.append({
                     '觸發日期': trigger_date.strftime('%Y-%m-%d'),
@@ -69,14 +76,16 @@ def analyze_7pct_strategy(df, trigger_pct=7.0):
                     '破底最低價': lowest_since_trigger,
                     '破底日期': lowest_date.strftime('%Y-%m-%d'),
                     '解套日期': date.strftime('%Y-%m-%d'),
+                    '解套點位': high if high >= current_high else close,
                     '最大跌幅(%)': round(max_drawdown, 2),
                     '剩餘跌幅(%)': round(residual_drawdown, 2),
                     '破底花費天數': days_to_bottom,
                     '解套花費天數': days_to_recovery,
-                    '狀態': '已解套'
+                    '狀態': '已解套',
+                    '解套形式': recovery_status
                 })
                 
-                # Reset for next event - current_high is now updated to this new high
+                # Reset for next event - tracking starts fresh from today's high
                 in_drawdown = False
                 current_high = high
                 current_high_date = date
@@ -85,10 +94,12 @@ def analyze_7pct_strategy(df, trigger_pct=7.0):
     if in_drawdown:
         max_drawdown = (current_high - lowest_since_trigger) / current_high * 100
         residual_drawdown = (trigger_price - lowest_since_trigger) / trigger_price * 100
-        days_to_bottom = (lowest_date - trigger_date).days
+        
+        # 使用者邏輯：天數一律從「前高起跌日」開始算
+        days_to_bottom = (lowest_date - current_high_date).days
         
         last_date = df.index[-1]
-        days_ongoing = (last_date - trigger_date).days
+        days_ongoing = (last_date - current_high_date).days
         
         events.append({
             '觸發日期': trigger_date.strftime('%Y-%m-%d'),
@@ -98,14 +109,22 @@ def analyze_7pct_strategy(df, trigger_pct=7.0):
             '破底最低價': lowest_since_trigger,
             '破底日期': lowest_date.strftime('%Y-%m-%d'),
             '解套日期': '進行中',
+            '解套點位': df['Close'].iloc[-1],
             '最大跌幅(%)': round(max_drawdown, 2),
             '剩餘跌幅(%)': round(residual_drawdown, 2),
             '破底花費天數': days_to_bottom,
             '解套花費天數': days_ongoing,
-            '狀態': '進行中'
+            '狀態': '進行中',
+            '解套形式': '套牢中'
         })
         
-    return pd.DataFrame(events)
+    final_df = pd.DataFrame(events)
+    # 過濾出雜訊波段：如果解套太快 (<=3 天) 且最大跌幅極小，則不呈現於主畫面上
+    if not final_df.empty:
+        # Keep events that took more than 3 days to recover OR had a deep max drawdown
+        final_df = final_df[(final_df['解套花費天數'] > 4) | (final_df['最大跌幅(%)'] > 8.0) | (final_df['狀態'] == '進行中')]
+        
+    return final_df
 
 def calculate_7pct_statistics(events_df):
     """
