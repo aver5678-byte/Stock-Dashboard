@@ -52,7 +52,7 @@ def page_biz_cycle():
     st.markdown(hero_header_html, unsafe_allow_html=True)
 
     # --- 4. 戰術即時面板 (Macro HUD) ---
-    tiles_html = "".join([f'<div style="background:{m["c"]}; color:white; padding:8px 12px; border-radius:8px; text-align:center; min-width:75px; box-shadow:0 4px 10px rgba(0,0,0,0.3); border:2px solid rgba(255,255,255,0.2);"><div style="font-size:10px; font-weight:800; opacity:0.8; margin-bottom:2px;">{m["a"]}月反映</div><div style="font-family:\'JetBrains Mono\'; font-size:18px; font-weight:950;">{m["s"]}</div></div>' for m in months_data])
+    tiles_html = "".join([f'<div style="background:{m["c"]}; color:white; padding:12px 15px; border-radius:10px; text-align:center; min-width:90px; box-shadow:0 6px 15px rgba(0,0,0,0.4); border:2px solid rgba(255,255,255,0.3);"><div style="font-size:16px; font-weight:900; margin-bottom:5px; letter-spacing:1px;">{m["a"]}月</div><div style="font-family:\'JetBrains Mono\'; font-size:26px; font-weight:950; line-height:1;">{m['s']}</div></div>' for m in months_data])
     
     # 預警線計算：對標實戰平均 4.1 個月
     progress_val = int(min(months_ongoing / 4.1 * 100, 100))
