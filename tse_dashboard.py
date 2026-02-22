@@ -964,15 +964,15 @@ def main():
     st.sidebar.markdown('<h1 style="border:none; margin-bottom:0;">📊 股市盤後系統</h1>', unsafe_allow_html=True)
     
     pages = {
-        "📉 40週乖離率分析": page_bias_analysis,
-        "🌡️ 景氣：獲利窗耗竭度": page_biz_cycle,
-        "🩸 股市回檔統計": page_downward_bias,
-        "📈 股市上漲統計": page_upward_bias
+        "週期乖離監控系統": page_bias_analysis,
+        "景氣循環窗位預警": page_biz_cycle,
+        "大盤回檔規律統計": page_downward_bias,
+        "大盤上漲強度統計": page_upward_bias
     }
     
     # 如果是站長登入
     if st.session_state.get('user_role') == 'admin':
-        pages["⚙️ 管理員後台"] = page_admin_dashboard
+        pages["系統管理中心系統"] = page_admin_dashboard
         
     selection = st.sidebar.radio("Navigation", list(pages.keys()), label_visibility="collapsed")
     
