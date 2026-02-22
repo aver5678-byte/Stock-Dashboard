@@ -439,8 +439,8 @@ def page_bias_analysis():
             days_spurt = (t2 - t1).days
             days_correction = int(days_total - days_spurt)
             
-            # 利潤點位差 (P2 - P1)
-            point_diff = int(peak_val - r['觸發時指數'])
+            # 價差演算 (對齊卡片顯示的 22% 警戒位，方便用戶肉眼驗算)
+            point_diff = int(peak_val - line_22) if pd.notna(line_22) and pd.notna(peak_val) else 0
             
             # --- 新增：故事線與狀態判定邏輯 ---
             is_ongoing = pd.isna(r['回歸0%日期'])
