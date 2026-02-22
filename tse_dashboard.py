@@ -236,9 +236,15 @@ def page_bias_analysis():
 
     fig.add_trace(go.Candlestick(x=df.index,
                     open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'],
+                    customdata=df['Bias'],
                     name='加權指數',
                     increasing_line_color='#10B981', decreasing_line_color='#EF4444',
-                    hovertemplate='開: %{open:.2f} | 高: %{high:.2f} | 低: %{low:.2f} | 收: %{close:.2f}<extra></extra>'), row=1, col=1)
+                    hovertemplate='<b style="color:#F8FAFC;">時間: %{x|%Y/%m/%d}</b><br><br>' +
+                                  '開: %{open:,.2f}<br>' +
+                                  '高: %{high:,.2f}<br>' +
+                                  '低: %{low:,.2f}<br>' +
+                                  '收: %{close:,.2f}<br><br>' +
+                                  '<b style="color:#38BDF8;">👉 乖離率同步: %{customdata:.2f}%</b><extra></extra>'), row=1, col=1)
                     
     fig.add_trace(go.Scatter(x=df.index, y=df['SMA40'], 
                              line={'color': '#94A3B8', 'width': 2}, 
@@ -278,12 +284,20 @@ def page_bias_analysis():
                       hovermode="x unified",
                       hoverlabel=dict(bgcolor="#1E293B", font_size=16, font_family="JetBrains Mono", bordercolor="#475569"),
                       margin=dict(l=40, r=40, t=60, b=40),
-                      legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1))
+                      legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0))
                       
     fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', showspikes=True, spikemode="across", spikesnap="cursor", showline=False, spikedash="solid", spikethickness=1, spikecolor="#94A3B8")
     fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', showline=False)
     
-    st.plotly_chart(fig, use_container_width=True)
+    # 圖表設定 (工具列客製化與滾輪縮放)
+    chart_config = {
+        'scrollZoom': True,
+        'displaylogo': False,
+        'modeBarButtonsToRemove': ['lasso2d', 'select2d', 'autoScale2d', 'hoverClosestCartesian', 'hoverCompareCartesian', 'toggleSpikelines'],
+        'toImageButtonOptions': {'format': 'png', 'filename': 'TSE_40W_Bias_Radar'}
+    }
+    
+    st.plotly_chart(fig, use_container_width=True, config=chart_config)
 
 
     # --- 戰情樞紐：歷史回測決策建議 ---
