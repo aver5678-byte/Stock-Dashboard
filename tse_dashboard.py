@@ -199,48 +199,35 @@ def page_bias_analysis():
     # 執行回測以獲取所有標籤
     b_df = backtest(df)
     
-    # --- 頂部區域：數位儀表板 (Gauge) ---
+    # --- 頂部區域：作戰戰略抬頭顯示器 (HUD) ---
     st.markdown('<div style="margin-top:-20px;"></div>', unsafe_allow_html=True)
     
-    # 建立目前乖離率儀表板
-    fig_gauge = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = latest_bias,
-        domain = {'x': [0, 1], 'y': [0, 1]},
-        title = {'text': "目前市場壓力計 (40W Bias)", 'font': {'size': 20, 'color': '#6B7280', 'weight': 'bold'}},
-        gauge = {
-            'axis': {'range': [None, 35], 'tickwidth': 1, 'tickcolor': "#E5E7EB"},
-            'bar': {'color': "#EF4444" if latest_bias > 22 else "#FBBF24" if latest_bias > 15 else "#10B981"},
-            'bgcolor': "white",
-            'borderwidth': 2,
-            'bordercolor': "#F3F4F6",
-            'steps': [
-                {'range': [0, 15], 'color': '#F0FDF4'},
-                {'range': [15, 22], 'color': '#FFFBEB'},
-                {'range': [22, 35], 'color': '#FFF1F2'}
-            ],
-            'threshold': {
-                'line': {'color': "red", 'width': 4},
-                'thickness': 0.75,
-                'value': 22
-            }
-        },
-        number = {'font': {'size': 50, 'family': 'JetBrains Mono', 'color': '#111827'}}
-    ))
-    
-    fig_gauge.update_layout(height=350, margin=dict(l=30, r=30, t=50, b=0), paper_bgcolor='rgba(0,0,0,0)')
-    st.plotly_chart(fig_gauge, use_container_width=True)
-    
-    # 顯示目前指數數據 (中心對齊標籤) - 數位跳表風格
-    st.markdown(f'''
-        <div class="gauge-center-data" style="background:#F9FAFB; padding:15px; border-radius:15px; display:inline-block; margin: -60px auto 40px auto; border:1px solid #EDEDF0;">
-            <div style="font-family:'JetBrains Mono'; font-weight:800; font-size:22px; color:#111827;">
-                <span style="color:#6B7280; font-size:14px; font-weight:500;">TAIEX</span> {latest_close:,.2f} 
-                <span style="color:#E5E7EB; margin:0 15px;">|</span>
-                <span style="color:#6B7280; font-size:14px; font-weight:500;">SMA40</span> {latest_sma:,.2f}
+    # 判斷警告顏色
+    status_color = "#EF4444" if latest_bias >= 22 else "#FBBF24" if latest_bias >= 15 else "#10B981"
+    status_text = "🚨 極度危險 (乖離 ≥ 22%)" if latest_bias >= 22 else "⚠️ 警戒區域 (乖離 ≥ 15%)" if latest_bias >= 15 else "✅ 穩定區間"
+
+    hud_html = f"""
+    <div style="background:#0F172A; border:4px solid #334155; border-radius:12px; padding:30px; margin-bottom:40px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+        <div style="flex:1;">
+            <div style="font-size:20px; color:#94A3B8; font-weight:800; letter-spacing:2px; margin-bottom:10px;">🔴 目前即時乖離率 (40W Bias)</div>
+            <div style="display:flex; align-items:baseline; gap:15px;">
+                <div style="font-family:'JetBrains Mono'; font-size:64px; font-weight:950; color:{status_color}; line-height:1;">{latest_bias:.1f}%</div>
+                <div style="font-size:24px; font-weight:900; color:{status_color}; background:rgba(255,255,255,0.1); padding:5px 15px; border-radius:8px;">{status_text}</div>
             </div>
         </div>
-    ''', unsafe_allow_html=True)
+        <div style="flex:1; display:flex; justify-content:flex-end; gap:40px; border-left:2px solid #334155; padding-left:40px;">
+            <div>
+                <div style="font-size:18px; color:#94A3B8; font-weight:800; letter-spacing:1px; margin-bottom:10px;">台股加權指數 (TAIEX)</div>
+                <div style="font-family:'JetBrains Mono'; font-size:40px; font-weight:950; color:white;">{latest_close:,.2f}</div>
+            </div>
+            <div>
+                <div style="font-size:18px; color:#94A3B8; font-weight:800; letter-spacing:1px; margin-bottom:10px;">40週均線 (SMA40)</div>
+                <div style="font-family:'JetBrains Mono'; font-size:40px; font-weight:950; color:#38BDF8;">{latest_sma:,.2f}</div>
+            </div>
+        </div>
+    </div>
+    """
+    st.markdown(hud_html, unsafe_allow_html=True)
         
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
                         vertical_spacing=0.05, 
@@ -295,60 +282,44 @@ def page_bias_analysis():
     st.plotly_chart(fig, use_container_width=True)
 
 
-    # --- 底部區域：歷史決策儀表 (Gauge) ---
-    st.markdown('<h2 style="text-align:center; margin-top:80px;">📊 歷史回測決策建議</h2>', unsafe_allow_html=True)
-    
-    col_g1, col_g2 = st.columns([1, 1])
+    # --- 戰情樞紐：歷史回測決策建議 ---
+    st.markdown('<h2 style="text-align:left; font-size:36px; margin-top:80px; margin-bottom:15px;">📊 歷史回測決策庫</h2>', unsafe_allow_html=True)
     
     win_rate, total_cases = calc_win_rate(df, latest_bias)
+    win_rate_val = float(win_rate) if isinstance(win_rate, (int, float)) else 0
+    prob_color = "#EF4444" if win_rate_val > 50 else "#FBBF24" if win_rate_val > 30 else "#10B981"
     
-    with col_g1:
-        # 下跌勝率儀表
-        fig_prob = go.Figure(go.Indicator(
-            mode = "gauge+number",
-            value = float(win_rate) if isinstance(win_rate, (int, float)) else 0,
-            title = {'text': "未來一個月下跌機率", 'font': {'size': 18, 'color': '#6B7280'}},
-            gauge = {
-                'axis': {'range': [0, 100], 'tickcolor': "#E5E7EB"},
-                'bar': {'color': "#EF4444"},
-                'steps': [
-                    {'range': [0, 30], 'color': '#DCFCE7'},
-                    {'range': [30, 70], 'color': '#FEF3C7'},
-                    {'range': [70, 100], 'color': '#FEE2E2'}
-                ]
-            },
-            number = {'suffix': "%", 'font': {'family': 'JetBrains Mono', 'size': 42}}
-        ))
-        fig_prob.update_layout(height=300, margin=dict(l=20, r=20, t=40, b=20), paper_bgcolor='rgba(0,0,0,0)')
-        st.plotly_chart(fig_prob, use_container_width=True)
-        st.markdown(f'<p style="text-align:center; color:#9CA3AF; font-size:14px; margin-top:-30px;">基於史上相似 {total_cases} 次樣本</p>', unsafe_allow_html=True)
+    avg_a, avg_b = 0, 0
+    if not b_df.empty:
+        finished_df = b_df.dropna(subset=['回歸0%總跌幅(%)'])
+        if not finished_df.empty:
+            avg_stats = finished_df.groupby('類型').agg({'回歸0%總跌幅(%)': 'mean'}).to_dict()['回歸0%總跌幅(%)']
+            avg_a = avg_stats.get('類型 A (低基期反彈)', 0)
+            avg_b = avg_stats.get('類型 B (高位末升段)', 0)
 
-    with col_g2:
-        # 類型統計卡片 (Tech Corner Style)
-        if not b_df.empty:
-            finished_df = b_df.dropna(subset=['回歸0%總跌幅(%)'])
-            if not finished_df.empty:
-                avg_stats = finished_df.groupby('類型').agg({'回歸0%總跌幅(%)': 'mean'}).to_dict()['回歸0%總跌幅(%)']
-                avg_a = avg_stats.get('類型 A (低基期反彈)', 0)
-                avg_b = avg_stats.get('類型 B (高位末升段)', 0)
-            else:
-                avg_a, avg_b = 0, 0
-            
-            st.markdown(f'''
-                <div class="tech-card" style="height:250px; display:flex; flex-direction:column; justify-content:center; margin-top:20px;">
-                    <div class="summary-label" style="text-align:center; margin-bottom:20px;">歷史平均回歸幅度</div>
-                    <div style="display:flex; justify-content:space-around;">
-                        <div style="text-align:center;">
-                            <div style="color:#6B7280; font-size:12px;">類型 A (低基期)</div>
-                            <div style="font-size:28px; font-weight:900; color:#10B981;">{avg_a:+.1f}%</div>
-                        </div>
-                        <div style="text-align:center;">
-                            <div style="color:#6B7280; font-size:12px;">類型 B (末升段)</div>
-                            <div style="font-size:28px; font-weight:900; color:#EF4444;">{avg_b:+.1f}%</div>
-                        </div>
-                    </div>
+    decision_html = f"""
+    <div style="background:#1E293B; border:4px solid #475569; border-radius:12px; padding:40px; display:flex; gap:40px; margin-bottom:40px; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+        <div style="flex:1; background:#0F172A; padding:30px; border-radius:8px; border-left:6px solid {prob_color}; text-align:center;">
+            <div style="font-size:24px; color:#94A3B8; font-weight:800; margin-bottom:15px; letter-spacing:1px;">未來一個月下跌機率</div>
+            <div style="font-family:'JetBrains Mono'; font-size:72px; font-weight:950; color:{prob_color}; line-height:1;">{win_rate_val:.1f}%</div>
+            <div style="font-size:16px; color:#64748B; font-weight:700; margin-top:15px;">基於史上相似 {total_cases} 次樣本</div>
+        </div>
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+            <div style="font-size:24px; color:#E2E8F0; font-weight:800; margin-bottom:25px; border-bottom:2px solid #334155; padding-bottom:15px;">歷史平均回歸幅度</div>
+            <div style="display:flex; justify-content:space-between;">
+                <div style="flex:1; text-align:center; border-right:2px solid #334155;">
+                    <div style="color:#94A3B8; font-size:18px; font-weight:800; margin-bottom:10px;">類型 A (低基期)</div>
+                    <div style="font-family:'JetBrains Mono'; font-size:42px; font-weight:950; color:#10B981;">{avg_a:+.1f}%</div>
                 </div>
-            ''', unsafe_allow_html=True)
+                <div style="flex:1; text-align:center;">
+                    <div style="color:#94A3B8; font-size:18px; font-weight:800; margin-bottom:10px;">類型 B (末升段)</div>
+                    <div style="font-family:'JetBrains Mono'; font-size:42px; font-weight:950; color:#EF4444;">{avg_b:+.1f}%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    """
+    st.markdown(decision_html, unsafe_allow_html=True)
 
     # --- 數位流水日誌 (Timeline Logs) ---
     st.markdown('<h2 style="text-align:left; font-size:36px; margin-top:80px; margin-bottom:15px;">📜 歷史極端乖離：全紀錄電子日誌</h2>', unsafe_allow_html=True)
