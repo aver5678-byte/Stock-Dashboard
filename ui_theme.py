@@ -52,30 +52,33 @@ div[data-testid="stSidebarUserContent"] .stRadio > div {
 }
 
 div[data-testid="stSidebarUserContent"] .stRadio label {
-    background-color: rgba(255,255,255,0.02) !important;
+    background-color: rgba(255,255,255,0.05) !important;
     border-radius: 12px !important;
-    padding: 16px 20px !important;
+    padding: 18px 20px !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    border: 1px solid transparent !important;
-    color: #F8FAFC !important;
-    font-weight: 800 !important;
-    font-size: 18px !important;
-    margin-bottom: 8px !important;
+    border: 1px solid rgba(255,255,255,0.1) !important;
+    color: #FFFFFF !important;
+    font-weight: 950 !important;
+    font-size: 19px !important;
+    margin-bottom: 12px !important;
+    opacity: 1 !important; /* 強制不透明度為 1，解決看不清的問題 */
 }
 
 div[data-testid="stSidebarUserContent"] .stRadio label:hover {
-    background-color: rgba(56, 189, 248, 0.08) !important;
+    background-color: rgba(56, 189, 248, 0.15) !important;
     color: #FFFFFF !important;
-    border-color: rgba(56, 189, 248, 0.3) !important;
-    transform: translateX(5px) !important;
+    border-color: rgba(56, 189, 248, 0.5) !important;
+    transform: translateX(8px) !important;
+    text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
 }
 
 div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
-    background-color: rgba(56, 189, 248, 0.15) !important;
+    background-color: rgba(56, 189, 248, 0.2) !important;
     color: #FFFFFF !important;
     font-weight: 950 !important;
-    box-shadow: inset 6px 0 0 #38BDF8 !important;
-    border: 1px solid rgba(56, 189, 248, 0.4) !important;
+    box-shadow: inset 8px 0 0 #38BDF8, 0 0 20px rgba(56, 189, 248, 0.2) !important;
+    border: 1px solid #38BDF8 !important;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
 }
 
 /* 2. 主標題文字 (ChatGPT 大標風格) */
