@@ -351,8 +351,20 @@ def page_bias_analysis():
             ''', unsafe_allow_html=True)
 
     # --- 數位流水日誌 (Timeline Logs) ---
-    st.markdown('<h2 style="text-align:center; margin-top:80px;">📜 歷史極端乖離：全紀錄電子日誌</h2>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align:center; color:#9CA3AF; margin-bottom:40px;">透過能量條直觀判定：歷史爆發力 vs 修復壓力 (Scale: 0-40%)</p>', unsafe_allow_html=True)
+    st.markdown('<h2 style="text-align:left; font-size:36px; margin-top:80px; margin-bottom:15px;">📜 歷史極端乖離：全紀錄電子日誌</h2>', unsafe_allow_html=True)
+    
+    # 新增：情報摘要 (Onboarding) 解說區塊
+    onboarding_html = """
+    <div style="background:#F8FAFC; border-left:6px solid #3B82F6; padding:25px; margin-bottom:50px; border-radius:8px; box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);">
+        <div style="font-size:20px; font-weight:800; color:#1E293B; margin-bottom:15px;">📋 數據解讀指南：當大盤乖離率突破 22% 警戒線時...</div>
+        <ul style="font-size:16px; color:#475569; line-height:1.7; margin:0; padding-left:20px;">
+            <li><strong style="color:#B91C1C;">🔥 噴出階段：</strong> 歷史經驗顯示，指數並不會馬上崩跌，通常還會伴隨最後一段「瘋狂噴出」的誘多行情（見下方中層紅色能量條）。</li>
+            <li><strong style="color:#047857;">🛡️ 修復階段：</strong> 市場終將回歸理性。過去的每一次極端乖離，最終都會以「指數大幅回調」，直到乖離率<strong>「回歸 0% (觸碰 40 週均線)」</strong>才算修復完畢（見中層綠色能量條與階段三點位）。</li>
+            <li><strong style="color:#0369A1;">⏳ 時間考驗：</strong> 這個降溫過程是漫長的，藉由對照過去的戰報，更能推測本次風險可能帶來的回檔深度與等待期。</li>
+        </ul>
+    </div>
+    """
+    st.markdown(onboarding_html, unsafe_allow_html=True)
 
     if not b_df.empty:
         # 建立流水日誌介面
@@ -386,11 +398,11 @@ def page_bias_analysis():
                 status_badge = '<span style="color:#10B981; background:#F0FDF4; padding:6px 16px; border-radius:8px; font-size:20px; font-weight:900; border:2px solid #A7F3D0;">✅ 歷史結案</span>'
                 days_label = "完整修復耗時"
                 
-            # 日期轉白話文輔助函數 (例如 '2026-01-05' -> '01/05')
+            # 日期轉白話文輔助函數 (例如 '2026-01-05' -> '2026/01/05')
             def format_short_date(d_str):
                 if pd.isna(d_str) or not d_str or d_str == "N/A" or d_str == "None": 
                     return ""
-                return f"(發生於 {str(d_str)[5:10].replace('-', '/')})"
+                return f"(發生於 {str(d_str)[:10].replace('-', '/')})"
                 
             trigger_date_str = format_short_date(r.get('觸發日期'))
             peak_date_str = format_short_date(r.get('波段最高日期'))
@@ -446,17 +458,17 @@ def page_bias_analysis():
 
   <!-- 底部區：故事線底座 -->
   <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0; background:#1E293B; border-top:4px solid #475569;">
-    <div style="background:#450A0A; padding:35px 10px; text-align:center; border-right:4px solid #334155;">
+    <div style="background:#450A0A; padding:35px 30px; text-align:left; border-right:4px solid #334155;">
       <div style="font-size:26px; color:#F87171; font-weight:900; margin-bottom:5px; white-space:nowrap; letter-spacing:1px;">[階段一] 觸發22%警戒</div>
       <div style="font-size:18px; color:#FCA5A5; font-weight:800; margin-bottom:15px; white-space:nowrap;">{trigger_date_str}</div>
       <div style="font-family:'JetBrains Mono'; font-size:48px; font-weight:950; color:white;">{line_22_str}</div>
     </div>
-    <div style="background:#450A0A; padding:35px 10px; text-align:center; border-right:4px solid #334155;">
+    <div style="background:#450A0A; padding:35px 30px; text-align:left; border-right:4px solid #334155;">
       <div style="font-size:26px; color:#FCA5A5; font-weight:900; margin-bottom:5px; white-space:nowrap; letter-spacing:1px;">[階段二] 波段見高點</div>
       <div style="font-size:18px; color:#FECACA; font-weight:800; margin-bottom:15px; white-space:nowrap;">{peak_date_str}</div>
       <div style="font-family:'JetBrains Mono'; font-size:48px; font-weight:950; color:#FCA5A5;">{peak_val_str}</div>
     </div>
-    <div style="background:#064E3B; padding:35px 10px; text-align:center;">
+    <div style="background:#064E3B; padding:35px 30px; text-align:left;">
       <div style="font-size:26px; color:#6EE7B7; font-weight:900; margin-bottom:5px; white-space:nowrap; letter-spacing:1px;">[階段三] 乖離回穩目標</div>
       <div style="font-size:18px; color:#A7F3D0; font-weight:800; margin-bottom:15px; white-space:nowrap;">{recover_date_str}</div>
       <div style="font-family:'JetBrains Mono'; font-size:48px; font-weight:950; color:#A7F3D0;">{recover_val_str}</div>
