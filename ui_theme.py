@@ -15,13 +15,12 @@ def apply_global_theme():
     color: #F1F5F9 !important;
 }
 
-/* 側邊欄 (Sidebar) 核心設計：金融 SaaS 玻璃質感 */
+/* 側邊欄 (Sidebar) 核心設計：獨立控制面板面板層 */
 section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(2, 6, 23, 1) 100%) !important;
-    backdrop-filter: blur(25px) !important;
+    background: #0F172A !important; 
     width: 380px !important;
-    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 15px 0 50px rgba(0,0,0,0.8) !important;
+    border-right: 1px solid #1E293B !important;
+    padding-top: 20px !important;
 }
 
 /* 徹底隱藏 Radio 圓點與原初樣式 */
@@ -54,41 +53,52 @@ div[data-testid="stSidebarUserContent"] .stRadio div[role="radiogroup"] > label 
     margin-left: 15px;
 }
 
-/* 導覽按鈕 (Radio 模擬)：模組化卡片化 */
+/* 導覽按鈕 (Radio 模擬)：模組化卡片系統 */
 div[data-testid="stSidebarUserContent"] .stRadio > div {
-    gap: 16px !important;
-    padding: 0 15px !important;
+    gap: 15px !important;
+    padding: 20px !important;
 }
 
 div[data-testid="stSidebarUserContent"] .stRadio label {
-    background: rgba(255, 255, 255, 0.03) !important;
+    background: #1E293B !important;
+    border: 1px solid #334155 !important;
     border-radius: 16px !important;
-    padding: 22px 25px !important;
-    transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1) !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
-    color: #F8FAFC !important;
-    font-weight: 800 !important;
-    font-size: 20px !important;
-    margin-bottom: 20px !important;
+    padding: 20px 25px !important;
+    margin-bottom: 5px !important;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    color: #94A3B8 !important;
+    font-weight: 700 !important;
+    font-size: 19px !important;
     opacity: 1 !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
 }
 
 div[data-testid="stSidebarUserContent"] .stRadio label:hover {
-    background: rgba(56, 189, 248, 0.1) !important;
-    color: #FFFFFF !important;
-    border-color: rgba(56, 189, 248, 0.4) !important;
-    transform: translateY(-3px) scale(1.02) !important;
-    box-shadow: 0 10px 30px rgba(56, 189, 248, 0.2) !important;
+    background: #2D3748 !important;
+    color: #38BDF8 !important;
+    border-color: #38BDF8 !important;
+    transform: translateY(-5px) !important;
+    box-shadow: 0 10px 25px rgba(56, 189, 248, 0.2) !important;
 }
 
 div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
-    background: linear-gradient(90deg, rgba(56, 189, 248, 0.15), rgba(56, 189, 248, 0.05)) !important;
+    background: #2D3748 !important;
     color: #FFFFFF !important;
-    font-weight: 950 !important;
-    box-shadow: inset 8px 0 0 #38BDF8, 0 15px 40px rgba(56, 189, 248, 0.3) !important;
+    font-weight: 900 !important;
     border: 1px solid #38BDF8 !important;
-    text-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.4), inset 5px 0 0 #38BDF8 !important;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+/* 添加右側玻璃邊緣光 */
+section[data-testid="stSidebar"]::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, rgba(56, 189, 248, 0.5), transparent);
 }
 
 /* 2. 主標題文字 (ChatGPT 大標風格) */
