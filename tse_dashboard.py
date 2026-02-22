@@ -717,7 +717,7 @@ def page_downward_bias():
         "台灣加權指數 (^TWII)": "^TWII"
     }
 
-    @st.cache_data(ttl=3456, show_spinner=False)
+    @st.cache_data(ttl=1, show_spinner=False)
     def get_analysis(ticker_symbol):
         df = fetch_data(ticker_symbol, start_date="2000-01-01")
         if df.empty:
@@ -846,7 +846,7 @@ def page_downward_bias():
                 tag_color = "#10B981"
                 card_border = "#064E3B"
                 tag_bg = "rgba(16, 185, 129, 0.1)"
-                period_str = f"{peak_date} ➔ {rec_date}"
+                period_str = f"{peak_date} ➔ {bottom_date}"
                 rec_days_str = f"總耗時 {days_to_rec} 天" if str(days_to_rec).isdigit() or isinstance(days_to_rec, (int, float)) else f"耗時 {days_to_rec} 天"
                 state_3_val = f"{float(r.get('解套點位', peak_price)):,.0f}"
                 state_3_sub = r.get('解套形式', '完全收復前高')
@@ -855,7 +855,7 @@ def page_downward_bias():
                 tag_color = "#EF4444"
                 card_border = "#450A0A"
                 tag_bg = "rgba(239, 68, 68, 0.1)"
-                period_str = f"{peak_date} ➔ 至今未解套"
+                period_str = f"{peak_date} ➔ {bottom_date}"
                 rec_days_str = f"已耗時 {days_to_rec} 天"
                 state_3_val = "等待收復"
                 state_3_sub = "套牢中"
