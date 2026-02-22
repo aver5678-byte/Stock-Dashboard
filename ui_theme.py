@@ -59,13 +59,13 @@ def apply_global_theme():
             opacity: 0.3;
         }
 
-        /* 3. 導覽項目：模組化卡片系統 (同步右側風格) */
-        div[data-testid="stSidebarUserContent"] .stRadio > div {
+        /* 3. 導覽項目：強制撐滿側邊欄容器 */
+        div[data-testid="stSidebarUserContent"] .stRadio div[role="radiogroup"] {
             gap: 15px !important;
-            padding: 15px !important;
             width: 100% !important;
-            display: flex;
-            flex-direction: column;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
         }
 
         div[data-testid="stSidebarUserContent"] .stRadio label {
@@ -92,7 +92,7 @@ def apply_global_theme():
         /* 暴力強制所有狀態文字純白高亮與左對齊 */
         div[data-testid="stSidebarUserContent"] .stRadio label p,
         div[data-testid="stSidebarUserContent"] .stRadio label span,
-        div[data-testid="stSidebarUserContent"] .stRadio label div {
+        div[data-testid="stSidebarUserContent"] .stRadio label div[data-testid="stMarkdownContainer"] {
             color: #FFFFFF !important;
             opacity: 1 !important;
             font-size: 19px !important;
@@ -101,6 +101,7 @@ def apply_global_theme():
             text-shadow: 0 2px 4px rgba(0,0,0,0.5) !important;
             width: 100% !important;
             text-align: left !important;
+            display: block !important;
         }
 
         /* Hover 時微浮起與發光 */
