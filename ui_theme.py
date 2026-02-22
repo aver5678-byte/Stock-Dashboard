@@ -60,7 +60,7 @@ def apply_global_theme():
         }
 
         /* 3. 導覽項目：強制撐滿側邊欄容器 */
-        div[data-testid="stSidebarUserContent"] .stRadio div[role="radiogroup"] {
+        div[data-testid="stSidebarUserContent"] div[data-testid="stRadio"] > div[role="radiogroup"] {
             gap: 15px !important;
             width: 100% !important;
             display: flex !important;
@@ -68,8 +68,9 @@ def apply_global_theme():
             align-items: stretch !important;
         }
 
-        div[data-testid="stSidebarUserContent"] .stRadio label {
+        div[data-testid="stSidebarUserContent"] div[data-testid="stRadio"] > div[role="radiogroup"] > label {
             width: 100% !important;
+            max-width: 100% !important;
             box-sizing: border-box !important;
             background: rgba(30, 41, 59, 0.4) !important;
             border: 1px solid rgba(56, 189, 248, 0.2) !important;
@@ -90,9 +91,9 @@ def apply_global_theme():
         }
 
         /* 暴力強制所有狀態文字純白高亮與左對齊 */
-        div[data-testid="stSidebarUserContent"] .stRadio label p,
-        div[data-testid="stSidebarUserContent"] .stRadio label span,
-        div[data-testid="stSidebarUserContent"] .stRadio label div[data-testid="stMarkdownContainer"] {
+        div[data-testid="stSidebarUserContent"] div[data-testid="stRadio"] label p,
+        div[data-testid="stSidebarUserContent"] div[data-testid="stRadio"] label span,
+        div[data-testid="stSidebarUserContent"] div[data-testid="stRadio"] label div[data-testid="stMarkdownContainer"] {
             color: #FFFFFF !important;
             opacity: 1 !important;
             font-size: 19px !important;
@@ -102,28 +103,31 @@ def apply_global_theme():
             width: 100% !important;
             text-align: left !important;
             display: block !important;
+            margin: 0 !important;
         }
 
         /* Hover 時微浮起與發光 */
-        div[data-testid="stSidebarUserContent"] .stRadio label:hover {
+        div[data-testid="stSidebarUserContent"] div[data-testid="stRadio"] label:hover {
             transform: translateY(-5px) scale(1.02) !important;
             background: #1E293B !important;
             border-color: #38BDF8 !important;
             box-shadow: 0 10px 30px rgba(56, 189, 248, 0.2) !important;
         }
-        div[data-testid="stSidebarUserContent"] .stRadio label:hover p {
+        div[data-testid="stSidebarUserContent"] div[data-testid="stRadio"] label:hover p {
             color: #38BDF8 !important;
         }
 
         /* Active 選中項：霓虹指示燈效果 */
-        div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] {
+        div[data-testid="stSidebarUserContent"] div[data-testid="stRadio"] label[data-checked="true"],
+        div[data-testid="stSidebarUserContent"] div[data-testid="stRadio"] label:has(input:checked) {
             background: linear-gradient(90deg, rgba(56, 189, 248, 0.3) 0%, rgba(56, 189, 248, 0.05) 100%) !important;
             border: 1px solid #38BDF8 !important;
             border-left: 8px solid #38BDF8 !important;
             box-shadow: 0 0 30px rgba(56, 189, 248, 0.3) !important;
             transform: scale(1.02) !important;
         }
-        div[data-testid="stSidebarUserContent"] .stRadio label[data-selected="true"] p {
+        div[data-testid="stSidebarUserContent"] div[data-testid="stRadio"] label[data-checked="true"] p,
+        div[data-testid="stSidebarUserContent"] div[data-testid="stRadio"] label:has(input:checked) p {
             color: #FFFFFF !important;
             font-weight: 950 !important;
             text-shadow: 0 0 15px rgba(255, 255, 255, 0.5) !important;
