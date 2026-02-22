@@ -290,10 +290,14 @@ def page_bias_analysis():
     fig.update_xaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', 
                      showspikes=True, spikemode="across", spikesnap="cursor", 
                      showline=False, spikedash="solid", spikethickness=1, spikecolor="#38BDF8",
-                     range=[df.index[-100], df.index[-1] + pd.Timedelta(days=14)]) # 預設看最近100週，多留2週空白
+                     # 初始顯示範圍
+                     range=[df.index[-100], df.index[-1] + pd.Timedelta(days=14)],
+                     # 物理煞車：禁止縮小到超過數據範圍
+                     minallowed=df.index[0],
+                     maxallowed=df.index[-1] + pd.Timedelta(days=30))
                      
     fig.update_yaxes(showgrid=True, gridwidth=1, gridcolor='#1E293B', showline=False,
-                     fixedrange=False) # 允許 Y 軸隨縮放調整固定比例
+                     autorange=True, fixedrange=True) # 禁止滾輪縮放 Y 軸，解決扁平化問題，讓它自動撐開高度
     
     # 圖表設定 (仿專業操盤軟體配置)
     chart_config = {
