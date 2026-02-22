@@ -31,11 +31,12 @@ def page_biz_cycle():
 
     current_score, months_data, mom_delta = load_ndc_data()
     
-    # 時間邏輯
+    # 時間邏輯：改採實戰起點 (2025/11/03) 計算耗竭進度
     now = datetime.now()
-    research_start = datetime(2025, 9, 1)
-    months_ongoing = (now.year - research_start.year) * 12 + (now.month - research_start.month)
-    if months_ongoing < 1: months_ongoing = 1
+    research_start = datetime(2025, 11, 3) 
+    diff = (now - research_start).days
+    months_ongoing = diff / 30.44
+    if months_ongoing < 0.1: months_ongoing = 0.1
 
     # --- 2. 視覺變數定義 ---
     status_pill_color = "#EF4444" if current_score >= 38 else "#FBBF24" if current_score >= 32 else "#10B981"
@@ -70,49 +71,49 @@ def page_biz_cycle():
     
     history_data = [
         {
-            "period": "2025.09 - 進行中", "months": float(months_ongoing), "type": "登頂倒數中", 
+            "period": "2025/11/03 - 進行中", "months": float(months_ongoing), "type": "登頂倒數中", 
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.15)", "status_icon": "🚨",
             "start_date": "2025/11/03 (09月燈號發布後首日)", "start_idx": "28,334",
             "peak_date": "2026/02/11", "peak_idx": "33,606", "gain_pct": "18.6%"
         },
         {
-            "period": "2024.04-2024.07 登頂", "months": 3.0, "type": "脈衝型 (見高 24,416)", 
+            "period": "2024/06/03 - 07/11 登頂", "months": 1.3, "type": "極速脈衝型", 
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
             "start_date": "2024/06/03 (04月燈號發布後首日)", "start_idx": "21,537",
             "peak_date": "2024/07/11", "peak_idx": "24,416", "gain_pct": "13.4%"
         },
         {
-            "period": "2020.12-2022.01 登頂", "months": 13.0, "type": "長線型 (見高 18,619)", 
+            "period": "2021/02/01 - 2022/01/05 登頂", "months": 11.1, "type": "罕見長線型", 
             "color": "#10B981", "bg": "rgba(16, 185, 129, 0.1)", "status_icon": "✅",
             "start_date": "2021/02/01 (12月燈號發布後首日)", "start_idx": "15,410",
             "peak_date": "2022/01/05", "peak_idx": "18,619", "gain_pct": "20.8%"
         },
         {
-            "period": "2009.11-2011.01 登頂", "months": 14.0, "type": "長線型 (見高 9,220)", 
+            "period": "2010/01/04 - 2011/01/28 登頂", "months": 12.8, "type": "罕見長線型", 
             "color": "#10B981", "bg": "rgba(16, 185, 129, 0.1)", "status_icon": "✅",
             "start_date": "2010/01/04 (11月燈號發布後首日)", "start_idx": "8,208",
             "peak_date": "2011/01/28", "peak_idx": "9,220", "gain_pct": "12.3%"
         },
         {
-            "period": "2007.09-2007.10 登頂", "months": 1.0, "type": "快閃型 (見高 9,859)", 
-            "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
+            "period": "2007/11/01 - 10/30 溢價歸零", "months": 0.1, "type": "發布即見頂 (快閃型)", 
+            "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "🆘",
             "start_date": "2007/11/01 (09月燈號發布後首日)", "start_idx": "9,598",
             "peak_date": "2007/10/30", "peak_idx": "9,859", "gain_pct": "2.7%"
         },
         {
-            "period": "2003.12-2004.03 登頂", "months": 3.0, "type": "脈衝型 (見高 7,135)", 
+            "period": "2004/02/02 - 03/05 登頂", "months": 1.1, "type": "極速脈衝型", 
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
             "start_date": "2004/02/02 (12月燈號發布後首日)", "start_idx": "6,320",
             "peak_date": "2004/03/05", "peak_idx": "7,135", "gain_pct": "12.9%"
         },
         {
-            "period": "2000.01-2000.02 登頂", "months": 1.0, "type": "快閃型 (見高 10,393)", 
-            "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
+            "period": "2000/03/01 - 02/18 溢價歸零", "months": 0.1, "type": "發布即見頂 (快閃型)", 
+            "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "🆘",
             "start_date": "2000/03/01 (01月燈號發布後首日)", "start_idx": "9,689",
             "peak_date": "2000/02/18", "peak_idx": "10,393", "gain_pct": "7.3%"
         },
         {
-            "period": "1994.06-1994.10 登頂", "months": 4.0, "type": "脈衝型 (見高 7,228)", 
+            "period": "1994/08/01 - 10/03 登頂", "months": 2.1, "type": "極速脈衝型", 
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
             "start_date": "1994/08/01 (06月燈號發布後首日)", "start_idx": "6,744",
             "peak_date": "1994/10/03", "peak_idx": "7,228", "gain_pct": "7.2%"
