@@ -712,8 +712,6 @@ def page_upward_bias():
 
 def page_downward_bias():
     log_visit("股市回檔統計表")
-    st.title("股市回檔統計表 (7% DD Entry)")
-    st.write("即時監測與歷史回測：針對標普 500 (SPX)、那斯達克 (IXIC) 及台股加權指數 (TWII)，分析自歷史高點跌破 7% 後的剩餘跌幅與反彈機率。")
     
     tickers = {
         "S&P 500 (^GSPC)": "^GSPC",
@@ -767,7 +765,7 @@ def page_downward_bias():
     status_pill_color = "#EF4444" if current_dd >= 7.0 else "#10B981"
     status_pill_text = "DANGER: HIGH RISK" if current_dd >= 7.0 else "SAFE: CRUISING"
     
-    hero_header_html = f"""<div style="background:#0F172A; border:4px solid #475569; border-radius:12px; padding:35px; margin-bottom:30px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><div style="font-family:'JetBrains Mono'; font-size:12px; color:#64748B; letter-spacing:2px; font-weight:800;">SYSTEM LIVE // 7PCT_DRAWDOWN_ENGINE_v4.2</div><div style="background:{status_pill_color}; color:white; padding:4px 12px; border-radius:6px; font-family:'JetBrains Mono'; font-size:12px; font-weight:900; box-shadow:0 0 15px {status_pill_color};">● {status_pill_text}</div></div><h1 style="color:white; font-size:48px; font-weight:950; margin:0; letter-spacing:-1.5px; line-height:1.2; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">📉 大盤規律：7% 回檔監控樞紐</h1><div style="margin-top:20px; color:#94A3B8; font-size:17px; font-weight:600; line-height:1.8; max-width:1100px; border-left:4px solid #334155; padding-left:20px;">監控 {symbol}：精準定位歷史級跌幅。當大盤自前高跌破 7% 時，往往是市場非理性拋售的起點，也是長線勝率極高的戰略進場區。</div></div>"""
+    hero_header_html = f"""<div style="background:#0F172A; border:4px solid #475569; border-radius:12px; padding:35px; margin-bottom:30px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><div style="font-family:'JetBrains Mono'; font-size:12px; color:#64748B; letter-spacing:2px; font-weight:800;">SYSTEM LIVE // 7PCT_DRAWDOWN_ENGINE_v4.2</div><div style="background:{status_pill_color}; color:white; padding:4px 12px; border-radius:6px; font-family:'JetBrains Mono'; font-size:12px; font-weight:900; box-shadow:0 0 15px {status_pill_color};">● {status_pill_text}</div></div><h1 style="color:white; font-size:48px; font-weight:950; margin:0; letter-spacing:-1.5px; line-height:1.2; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">📉 大盤規律：7% 回檔監控樞紐</h1><div style="margin-top:20px; color:#94A3B8; font-size:17px; font-weight:600; line-height:1.8; max-width:1100px; border-left:4px solid #334155; padding-left:20px;"><b>即時監測與歷史回測</b>：針對標普 500 (SPX)、那斯達克 (IXIC) 及台股加權指數 (TWII)，分析自歷史高點跌破 7% 後的剩餘跌幅與反彈機率。<br><br>監控 {symbol}：精準定位歷史級跌幅。當大盤自前高跌破 7% 時，往往是市場非理性拋售的起點，也是長線勝率極高的戰略進場區。</div></div>"""
     st.markdown(hero_header_html, unsafe_allow_html=True)
 
     # --- 2. 戰術解說：Onboarding Guide ---

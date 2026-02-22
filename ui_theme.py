@@ -216,5 +216,43 @@ def apply_global_theme():
             color: #020617 !important;
             box-shadow: 0 0 20px rgba(56, 189, 248, 0.4) !important;
         }
+
+        /* ---------------------------------------------------
+           下拉選單 (Selectbox) 暗黑玻璃化重塑
+           --------------------------------------------------- */
+        
+        /* 1. 標題文字 (Label) 亮度拯救 */
+        div[data-testid="stSelectbox"] label p {
+            color: #FFFFFF !important;
+            font-weight: 800 !important;
+            font-size: 15px !important;
+            letter-spacing: 1px !important;
+        }
+
+        /* 2. 選單本體 (Dropdown box) 玻璃化與外框 */
+        div[data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+            background-color: rgba(15, 23, 42, 0.9) !important;
+            border: 2px solid #334155 !important;
+            border-radius: 8px !important;
+            color: #F1F5F9 !important;
+            transition: all 0.3s ease;
+        }
+
+        /* 3. 選單互動態 (Hover / Focus) 霓虹發光 */
+        div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:hover,
+        div[data-testid="stSelectbox"] div[data-baseweb="select"] > div:focus-within {
+            border-color: #38BDF8 !important;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.4) !important;
+        }
+
+        /* 4. 選單內文字與下拉箭頭 */
+        div[data-testid="stSelectbox"] div[data-baseweb="select"] span {
+            color: #F1F5F9 !important;
+            font-weight: 700 !important;
+        }
+        svg[data-baseweb="icon"] {
+            color: #38BDF8 !important;
+        }
+        
         </style>
     """, unsafe_allow_html=True)
