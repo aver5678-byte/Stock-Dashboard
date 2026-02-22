@@ -963,23 +963,15 @@ def main():
     # 1. 頂部 Logo (GPT 風格)
     st.sidebar.markdown('<h1 style="border:none; margin-bottom:0;">📊 股市盤後系統</h1>', unsafe_allow_html=True)
     
-    # 2. 功能導航分組
-    st.sidebar.markdown('<p class="sidebar-section-header">分析核心</p>', unsafe_allow_html=True)
-    
     pages = {
         "📉 40週乖離率分析": page_bias_analysis,
-        "🌡️ 景氣：獲利窗耗竭度": page_biz_cycle
-    }
-    
-    st.sidebar.markdown('<p class="sidebar-section-header">策略回測</p>', unsafe_allow_html=True)
-    pages.update({
+        "🌡️ 景氣：獲利窗耗竭度": page_biz_cycle,
         "🩸 股市回檔統計": page_downward_bias,
         "📈 股市上漲統計": page_upward_bias
-    })
+    }
     
-    # 如果是站長登入，隱藏分組
+    # 如果是站長登入
     if st.session_state.get('user_role') == 'admin':
-        st.sidebar.markdown('<p class="sidebar-section-header">系統管理</p>', unsafe_allow_html=True)
         pages["⚙️ 管理員後台"] = page_admin_dashboard
         
     selection = st.sidebar.radio("Navigation", list(pages.keys()), label_visibility="collapsed")
