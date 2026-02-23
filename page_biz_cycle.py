@@ -53,24 +53,16 @@ def page_biz_cycle():
     # 預警線計算：對標實戰平均 4.1 個月
     progress_val = int(min(months_ongoing / 4.1 * 100, 100))
 
-    # --- 3. 頂部區域：Hero Header (地端修正版 - 解決 Markdown 縮排導致的代碼方塊問題) ---
     hero_header_html = f"""<div style="background:#0F172A; border:4px solid #475569; border-radius:12px; padding:35px; margin-bottom:30px; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-<div style="font-family:'Inter', 'Microsoft JhengHei', sans-serif; font-size:13px; color:#64748B; letter-spacing:1px; font-weight:800;">🛰️ 系統即時偵測中 // 景氣週期感測模組 v6.5</div>
+<div style="font-family:'Inter', 'Microsoft JhengHei', sans-serif; font-size:13px; color:#64748B; letter-spacing:1px; font-weight:800;">系統即時偵測中 // 景氣燈號量化</div>
 <div style="background:{status_pill_color}; color:white; padding:6px 16px; border-radius:8px; font-family:'Microsoft JhengHei', sans-serif; font-size:14px; font-weight:900; box-shadow:0 0 15px {status_pill_color}; border:1px solid rgba(255,255,255,0.3);">
 {status_pill_text_zh}
 </div>
 </div>
-<h1 style="color:white; font-size:48px; font-weight:950; margin:0; letter-spacing:-1.5px; line-height:1.2; text-shadow:0 0 30px rgba(239, 68, 68, 0.4);">🚨 景氣紅燈預警：市場過熱偵測儀</h1>
-<div style="margin-top:25px; margin-bottom:25px; color:#94A3B8; font-size:18px; font-weight:600; line-height:2; max-width:1100px; border-left:4px solid #EF4444; padding-left:30px; margin-left:5px;">
-景氣轉強是好事，但一旦進入<b>「黃紅燈」</b>區間，就代表市場已經開始「發燒」。<br>
-歷史告訴我們，過熱雖然會持續一陣子。但背後隱藏的是極高的下修風險。
-</div>
-<div style="background:rgba(239, 68, 68, 0.08); border:1px solid rgba(239, 68, 68, 0.3); border-radius:10px; padding:20px 25px; margin-top:20px;">
-<span style="color:white; font-size:17px; font-weight:800;">● 核心準則</span>：
-<span style="color:#CBD5E1; font-size:16px; line-height:1.6;">
-我們不賭最後一個銅板。偵測過熱指標，一旦出現，請立即進入 <b style="color:white; background:#EF4444; padding:2px 8px; border-radius:4px;">高度警戒模式</b>。守住戰果，遠比盲目追高重要。
-</span>
+<h1 style="color:white; font-size:48px; font-weight:950; margin:0; letter-spacing:-1.5px; line-height:1.2; text-shadow:0 0 30px rgba(251, 191, 36, 0.4);">💼 景氣信號：登頂實戰窗口觀測儀</h1>
+<div style="margin-top:25px; margin-bottom:25px; color:#94A3B8; font-size:17px; font-weight:600; line-height:1.8; max-width:1100px; border-left:4px solid {status_pill_color}; padding-left:30px; margin-left:5px;">
+<b>獨立戰略校準模組</b>：專門量化「景氣過熱」訊號公告後，大盤真實的<b>剩餘獲利天數</b>。由於官方數據存在 2 個月時差，我們自動執行時空校正，並同步比對過去三十年每一場「高溫期」從亮燈到指數見頂的<b>真實演進路徑</b>。透過這項數據，我們能量化市場在進入狂熱區域後的「生存窗口」，協助您在安全出口封死之前，精準判斷目前波段的<b>撤退剩餘價值</b>。
 </div>
 </div>"""
     st.markdown(hero_header_html, unsafe_allow_html=True)
