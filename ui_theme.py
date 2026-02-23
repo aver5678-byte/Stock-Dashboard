@@ -268,75 +268,53 @@ def apply_global_theme():
             border-radius: 8px !important;
             color: #38BDF8 !important;
         }
-        /* 8. 右上角會員中心精緻化 (Glassmorphism) - 強制浮動版 */
-        div[data-testid="stAppViewContainer"] > section:nth-child(2) > div:nth-child(1) {
-            position: relative;
-        }
-        
-        .top-nav-user-container {
+        /* 8. 右上角會員中心精緻化 (Glassmorphism) - 最終功能版 */
+        .top-nav-zone {
             position: fixed !important;
-            top: 1.5rem !important;
-            right: 2.5rem !important;
+            top: 20px !important;
+            right: 25px !important;
             z-index: 999999 !important;
             display: flex !important;
             align-items: center !important;
-            gap: 15px !important;
-            animation: fadeIn 0.8s ease-out !important;
+            gap: 10px !important;
         }
 
-        .user-glass-card {
+        /* 強制重塑右上角那顆 st.button */
+        div.top-nav-zone div[data-testid="stButton"] button {
+            background: #FFFFFF !important;
+            color: #3C4043 !important;
+            border: 1px solid #DADCE0 !important;
+            border-radius: 50px !important;
+            padding: 8px 20px !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
+            width: auto !important;
+            height: auto !important;
+            transition: all 0.3s ease !important;
+        }
+
+        div.top-nav-zone div[data-testid="stButton"] button:hover {
+            background: #F8F9FA !important;
+            border-color: #38BDF8 !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 25px rgba(56, 189, 248, 0.3) !important;
+        }
+
+        /* 已登入的頭像卡片 */
+        .user-status-card {
             background: rgba(15, 23, 42, 0.8) !important;
             backdrop-filter: blur(12px) !important;
             border: 1px solid rgba(56, 189, 248, 0.5) !important;
             border-radius: 50px !important;
-            padding: 6px 20px 6px 8px !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 12px !important;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
-            transition: all 0.3s ease !important;
-        }
-
-        .user-glass-card:hover {
-            border-color: #38BDF8 !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 15px 40px rgba(56, 189, 248, 0.3) !important;
-        }
-
-        .user-avatar-circle {
-            width: 34px !important;
-            height: 34px !important;
-            background: linear-gradient(135deg, #38BDF8, #1D4ED8) !important;
-            border-radius: 50% !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            color: white !important;
-            font-weight: 900 !important;
-            font-size: 15px !important;
-            box-shadow: 0 0 12px rgba(56, 189, 248, 0.6) !important;
-        }
-
-        .google-signin-btn {
+            padding: 5px 15px 5px 5px !important;
             display: flex !important;
             align-items: center !important;
             gap: 10px !important;
-            background: white !important;
-            color: #3C4043 !important;
-            padding: 10px 22px !important;
-            border-radius: 50px !important;
-            font-weight: 600 !important;
-            font-size: 14px !important;
-            cursor: pointer !important;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
-            transition: all 0.3s !important;
-            border: 2px solid #E5E7EB !important;
-        }
-
-        .google-signin-btn:hover {
-            border-color: #38BDF8 !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 15px 35px rgba(56, 189, 248, 0.2) !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
         }
 
         @keyframes fadeIn {

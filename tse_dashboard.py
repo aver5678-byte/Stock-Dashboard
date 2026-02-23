@@ -1412,76 +1412,63 @@ if user_info := google_login():
 """)
 
 def render_top_nav_profile():
-    """ 渲染置於右上角的 SaaS 級會員中心 (改良版 - 排除亂碼與位置錯誤) """
+    """ 渲染置於右上角的 SaaS 級會員中心 (合併功能與門面) """
     user_email = st.session_state.get('user_email')
-    
-    # 使用絕對穩定的 Google Logo 來源
     google_icon = "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png"
     
-    # 容器與樣式：沒登入時
-    if st.session_state['user_role'] == 'guest':
-        # 右上角顯示 Google 登入卡片
-        st.markdown(f"""
-            <div class="top-nav-user-container">
-                <div class="google-signin-btn">
-                    <img src="{google_icon}" style="width: 20px; height: 20px;">
-                    <span style="font-size: 14px; font-weight: 600;">Sign in with Google</span>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+    # 使用一個固定容器封裝
+    with st.container():
+        st.markdown('<div class="top-nav-zone">', unsafe_allow_html=True)
         
-        # 側邊欄觸發鈕 (因為右上角 HTML 無法直接觸發 Python)
-        st.sidebar.markdown("<br><br><br>", unsafe_allow_html=True)
-        st.sidebar.markdown("---")
-        if st.sidebar.button("🔐 點擊此處進行 Google 登入測試", use_container_width=True):
-            st.session_state['show_login'] = True
-    
-    # 容器與樣式：已登入時
-    else:
-        display_name = user_email.split("@")[0] if "@" in user_email else user_email
-        avatar_init = display_name[0].upper()
-        role_label = '站長' if st.session_state.get('user_role') == 'admin' else '會員'
+        # 沒登入時：直接渲染「真的按鈕」在右上角
+        if st.session_state['user_role'] == 'guest':
+            if st.button("Sign in with Google", key="real_google_login_btn"):
+                st.session_state['show_login'] = True
         
-        st.markdown(f"""
-            <div class="top-nav-user-container">
-                <div class="user-glass-card">
-                    <div class="user-avatar-circle">{avatar_init}</div>
+        # 已登入時：渲染頭像
+        else:
+            display_name = user_email.split("@")[0] if "@" in user_email else user_email
+            avatar_init = display_name[0].upper()
+            role_label = '站長' if st.session_state.get('user_role') == 'admin' else '會員'
+            
+            st.markdown(f"""
+                <div class="user-status-card">
+                    <div class="user-avatar-circle" style="width:34px; height:34px; background:linear-gradient(135deg, #38BDF8, #1D4ED8); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:900;">
+                        {avatar_init}
+                    </div>
                     <div style="display:flex; flex-direction:column;">
-                        <span style="color:white; font-size:14px; font-weight:800; line-height:1.2;">{display_name}</span>
-                        <span style="color:#38BDF8; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px;">{role_label}</span>
+                        <span style="color:white; font-size:13px; font-weight:800; line-height:1.2;">{display_name}</span>
+                        <span style="color:#38BDF8; font-size:9px; font-weight:900; text-transform:uppercase;">{role_label}</span>
                     </div>
                 </div>
-            </div>
-        """, unsafe_allow_html=True)
-        
-        # 登出按鈕放在側邊欄
-        st.sidebar.markdown("<br><br><br>", unsafe_allow_html=True)
-        st.sidebar.markdown("---")
-        if st.sidebar.button("🚪 登出系統 (Logout)", use_container_width=True):
-            st.session_state['user_role'] = 'guest'
-            st.session_state['user_email'] = None
-            st.rerun()
+            """, unsafe_allow_html=True)
+            
+            # 把登出藏在選單最下面
+            st.sidebar.markdown("<br><br><br>", unsafe_allow_html=True)
+            st.sidebar.markdown("---")
+            if st.sidebar.button("🚪 登出帳號", use_container_width=True):
+                st.session_state['user_role'] = 'guest'
+                st.session_state['user_email'] = None
+                st.rerun()
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # 模擬登入彈窗
     if st.session_state.get('show_login', False) and st.session_state['user_role'] == 'guest':
-        with st.sidebar.expander("🔑 Google 帳號授權模擬", expanded=True):
-            st.write("請輸入信箱進行身份驗證：")
-            test_email = st.text_input("Email", placeholder="aver5678@gmail.com")
-            btn_col1, btn_col2 = st.columns(2)
-            with btn_col1:
-                if st.button("確認授權"):
-                    if test_email == ADMIN_EMAIL:
-                        st.session_state['user_role'] = 'admin'
-                        st.session_state['user_email'] = test_email
-                    elif test_email:
-                        st.session_state['user_role'] = 'user'
-                        st.session_state['user_email'] = test_email
-                    st.session_state['show_login'] = False
-                    st.rerun()
-            with btn_col2:
-                if st.button("取消返回"):
-                    st.session_state['show_login'] = False
-                    st.rerun()
+        with st.sidebar.expander("🔑 身份驗證服務", expanded=True):
+            test_email = st.text_input("請輸入測試 Email", placeholder="aver5678@gmail.com")
+            if st.button("確認授權"):
+                if test_email == ADMIN_EMAIL:
+                    st.session_state['user_role'] = 'admin'
+                    st.session_state['user_email'] = test_email
+                elif test_email:
+                    st.session_state['user_role'] = 'user'
+                    st.session_state['user_email'] = test_email
+                st.session_state['show_login'] = False
+                st.rerun()
+            if st.button("關閉"):
+                st.session_state['show_login'] = False
+                st.rerun()
 
 def main():
     # 1. 頂部 Logo (GPT 風格)
