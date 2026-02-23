@@ -203,12 +203,12 @@ def page_bias_analysis():
     
     hero_header_html = f"""<div style="background:#0F172A; border:4px solid #475569; border-radius:12px; padding:35px; margin-bottom:30px; box-shadow:0 20px 40px rgba(0,0,0,0.5); text-align:left;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <div style="font-family:'JetBrains Mono'; font-size:12px; color:#64748B; letter-spacing:2px; font-weight:800;">SYSTEM LIVE // TSE_BIAS_MONITOR_v4.2</div>
-            <div style="background:{status_pill_color}; color:white; padding:4px 12px; border-radius:6px; font-family:'JetBrains Mono'; font-size:12px; font-weight:900; box-shadow:0 0 15px {status_pill_color};">● {status_pill_text}</div>
+            <div style="font-family:'Inter', 'Microsoft JhengHei', sans-serif; font-size:13px; color:#64748B; letter-spacing:1px; font-weight:800;">🛰️ 系統即時監控中 // 40週乖離觀測模組</div>
+            <div style="background:{status_pill_color}; color:white; padding:4px 12px; border-radius:6px; font-family:'Microsoft JhengHei', sans-serif; font-size:12px; font-weight:900; box-shadow:0 0 15px {status_pill_color};">● {status_pill_text}</div>
         </div>
         <h1 style="color:white; font-size:48px; font-weight:950; margin:0; letter-spacing:-1.5px; line-height:1.2; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">🛰️ 40週乖離率：市場引力觀測儀</h1>
         <div style="margin:20px 0 0; color:#94A3B8; font-size:17px; font-weight:600; line-height:1.6; max-width:1000px; border-left:4px solid #334155; padding-left:20px;">
-            旨在台灣加權指數週線圖 40週均線「極端偏差」。當價格超過40週均線價格並超越乖離進入 > 22% 極端區時，代表動能進入失控狀態，市場即將啟動「均值回歸」修復漲程，這是大後波段最核心的防禦指標，本指標無法預測行情，可以提醒投資人指數是否過熱。
+            <b>獨立戰略分析模組</b>：專門量化台股週線與「40週均線」之間的極端離心偏差。當指數價格大幅拋離長期成本、並進入 > 22% 的極端乖離區時，核心動能將脫離引力進入「物理失控」狀態。本指標旨在提供大波段操作中的核心「防禦座標」，不求預測未來，而是透過量化歷史數據的過熱軌跡，精準警示市場是否已處於隨時可能觸發「均值回歸」的臨界邊緣。
         </div>
     </div>"""
     st.markdown(hero_header_html, unsafe_allow_html=True)
@@ -380,7 +380,6 @@ def page_bias_analysis():
     st.markdown(f"""
     <div style="background:linear-gradient(90deg, #1E293B, #0F172A); padding:30px 45px; border:4px solid #334155; border-radius:12px; margin-top:80px; margin-bottom:30px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
         <div style="color:white; font-size:48px; font-weight:950; letter-spacing:-1.5px; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">🛡️ 戰略模擬：歷史極端數據回測</div>
-        <div style="font-family:'JetBrains Mono'; font-size:16px; color:#64748B; font-weight:800; border:1px solid #334155; padding:5px 15px; border-radius:6px;">ENGINE // BACKTEST_v4.2</div>
     </div>
     """, unsafe_allow_html=True)
     
@@ -450,7 +449,6 @@ def page_bias_analysis():
     st.markdown(f"""
     <div style="background:linear-gradient(90deg, #1E293B, #0F172A); padding:30px 45px; border:4px solid #334155; border-radius:12px; margin-top:20px; margin-bottom:30px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
         <div style="color:white; font-size:48px; font-weight:950; letter-spacing:-1.5px; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">📜 歷史極端乖離：全紀錄電子日誌</div>
-        <div style="font-family:'JetBrains Mono'; font-size:16px; color:#64748B; font-weight:800; border:1px solid #334155; padding:5px 15px; border-radius:6px;">LOG_SYSTEM // BIAS_RECORDS_v4.2</div>
     </div>
     """, unsafe_allow_html=True)
     onboarding_html = f"""
@@ -749,8 +747,8 @@ def page_upward_bias():
     hero_header_html = f"""
     <div style="background:#0F172A; border:4px solid #334155; border-radius:12px; padding:35px; margin-bottom:30px; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <div style="font-family:'JetBrains Mono'; font-size:12px; color:#64748B; letter-spacing:2px; font-weight:800;">SYSTEM LIVE // UPWARD_MOMENTUM_ENGINE_v4.2</div>
-            <div style="background:{status_pill_color}; color:white; padding:4px 12px; border-radius:6px; font-family:'JetBrains Mono'; font-size:12px; font-weight:900; box-shadow:0 0 15px {status_pill_color};">● {status_pill_text}</div>
+            <div style="font-family:'Inter', 'Microsoft JhengHei', sans-serif; font-size:13px; color:#64748B; letter-spacing:1px; font-weight:800;">🛰️ 系統即時監控中 // 大盤漲幅量化模組</div>
+            <div style="background:{status_pill_color}; color:white; padding:4px 12px; border-radius:6px; font-family:'Microsoft JhengHei', sans-serif; font-size:12px; font-weight:900; box-shadow:0 0 15px {status_pill_color};">● {status_pill_text}</div>
         </div>
         <h1 style="color:white; font-size:48px; font-weight:950; margin:0; letter-spacing:-1.5px; line-height:1.2; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">🚀 大盤上漲：漲幅統計</h1>
         <div style="margin-top:20px; color:#94A3B8; font-size:17px; font-weight:600; line-height:1.8; max-width:1100px; border-left:4px solid #334155; padding-left:20px;">
@@ -1008,10 +1006,6 @@ def page_upward_bias():
 def page_downward_bias():
     log_visit("股市回檔統計表")
     
-    tickers = {
-        "台灣加權指數 (^TWII)": "^TWII"
-    }
-
     @st.cache_data(ttl=1, show_spinner=False)
     def get_analysis(ticker_symbol):
         df = fetch_data(ticker_symbol, start_date="2000-01-01")
@@ -1045,9 +1039,8 @@ def page_downward_bias():
 
         return df, events_df, metrics, dist_df, current_dd, last_date
 
-    selected_name = st.selectbox("選擇分析指數", list(tickers.keys()))
-    symbol = tickers[selected_name]
-
+    # 固定監控台股加權指數
+    symbol = "^TWII"
     df, events_df, metrics, dist_df, current_dd, last_date = get_analysis(symbol)
 
     if df.empty or events_df.empty:
@@ -1058,7 +1051,7 @@ def page_downward_bias():
     status_pill_color = "#EF4444" if current_dd >= 7.0 else "#10B981"
     status_pill_text = "DANGER: HIGH RISK" if current_dd >= 7.0 else "SAFE: CRUISING"
     
-    hero_header_html = f"""<div style="background:#0F172A; border:4px solid #475569; border-radius:12px; padding:35px; margin-bottom:30px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><div style="font-family:'JetBrains Mono'; font-size:12px; color:#64748B; letter-spacing:2px; font-weight:800;">SYSTEM LIVE // 7PCT_DRAWDOWN_ENGINE_v4.2</div><div style="background:{status_pill_color}; color:white; padding:4px 12px; border-radius:6px; font-family:'JetBrains Mono'; font-size:12px; font-weight:900; box-shadow:0 0 15px {status_pill_color};">● {status_pill_text}</div></div><h1 style="color:white; font-size:48px; font-weight:950; margin:0; letter-spacing:-1.5px; line-height:1.2; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">🚀 大盤下跌：跌幅統計</h1><div style="margin-top:20px; color:#94A3B8; font-size:17px; font-weight:600; line-height:1.8; max-width:1100px; border-left:4px solid #334155; padding-left:20px;"><b>即時監測與歷史回測</b>：針對標普 500 (SPX)、那斯達克 (IXIC) 及台股加權指數 (TWII)，分析自歷史高點跌破 7% 後的剩餘跌幅與反彈機率。<br><br>監控 {symbol}：精準定位歷史級跌幅。當大盤自前高跌破 7% 時，往往是市場非理性拋售的起點，也是長線勝率極高的戰略進場區。</div></div>"""
+    hero_header_html = f"""<div style="background:#0F172A; border:4px solid #475569; border-radius:12px; padding:35px; margin-bottom:30px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><div style="font-family:'Inter', 'Microsoft JhengHei', sans-serif; font-size:13px; color:#64748B; letter-spacing:1px; font-weight:800;">🛰️ 系統即時監控中 // 大盤回檔量化模組</div><div style="background:{status_pill_color}; color:white; padding:4px 12px; border-radius:6px; font-family:'Microsoft JhengHei', sans-serif; font-size:12px; font-weight:900; box-shadow:0 0 15px {status_pill_color};">● {status_pill_text}</div></div><h1 style="color:white; font-size:48px; font-weight:950; margin:0; letter-spacing:-1.5px; line-height:1.2; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">🚀 大盤下跌：跌幅統計</h1><div style="margin-top:20px; color:#94A3B8; font-size:17px; font-weight:600; line-height:1.8; max-width:1100px; border-left:4px solid #334155; padding-left:20px;"><b>獨立戰略分析模組</b>：專門量化大盤從波段頂峰反轉後的「真實跌幅」。我們從每一波修正前的高點算起，直到市場正式跌破「7% 關鍵防線」時，確認該次下殺的剩餘路徑與最終落落地點。透過這項數據，「空頭修復」的破壞力與耗時，協助您判斷當前波段的剩餘下修空間。</div></div>"""
     st.markdown(hero_header_html, unsafe_allow_html=True)
 
     # --- 戰略導讀 (一)：新手避坑指南 ---
@@ -1412,76 +1405,8 @@ if user_info := google_login():
 """)
 
 def render_top_nav_profile():
-    """ 
-    極簡穩定版：右上角會員中心
-    核心邏輯：右上角僅作顯示與觸發，登入框顯示在主畫面中央，確保 100% 可見。
-    """
-    user_email = st.session_state.get('user_email')
-    
-    # 1. 右上角：僅渲染按鈕或頭像
-    st.markdown('<div class="top-nav-zone">', unsafe_allow_html=True)
-    if st.session_state['user_role'] == 'guest':
-        if st.button("Sign in with Google", key="google_login_trigger"):
-            st.session_state['show_login'] = True
-            st.rerun()
-    else:
-        # 已登入狀態
-        display_name = user_email.split("@")[0] if "@" in user_email else user_email
-        st.markdown(f"""
-            <div class="user-status-card">
-                <div class="user-avatar-circle" style="width:34px; height:34px; background:linear-gradient(135deg, #38BDF8, #1D4ED8); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:900;">
-                    {display_name[0].upper()}
-                </div>
-                <div style="display:flex; flex-direction:column;">
-                    <span style="color:white; font-size:13px; font-weight:800; line-height:1.2;">{display_name}</span>
-                    <span style="color:#38BDF8; font-size:9px; font-weight:900; text-transform:uppercase;">{'站主' if st.session_state['user_role'] == 'admin' else '成員'}</span>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # 2. 主畫面中央登入框 (按按鈕後才出現)
-    if st.session_state.get('show_login', False) and st.session_state['user_role'] == 'guest':
-        st.markdown("<br><br>", unsafe_allow_html=True)
-        # 使用 columns 居中顯示登入框
-        _, center_col, _ = st.columns([1, 2, 1])
-        with center_col:
-            st.markdown("""
-                <div style="background:#1E293B; border:1px solid #38BDF8; padding:30px; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.5);">
-                    <h2 style="color:white; text-align:center; margin-bottom:20px;">👤 模擬 Google 身份驗證</h2>
-                    <p style="color:#94A3B8; text-align:center; font-size:14px;">請輸入測試信箱以進入系統。管理員請輸入專屬 Email。</p>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            input_email = st.text_input("輸入您的 Google Email", placeholder="aver5678@gmail.com", key="login_main_input")
-            
-            col_a, col_b = st.columns(2)
-            with col_a:
-                if st.button("🚀 確認登入 (Confirm)", use_container_width=True):
-                    if input_email:
-                        if input_email == ADMIN_EMAIL:
-                            st.session_state['user_role'] = 'admin'
-                        else:
-                            st.session_state['user_role'] = 'user'
-                        st.session_state['user_email'] = input_email
-                        st.session_state['show_login'] = False
-                        st.rerun()
-                    else:
-                        st.error("請輸入有效信箱！")
-            with col_b:
-                if st.button("❌ 取消登入 (Cancel)", use_container_width=True):
-                    st.session_state['show_login'] = False
-                    st.rerun()
-        st.markdown("<br><br>", unsafe_allow_html=True)
-
-    # 3. 側邊欄登出按鈕
-    if st.session_state['user_role'] != 'guest':
-        st.sidebar.markdown("---")
-        if st.sidebar.button("🚪 登出帳號 (Logout)", use_container_width=True):
-            st.session_state['user_role'] = 'guest'
-            st.session_state['user_email'] = None
-            st.session_state['show_login'] = False
-            st.rerun()
+    """ 暫時移除登入系統設計 (晚點再搞) """
+    pass
 
 def main():
     # 1. 頂部 Logo (GPT 風格)
@@ -1494,7 +1419,7 @@ def main():
         "大盤上漲強度統計": page_upward_bias
     }
     
-    # --- [A. 站長管理區] --- (僅管理員可見)
+    # --- [A. 站長管理區] --- (暫時保留邏輯，但因無登入功能故一般人看不到)
     if st.session_state.get('user_role') == 'admin':
         st.sidebar.markdown('<div class="sidebar-section-header">🛠️ 戰情管理後台</div>', unsafe_allow_html=True)
         with st.sidebar.expander("系統控制面板", expanded=True):

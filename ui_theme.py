@@ -268,49 +268,50 @@ def apply_global_theme():
             border-radius: 8px !important;
             color: #38BDF8 !important;
         }
-        /* 8. 右上角會員中心精緻化 (Glassmorphism) - 最終功能版 */
-        .top-nav-zone {
+        /* 8. 右上角角落按鈕 (修正定位與質感) */
+        #login-anchor + div {
             position: fixed !important;
             top: 20px !important;
-            right: 25px !important;
+            right: 20px !important;
             z-index: 999999 !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 10px !important;
+            width: auto !important;
         }
 
-        /* 強制重塑右上角那顆 st.button */
-        div.top-nav-zone div[data-testid="stButton"] button {
-            background: #FFFFFF !important;
+        #login-anchor + div button {
+            background-color: #FFFFFF !important;
             color: #3C4043 !important;
             border: 1px solid #DADCE0 !important;
-            border-radius: 50px !important;
+            border-radius: 6px !important;
             padding: 8px 20px !important;
             font-size: 14px !important;
-            font-weight: 600 !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 10px !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
-            width: auto !important;
-            height: auto !important;
-            transition: all 0.3s ease !important;
+            font-weight: 700 !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+            transition: all 0.2s !important;
         }
 
-        div.top-nav-zone div[data-testid="stButton"] button:hover {
-            background: #F8F9FA !important;
+        #login-anchor + div button:hover {
+            background-color: #F8F9FA !important;
             border-color: #38BDF8 !important;
-            transform: translateY(-2px) !important;
-            box-shadow: 0 8px 25px rgba(56, 189, 248, 0.3) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2) !important;
         }
 
-        /* 已登入的頭像卡片 */
-        .user-status-card {
-            background: rgba(15, 23, 42, 0.8) !important;
-            backdrop-filter: blur(12px) !important;
-            border: 1px solid rgba(56, 189, 248, 0.5) !important;
-            border-radius: 50px !important;
-            padding: 5px 15px 5px 5px !important;
+        /* 隱藏原生開發選單 */
+        header[data-testid="stHeader"] {
+            background-color: transparent !important;
+        }
+        #MainMenu { visibility: hidden; }
+
+        /* 已登入名片 - 也要釘在最右上角 */
+        .user-status-card-fixed {
+            position: fixed !important;
+            top: 15px !important;
+            right: 15px !important;
+            z-index: 1000000 !important;
+            background: #1E293B !important;
+            border: 1px solid #38BDF8 !important;
+            border-radius: 12px !important;
+            padding: 5px 15px !important;
             display: flex !important;
             align-items: center !important;
             gap: 10px !important;
