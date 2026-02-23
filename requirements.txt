@@ -1,11 +1,8 @@
 streamlit
-yfinance
 pandas
-numpy
 plotly
-xlsxwriter
+yfinance
+ccxt
+numpy
+scipy
 altair
-streamlit-google-auth
-supabase
-feedparser
-textblob
