@@ -1412,63 +1412,76 @@ if user_info := google_login():
 """)
 
 def render_top_nav_profile():
-    """ 渲染置於右上角的 SaaS 級會員中心 (合併功能與門面) """
+    """ 
+    極簡穩定版：右上角會員中心
+    核心邏輯：右上角僅作顯示與觸發，登入框顯示在主畫面中央，確保 100% 可見。
+    """
     user_email = st.session_state.get('user_email')
-    google_icon = "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png"
     
-    # 使用一個固定容器封裝
-    with st.container():
-        st.markdown('<div class="top-nav-zone">', unsafe_allow_html=True)
-        
-        # 沒登入時：直接渲染「真的按鈕」在右上角
-        if st.session_state['user_role'] == 'guest':
-            if st.button("Sign in with Google", key="real_google_login_btn"):
-                st.session_state['show_login'] = True
-        
-        # 已登入時：渲染頭像
-        else:
-            display_name = user_email.split("@")[0] if "@" in user_email else user_email
-            avatar_init = display_name[0].upper()
-            role_label = '站長' if st.session_state.get('user_role') == 'admin' else '會員'
-            
-            st.markdown(f"""
-                <div class="user-status-card">
-                    <div class="user-avatar-circle" style="width:34px; height:34px; background:linear-gradient(135deg, #38BDF8, #1D4ED8); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:900;">
-                        {avatar_init}
-                    </div>
-                    <div style="display:flex; flex-direction:column;">
-                        <span style="color:white; font-size:13px; font-weight:800; line-height:1.2;">{display_name}</span>
-                        <span style="color:#38BDF8; font-size:9px; font-weight:900; text-transform:uppercase;">{role_label}</span>
-                    </div>
+    # 1. 右上角：僅渲染按鈕或頭像
+    st.markdown('<div class="top-nav-zone">', unsafe_allow_html=True)
+    if st.session_state['user_role'] == 'guest':
+        if st.button("Sign in with Google", key="google_login_trigger"):
+            st.session_state['show_login'] = True
+            st.rerun()
+    else:
+        # 已登入狀態
+        display_name = user_email.split("@")[0] if "@" in user_email else user_email
+        st.markdown(f"""
+            <div class="user-status-card">
+                <div class="user-avatar-circle" style="width:34px; height:34px; background:linear-gradient(135deg, #38BDF8, #1D4ED8); border-radius:50%; display:flex; align-items:center; justify-content:center; color:white; font-weight:900;">
+                    {display_name[0].upper()}
+                </div>
+                <div style="display:flex; flex-direction:column;">
+                    <span style="color:white; font-size:13px; font-weight:800; line-height:1.2;">{display_name}</span>
+                    <span style="color:#38BDF8; font-size:9px; font-weight:900; text-transform:uppercase;">{'站主' if st.session_state['user_role'] == 'admin' else '成員'}</span>
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # 2. 主畫面中央登入框 (按按鈕後才出現)
+    if st.session_state.get('show_login', False) and st.session_state['user_role'] == 'guest':
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        # 使用 columns 居中顯示登入框
+        _, center_col, _ = st.columns([1, 2, 1])
+        with center_col:
+            st.markdown("""
+                <div style="background:#1E293B; border:1px solid #38BDF8; padding:30px; border-radius:20px; box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+                    <h2 style="color:white; text-align:center; margin-bottom:20px;">👤 模擬 Google 身份驗證</h2>
+                    <p style="color:#94A3B8; text-align:center; font-size:14px;">請輸入測試信箱以進入系統。管理員請輸入專屬 Email。</p>
                 </div>
             """, unsafe_allow_html=True)
             
-            # 把登出藏在選單最下面
-            st.sidebar.markdown("<br><br><br>", unsafe_allow_html=True)
-            st.sidebar.markdown("---")
-            if st.sidebar.button("🚪 登出帳號", use_container_width=True):
-                st.session_state['user_role'] = 'guest'
-                st.session_state['user_email'] = None
-                st.rerun()
+            input_email = st.text_input("輸入您的 Google Email", placeholder="aver5678@gmail.com", key="login_main_input")
+            
+            col_a, col_b = st.columns(2)
+            with col_a:
+                if st.button("🚀 確認登入 (Confirm)", use_container_width=True):
+                    if input_email:
+                        if input_email == ADMIN_EMAIL:
+                            st.session_state['user_role'] = 'admin'
+                        else:
+                            st.session_state['user_role'] = 'user'
+                        st.session_state['user_email'] = input_email
+                        st.session_state['show_login'] = False
+                        st.rerun()
+                    else:
+                        st.error("請輸入有效信箱！")
+            with col_b:
+                if st.button("❌ 取消登入 (Cancel)", use_container_width=True):
+                    st.session_state['show_login'] = False
+                    st.rerun()
+        st.markdown("<br><br>", unsafe_allow_html=True)
 
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # 模擬登入彈窗
-    if st.session_state.get('show_login', False) and st.session_state['user_role'] == 'guest':
-        with st.sidebar.expander("🔑 身份驗證服務", expanded=True):
-            test_email = st.text_input("請輸入測試 Email", placeholder="aver5678@gmail.com")
-            if st.button("確認授權"):
-                if test_email == ADMIN_EMAIL:
-                    st.session_state['user_role'] = 'admin'
-                    st.session_state['user_email'] = test_email
-                elif test_email:
-                    st.session_state['user_role'] = 'user'
-                    st.session_state['user_email'] = test_email
-                st.session_state['show_login'] = False
-                st.rerun()
-            if st.button("關閉"):
-                st.session_state['show_login'] = False
-                st.rerun()
+    # 3. 側邊欄登出按鈕
+    if st.session_state['user_role'] != 'guest':
+        st.sidebar.markdown("---")
+        if st.sidebar.button("🚪 登出帳號 (Logout)", use_container_width=True):
+            st.session_state['user_role'] = 'guest'
+            st.session_state['user_email'] = None
+            st.session_state['show_login'] = False
+            st.rerun()
 
 def main():
     # 1. 頂部 Logo (GPT 風格)
