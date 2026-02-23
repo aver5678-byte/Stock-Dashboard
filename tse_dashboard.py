@@ -1411,45 +1411,56 @@ if user_info := google_login():
         顯示_一般會員側邊欄()
 """)
 
-def render_user_profile():
-    """ 渲染置底的個人中心名牌 """
+def render_top_nav_profile():
+    """ 渲染置於右上角的 SaaS 級會員中心 """
     user_email = st.session_state.get('user_email')
-    if not user_email:
-        user_email = '訪客 (未登入)'
-        
-    role_name = '站長' if st.session_state.get('user_role') == 'admin' else '一般會員' if st.session_state.get('user_role') == 'user' else 'Guest'
-    avatar_init = user_email[0].upper() if user_email and user_email[0].isalpha() else 'G'
+    role_name = '站長' if st.session_state.get('user_role') == 'admin' else '會員' if st.session_state.get('user_role') == 'user' else '訪客'
     
-    # 處理顯示名稱 (如果是 Email 則去除 @ 之後的文字)
-    display_name = user_email.split("@")[0] if "@" in user_email else user_email
-
-    st.sidebar.markdown("---")
-    st.sidebar.markdown(f'''
-        <div class="user-profile-card" style="background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border: 1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-            <div class="user-avatar" style="box-shadow: 0 2px 8px rgba(248,113,113,0.4);">{avatar_init}</div>
-            <div class="user-info-text">
-                <div class="user-name" style="font-weight:900; color:#111827;">{display_name}</div>
-                <div class="user-role" style="font-size:10px; color:#F87171; font-weight:800; text-transform:uppercase; letter-spacing:1px;">{role_name}</div>
-            </div>
-        </div>
-    ''', unsafe_allow_html=True)
+    # 容器開始
+    st.markdown('<div class="top-nav-user-container">', unsafe_allow_html=True)
     
     if st.session_state['user_role'] == 'guest':
-        # 設計一個看起來像 Google 的按鈕
+        # 沒登入時：漂亮的 Google 按鈕
         google_btn_html = """
-        <div style="cursor: pointer; display: flex; align-items: center; justify-content: center; background-color: white; border: 1px solid #dadce0; border-radius: 4px; padding: 10px; margin: 10px 0; transition: background-color .2s ease-in-out;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='white'">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" style="width: 18px; margin-right: 10px;">
-            <span style="color: #3c4043; font-family: 'Google Sans',arial,sans-serif; font-weight: 500; font-size: 14px;">使用 Google 帳號登入</span>
+        <div class="google-signin-btn">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" style="width: 18px;">
+            Sign in with Google
         </div>
         """
-        st.sidebar.markdown(google_btn_html, unsafe_allow_html=True)
-        if st.sidebar.button("👆 點擊上方按鈕開始模擬登入"):
-            st.session_state['show_login'] = not st.session_state.get('show_login', False)
+        st.markdown(google_btn_html, unsafe_allow_html=True)
+        # 用一個隱形的按鈕來觸發模擬登入彈窗
+        if st.button("🔐 登入", key="top_nav_login_trigger"):
+            st.session_state['show_login'] = True
+    else:
+        # 已登入時：精緻圓形頭像卡片
+        display_name = user_email.split("@")[0] if "@" in user_email else user_email
+        avatar_init = display_name[0].upper()
         
-        if st.session_state.get('show_login', False):
-            with st.sidebar.expander("輸入信箱登入", expanded=True):
-                email = st.text_input("Google Email", key="login_email_input")
-                if st.button("確認登入"):
+        profile_html = f"""
+        <div class="user-glass-card">
+            <div class="user-avatar-circle">{avatar_init}</div>
+            <div style="display:flex; flex-direction:column;">
+                <div style="color:white; font-size:14px; font-weight:800; line-height:1.2;">{display_name}</div>
+                <div style="color:#38BDF8; font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1px;">{role_name}</div>
+            </div>
+        </div>
+        """
+        st.markdown(profile_html, unsafe_allow_html=True)
+        if st.button("🚪 登出", key="top_nav_logout"):
+            st.session_state['user_role'] = 'guest'
+            st.session_state['user_email'] = None
+            st.rerun()
+
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # 模擬登入彈窗 (僅當點擊登入時顯示)
+    if st.session_state.get('show_login', False) and st.session_state['user_role'] == 'guest':
+        with st.sidebar.expander("👤 模擬 Google 登入驗證", expanded=True):
+            st.info("請輸入 Email 類比 Google 登入流程")
+            email = st.text_input("輸入測試信箱", placeholder="例如: aver5678@gmail.com")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("確認授權"):
                     if email == ADMIN_EMAIL:
                         st.session_state['user_role'] = 'admin'
                         st.session_state['user_email'] = email
@@ -1504,8 +1515,8 @@ def main():
     st.sidebar.markdown('<div class="sidebar-section-header">📡 模組切換中心</div>', unsafe_allow_html=True)
     selection = st.sidebar.radio("Navigation", list(pages.keys()), label_visibility="collapsed")
     
-    # 3. 底部用戶中心
-    render_user_profile()
+    # 3. 右上角用戶中心
+    render_top_nav_profile()
     
     # 執行對應的頁面函數
     pages[selection]()
