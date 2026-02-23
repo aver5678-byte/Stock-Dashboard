@@ -253,6 +253,10 @@ def apply_global_theme():
         svg[data-baseweb="icon"] {
             color: #38BDF8 !important;
         }
+        /* 7. 隱藏原生開發選單 (使 App 看起來更像獨立軟體) */
+        #MainMenu {visibility: hidden;}
+        header {visibility: hidden;}
+        footer {visibility: hidden;}
         
         </style>
     """, unsafe_allow_html=True)

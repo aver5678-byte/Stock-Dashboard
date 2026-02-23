@@ -1435,7 +1435,15 @@ def render_user_profile():
     ''', unsafe_allow_html=True)
     
     if st.session_state['user_role'] == 'guest':
-        if st.sidebar.button("🔐 模擬登入 (體驗版)"):
+        # 設計一個看起來像 Google 的按鈕
+        google_btn_html = """
+        <div style="cursor: pointer; display: flex; align-items: center; justify-content: center; background-color: white; border: 1px solid #dadce0; border-radius: 4px; padding: 10px; margin: 10px 0; transition: background-color .2s ease-in-out;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='white'">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_Logo.svg" style="width: 18px; margin-right: 10px;">
+            <span style="color: #3c4043; font-family: 'Google Sans',arial,sans-serif; font-weight: 500; font-size: 14px;">使用 Google 帳號登入</span>
+        </div>
+        """
+        st.sidebar.markdown(google_btn_html, unsafe_allow_html=True)
+        if st.sidebar.button("👆 點擊上方按鈕開始模擬登入"):
             st.session_state['show_login'] = not st.session_state.get('show_login', False)
         
         if st.session_state.get('show_login', False):
@@ -1467,13 +1475,35 @@ def main():
         "大盤上漲強度統計": page_upward_bias
     }
     
-    # 如果是站長登入
+    # --- [A. 站長管理區] ---
+    st.sidebar.markdown('<div class="sidebar-section-header">🛠️ 戰情管理後台</div>', unsafe_allow_html=True)
+    with st.sidebar.expander("系統控制面板", expanded=True):
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("🔄 刷新數據", help="強制重新載入所有腳本"):
+                st.rerun()
+        with col2:
+            if st.button("🧹 清除緩存", help="重抓最原始資料"):
+                st.cache_data.clear()
+                st.cache_resource.clear()
+                st.rerun()
+        
+        st.markdown(f"""
+            <div style="font-size:11px; color:#64748B; padding:5px; border-top:1px solid #334155; margin-top:10px;">
+                <b>當前權限：</b> {st.session_state.get('user_role', 'guest').upper()}<br>
+                <b>管理員信箱：</b> {ADMIN_EMAIL}
+            </div>
+        """, unsafe_allow_html=True)
+
+    # 如果是站長登入，增加後台管理模組
     if st.session_state.get('user_role') == 'admin':
         pages["系統管理中心系統"] = page_admin_dashboard
         
+    st.sidebar.markdown('<div class="sidebar-section-header">📡 模組切換中心</div>', unsafe_allow_html=True)
     selection = st.sidebar.radio("Navigation", list(pages.keys()), label_visibility="collapsed")
     
-    # 執行對應的頁面函數
+    # 3. 底部用戶中心
+    render_user_profile()
     
     # 執行對應的頁面函數
     pages[selection]()
