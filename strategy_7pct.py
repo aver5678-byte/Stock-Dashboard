@@ -197,6 +197,18 @@ def calculate_7pct_statistics(events_df):
                 'avg_total': round(crash['解套總耗時'].mean(), 1)
             }
 
+    # 增加總跌幅階梯機率 (基於所有事件)
+    total_count = len(events_df)
+    if total_count > 0:
+        metrics['跌幅超過 10% 機率'] = round(len(events_df[events_df['最大跌幅(%)'] >= 10.0]) / total_count * 100, 1)
+        metrics['跌幅超過 15% 機率'] = round(len(events_df[events_df['最大跌幅(%)'] >= 15.0]) / total_count * 100, 1)
+        metrics['跌幅超過 20% 機率'] = round(len(events_df[events_df['最大跌幅(%)'] >= 20.0]) / total_count * 100, 1)
+        metrics['跌幅超過 30% 機率'] = round(len(events_df[events_df['最大跌幅(%)'] >= 30.0]) / total_count * 100, 1)
+        metrics['跌幅超過 50% 機率'] = round(len(events_df[events_df['最大跌幅(%)'] >= 50.0]) / total_count * 100, 1)
+    else:
+        for k in ['跌幅超過 10% 機率', '跌幅超過 15% 機率', '跌幅超過 20% 機率', '跌幅超過 30% 機率', '跌幅超過 50% 機率']:
+            metrics[k] = 0
+
     # 保留舊有機率統計與 Key 供分佈圖與舊 UI 組件參考
     metrics['Prob Residual DD > 10%'] = round(len(recovered_events[recovered_events['剩餘跌幅(%)'] > 10]) / len(recovered_events) * 100, 2) if len(recovered_events) > 0 else 0
     metrics['Prob Residual DD > 20%'] = round(len(recovered_events[recovered_events['剩餘跌幅(%)'] > 20]) / len(recovered_events) * 100, 2) if len(recovered_events) > 0 else 0
