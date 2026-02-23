@@ -245,6 +245,28 @@ def page_bias_analysis():
     </div>
     """
     st.markdown(hud_html, unsafe_allow_html=True)
+
+    # --- 歷史雷達戰術導讀：解讀引力與軌跡 ---
+    chart_guide_html = f"""
+    <div style="background:linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border:2px solid #334155; border-radius:12px; padding:30px; margin-bottom:30px; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+        <h2 style="color:#F1F5F9; font-size:24px; font-weight:900; margin-top:0; margin-bottom:20px; display:flex; align-items:center; gap:12px;">📋 戰略導讀：如何解讀「極端乖離」與「引力回歸」？</h2>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:25px;">
+            <div style="background:rgba(255,255,255,0.03); padding:18px; border-radius:10px; border-left:4px solid #94A3B8;">
+                <div style="color:#CBD5E1; font-weight:800; font-size:16px; margin-bottom:10px;">📡 測距核心：K 線與白線的距離</div>
+                <div style="color:#94A3B8; font-size:14px; line-height:1.6;">圖中的<b>白線</b>代表 40 週平均價格（大盤的生命線）。當 K 線（即時價格）遠遠拋開白線時，就像橡皮筋拉得太緊，會產生強大的<b>「引力回歸」</b>。乖離率就是用來量化這條橡皮筋現在繃得有多緊。</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); padding:18px; border-radius:10px; border-left:4px solid #EF4444;">
+                <div style="color:#FCA5A5; font-weight:800; font-size:16px; margin-bottom:10px;">🔴 顏色判別：識別「高壓警戒區」</div>
+                <div style="color:#94A3B8; font-size:14px; line-height:1.6;">當圖中出現 <b>紅色 K 線</b> 時，代表當時的乖離率已突破歷史警戒線（22%）。這不是預測明天就會跌，而是提醒您目前處於「空氣稀薄」的高海拔區，動能隨時可能耗竭，轉向回歸白線。</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); padding:18px; border-radius:10px; border-left:4px solid #38BDF8;">
+                <div style="color:#7DD3FC; font-weight:800; font-size:16px; margin-bottom:10px;">🛡️ 實戰要訣：觀察歷史回歸的路徑</div>
+                <div style="color:#94A3B8; font-size:14px; line-height:1.6;">您可以滑動圖表觀察：每當 K 線進入紅色高壓區後，最終都會以「價格下跌」或「盤整」的方式向白線靠攏。目前的數據正處於歷史級的高壓，旨在警告投資人：目前的價格支撐主要來自情緒，而非引力常態。</div>
+            </div>
+        </div>
+    </div>
+    """
+    st.markdown(chart_guide_html, unsafe_allow_html=True)
         
     # 準備 K 線圖的動態警告文字
     df['WarningText'] = df['Bias'].apply(lambda x: f'<br><br><b style="color:#EF4444;">🚨 偵測到極端乖離: {x:.1f}%</b><br><b style="color:#EF4444;">市場過熱，注意修正風險！</b>' if x >= 22 else '')
@@ -386,27 +408,43 @@ def page_bias_analysis():
     sc2_label = "✅ 劇本二：技術性修整 (對標類型 A 模式)"
     sc2_val, sc2_target, sc2_color = avg_a, target_a, "#10B981"
 
-    # 這裡使用更直觀的「劇本式」文案，幫助小白理解
-    decision_html = f"""<div style="background:#1E293B; border:4px solid #475569; border-radius:12px; padding:40px; display:flex; flex-direction:column; gap:30px; margin-bottom:40px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; gap:40px;"><div style="flex:1.2; background:#0F172A; padding:35px; border-radius:12px; border-left:8px solid {prob_color}; text-align:center; display:flex; flex-direction:column; justify-content:center;">    <div style="font-size:24px; color:#94A3B8; font-weight:800; margin-bottom:15px; letter-spacing:1px;">⚠️ 一個月內「暴力回撤」風險</div>
-    <div style="font-family:'JetBrains Mono'; font-size:72px; font-weight:950; color:{prob_color}; line-height:1;">{risk_val:.1f}%</div>
-    <div style="font-size:18px; color:#F1F5F9; font-weight:700; margin-top:20px; line-height:1.6;">「歷史相似 {total_events} 次極端事件中，曾有過半案例在一個月內出現暴力回撤。」</div>
-    <div style="font-size:14px; color:#64748B; font-weight:600; margin-top:10px;">(風險定義：訊號發出後 4 週內跌幅 > 3.5%)</div>
-</div><div style="flex:1; display:flex; flex-direction:column; justify-content:center; background:rgba(255,255,255,0.03); padding:30px; border-radius:12px;"><div style="font-size:24px; color:#E2E8F0; font-weight:800; margin-bottom:25px; border-bottom:2px solid #334155; padding-bottom:15px;">❱ 測距模擬：若開始修正...</div><div style="display:flex; flex-direction:column; gap:25px;"><div><div style="color:#94A3B8; font-size:16px; font-weight:800; margin-bottom:8px;">{sc1_label}</div><div style="display:flex; align-items:baseline; gap:10px;"><div style="font-family:'JetBrains Mono'; font-size:32px; font-weight:950; color:{sc1_color};">{sc1_val:+.1f}%</div><div style="color:#F1F5F9; font-size:18px; font-weight:700;">目標約 {sc1_target:,.0f} 點</div></div></div><div><div style="color:#94A3B8; font-size:16px; font-weight:800; margin-bottom:8px;">{sc2_label}</div><div style="display:flex; align-items:baseline; gap:10px;"><div style="font-family:'JetBrains Mono'; font-size:32px; font-weight:950; color:{sc2_color};">{sc2_val:+.1f}%</div><div style="color:#F1F5F9; font-size:18px; font-weight:700;">目標約 {sc2_target:,.0f} 點</div></div></div></div></div></div><div style="text-align:left; border-top:1px solid #334155; padding-top:15px;"><div style="font-size:14px; color:#64748B; line-height:1.6;">💡 <b>數據怎麼算的？</b> 此百分比對標下方歷史結案事件。我們依據類型 A/B 的<b>「最大修正深度」</b>平均值進行壓力測試。模擬若「現在即見頂」，預期要降落到哪個座標才算完成泡沫修復。
-</div></div></div>"""
-    st.markdown(decision_html, unsafe_allow_html=True)
-
-    # 新增：戰術導讀 (🛰️ 40週乖離率)
-    bias_guide_html = f"""
-    <div style="background:linear-gradient(135deg, #0F172A 0%, #1E293B 100%); border:2px solid #38BDF8; border-radius:12px; padding:30px; margin-bottom:40px; box-shadow:0 10px 30px rgba(56,189,248,0.1); text-align:left;">
-        <h2 style="color:#F1F5F9; font-size:24px; font-weight:900; margin-top:0; margin-bottom:15px; display:flex; align-items:center; gap:12px;">🛰️ 40週乖離率：市場引力觀測儀</h2>
-        <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #38BDF8;">
-            <div style="color:#94A3B8; font-size:15px; line-height:1.8;">
-                旨在觀測台灣加權指數週線圖 <b>40週均線的「極端偏差」</b>。當價格超越 40 週均線並進入 <b style="color:#EF4444;">> 22% 極端區</b> 時，代表動能進入失控狀態，市場即將啟動「均值回歸」修復漲程。這是大後波段最核心的防禦指標，本指標雖然無法預測精確頂點，但能有效提醒投資人指數是否過熱。
+    # --- 位一：戰略模擬導讀 (精確版本) ---
+    sim_guide_html = f"""
+    <div style="background:linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border:2px solid #334155; border-radius:12px; padding:35px; margin-bottom:30px; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
+        <h2 style="color:#F1F5F9; font-size:24px; font-weight:900; margin-top:0; margin-bottom:20px; display:flex; align-items:center; gap:12px;">�️ 戰略導讀：如何使用『壓力測試』？</h2>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:25px;">
+            <div style="background:rgba(255,255,255,0.03); padding:18px; border-radius:10px; border-left:4px solid #EF4444;">
+                <div style="color:#FCA5A5; font-weight:800; font-size:16px; margin-bottom:10px;">💥 閃崩機率（左側）</div>
+                <div style="color:#94A3B8; font-size:14px; line-height:1.6;">我們翻遍了歷史，找出所有「跟現在一樣熱」的時刻。這個機率告訴您：在過去類似的情況下，有多少比例在一個月內就出現了「突然跳水」的情況。這是提醒您現在是不是處於「短線隨時會閃崩」的高危險期。</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); padding:18px; border-radius:10px; border-left:4px solid #38BDF8;">
+                <div style="color:#7DD3FC; font-weight:800; font-size:16px; margin-bottom:10px;">📉 跌幅模擬（右側）</div>
+                <div style="color:#94A3B8; font-size:14px; line-height:1.6; margin-top:5px;">
+                    萬一真的開始跌了，我們根據歷史數據模擬了兩條路：<br>
+                    <span style="color:#FCA5A5;">● <b>劇本一（大崩盤）</b>：模擬歷史「最慘烈」的行情崩解。</span><br>
+                    <span style="color:#A7F3D0;">● <b>劇本二（小回檔）</b>：模擬歷史「最常見」的漲多回補。</span>
+                </div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); padding:18px; border-radius:10px; border-left:4px solid #FBBF24;">
+                <div style="color:#FDE68A; font-weight:800; font-size:16px; margin-bottom:10px;">🛡️ 核心用意</div>
+                <div style="color:#94A3B8; font-size:14px; line-height:1.6;">這不是預測，而是幫您 <b>「找好退路」</b>。讓您在市場熱度最高時，心裡先有個底：萬一發生意外，我有沒有準備好應對這兩種深度的心理預算。</div>
             </div>
         </div>
     </div>
     """
-    st.markdown(bias_guide_html, unsafe_allow_html=True)
+    st.markdown(sim_guide_html, unsafe_allow_html=True)
+
+    # 針對過半邏輯進行動態修復
+    happened_count = int(round(total_events * risk_val / 100))
+
+    decision_html = f"""<div style="background:#1E293B; border:4px solid #475569; border-radius:12px; padding:40px; display:flex; flex-direction:column; gap:30px; margin-bottom:40px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; gap:40px;"><div style="flex:1.2; background:#0F172A; padding:35px; border-radius:12px; border-left:8px solid {prob_color}; text-align:center; display:flex; flex-direction:column; justify-content:center;">    <div style="font-size:24px; color:#94A3B8; font-weight:800; margin-bottom:15px; letter-spacing:1px;">💥 一個月內「突然閃崩」機率</div>
+    <div style="font-family:'JetBrains Mono'; font-size:72px; font-weight:950; color:{prob_color}; line-height:1;">{risk_val:.1f}%</div>
+    <div style="font-size:18px; color:#F1F5F9; font-weight:700; margin-top:20px; line-height:1.6;">「歷史相似 {total_events} 次極端事件中，曾有 {happened_count} 次在一週內出現急跌。」</div>
+    <div style="font-size:14px; color:#64748B; font-weight:600; margin-top:10px;">(風險定義：訊號發出後 4 週內跌幅 > 3.5%)</div>
+</div><div style="flex:1; display:flex; flex-direction:column; justify-content:center; background:rgba(255,255,255,0.03); padding:30px; border-radius:12px;"><div style="font-size:24px; color:#E2E8F0; font-weight:800; margin-bottom:25px; border-bottom:2px solid #334155; padding-bottom:15px;">❱ 測距模擬：若開始修正...</div><div style="display:flex; flex-direction:column; gap:25px;"><div><div style="color:#94A3B8; font-size:16px; font-weight:800; margin-bottom:8px;">🆘 劇本一：災難級崩盤 (對標極端泡沫)</div><div style="display:flex; align-items:baseline; gap:10px;"><div style="font-family:'JetBrains Mono'; font-size:32px; font-weight:950; color:{sc1_color};">{sc1_val:+.1f}%</div><div style="color:#F1F5F9; font-size:18px; font-weight:700;">目標約 {sc1_target:,.0f} 點</div></div></div><div><div style="color:#94A3B8; font-size:16px; font-weight:800; margin-bottom:8px;">✅ 劇本二：正常技術回檔 (對標常見修正)</div><div style="display:flex; align-items:baseline; gap:10px;"><div style="font-family:'JetBrains Mono'; font-size:32px; font-weight:950; color:{sc2_color};">{sc2_val:+.1f}%</div><div style="color:#F1F5F9; font-size:18px; font-weight:700;">目標約 {sc2_target:,.0f} 點</div></div></div></div></div></div><div style="text-align:left; border-top:1px solid #334155; padding-top:15px;"><div style="font-size:14px; color:#64748B; line-height:1.6;">💡 <b>這是怎麼算的？</b> 系統翻閱歷史數據，尋找跟「現在一樣過熱」的時刻，模擬若現在就是頂點，依照過去「大崩盤」或「一般修正」的平均深度，計算大盤會降落到哪個位置。
+</div></div></div>"""
+    st.markdown(decision_html, unsafe_allow_html=True)
+
 
     # --- 數位流水日誌 (旗艦比例重構版) ---
     st.markdown(f"""
