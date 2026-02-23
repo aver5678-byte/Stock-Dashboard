@@ -1475,25 +1475,27 @@ def main():
         "大盤上漲強度統計": page_upward_bias
     }
     
-    # --- [A. 站長管理區] ---
-    st.sidebar.markdown('<div class="sidebar-section-header">🛠️ 戰情管理後台</div>', unsafe_allow_html=True)
-    with st.sidebar.expander("系統控制面板", expanded=True):
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("🔄 刷新數據", help="強制重新載入所有腳本"):
-                st.rerun()
-        with col2:
-            if st.button("🧹 清除緩存", help="重抓最原始資料"):
-                st.cache_data.clear()
-                st.cache_resource.clear()
-                st.rerun()
-        
-        st.markdown(f"""
-            <div style="font-size:11px; color:#64748B; padding:5px; border-top:1px solid #334155; margin-top:10px;">
-                <b>當前權限：</b> {st.session_state.get('user_role', 'guest').upper()}<br>
-                <b>管理員信箱：</b> {ADMIN_EMAIL}
-            </div>
-        """, unsafe_allow_html=True)
+    # --- [A. 站長管理區] --- (僅管理員可見)
+    if st.session_state.get('user_role') == 'admin':
+        st.sidebar.markdown('<div class="sidebar-section-header">🛠️ 戰情管理後台</div>', unsafe_allow_html=True)
+        with st.sidebar.expander("系統控制面板", expanded=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("🔄 刷新數據", help="強制重新載入所有腳本"):
+                    st.rerun()
+            with col2:
+                if st.button("🧹 清除緩存", help="重抓最原始資料"):
+                    st.cache_data.clear()
+                    st.cache_resource.clear()
+                    st.rerun()
+            
+            st.markdown(f"""
+                <div style="font-size:11px; color:#64748B; padding:5px; border-top:1px solid #334155; margin-top:10px;">
+                    <b>當前權限：</b> {st.session_state.get('user_role', 'guest').upper()}<br>
+                    <b>管理員信箱：</b> {ADMIN_EMAIL}
+                </div>
+            """, unsafe_allow_html=True)
+
 
     # 如果是站長登入，增加後台管理模組
     if st.session_state.get('user_role') == 'admin':
