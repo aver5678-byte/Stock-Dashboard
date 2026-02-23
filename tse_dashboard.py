@@ -1415,28 +1415,28 @@ def render_top_nav_profile():
     """ 渲染置於右上角的 SaaS 級會員中心 (改良版 - 排除亂碼與位置錯誤) """
     user_email = st.session_state.get('user_email')
     
-    # 使用 Base64 或絕對穩定的網址來避免圖片破裂
-    google_icon = "https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png"
+    # 使用絕對穩定的 Google Logo 來源
+    google_icon = "https://www.gstatic.com/images/branding/product/2x/googleg_96dp.png"
     
-    # 沒登入時
+    # 容器與樣式：沒登入時
     if st.session_state['user_role'] == 'guest':
-        # 右上角浮動按鈕區
+        # 右上角顯示 Google 登入卡片
         st.markdown(f"""
             <div class="top-nav-user-container">
                 <div class="google-signin-btn">
-                    <img src="{google_icon}" style="width: 18px; height: 18px;">
-                    <span style="white-space: nowrap;">Sign in with Google</span>
+                    <img src="{google_icon}" style="width: 20px; height: 20px;">
+                    <span style="font-size: 14px; font-weight: 600;">Sign in with Google</span>
                 </div>
             </div>
         """, unsafe_allow_html=True)
         
-        # 功能性按鈕統一放在側邊欄底部，避免與選單混淆
+        # 側邊欄觸發鈕 (因為右上角 HTML 無法直接觸發 Python)
         st.sidebar.markdown("<br><br><br>", unsafe_allow_html=True)
         st.sidebar.markdown("---")
-        if st.sidebar.button("🔐 啟動模擬登入程序", use_container_width=True):
+        if st.sidebar.button("🔐 點擊此處進行 Google 登入測試", use_container_width=True):
             st.session_state['show_login'] = True
     
-    # 已登入時
+    # 容器與樣式：已登入時
     else:
         display_name = user_email.split("@")[0] if "@" in user_email else user_email
         avatar_init = display_name[0].upper()
@@ -1454,6 +1454,7 @@ def render_top_nav_profile():
             </div>
         """, unsafe_allow_html=True)
         
+        # 登出按鈕放在側邊欄
         st.sidebar.markdown("<br><br><br>", unsafe_allow_html=True)
         st.sidebar.markdown("---")
         if st.sidebar.button("🚪 登出系統 (Logout)", use_container_width=True):

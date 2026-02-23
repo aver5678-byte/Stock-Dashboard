@@ -253,10 +253,21 @@ def apply_global_theme():
         svg[data-baseweb="icon"] {
             color: #38BDF8 !important;
         }
-        /* 7. 隱藏原生開發選單 (使 App 看起來更像獨立軟體) */
-        #MainMenu {visibility: hidden;}
-        header {visibility: hidden;}
-        footer {visibility: hidden;}
+        /* 7. 隱藏原生開發選單 (保留左側側邊欄開關，隱藏右側開發選單) */
+        #MainMenu { display: none !important; }
+        header { 
+            background-color: transparent !important;
+            border-bottom: none !important;
+        }
+        footer { visibility: hidden; }
+
+        /* 讓側邊欄開關按鈕 (>) 變亮眼，方便您找回來 */
+        button[data-testid="stHeaderSidebarButton"] {
+            background-color: rgba(56, 189, 248, 0.1) !important;
+            border: 1px solid rgba(56, 189, 248, 0.3) !important;
+            border-radius: 8px !important;
+            color: #38BDF8 !important;
+        }
         /* 8. 右上角會員中心精緻化 (Glassmorphism) - 強制浮動版 */
         div[data-testid="stAppViewContainer"] > section:nth-child(2) > div:nth-child(1) {
             position: relative;
