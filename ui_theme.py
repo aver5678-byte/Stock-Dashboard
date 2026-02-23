@@ -257,50 +257,53 @@ def apply_global_theme():
         #MainMenu {visibility: hidden;}
         header {visibility: hidden;}
         footer {visibility: hidden;}
-        /* 8. 右上角會員中心精緻化 (Glassmorphism) */
+        /* 8. 右上角會員中心精緻化 (Glassmorphism) - 強制浮動版 */
+        div[data-testid="stAppViewContainer"] > section:nth-child(2) > div:nth-child(1) {
+            position: relative;
+        }
+        
         .top-nav-user-container {
-            position: fixed;
-            top: 20px;
-            right: 25px;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            animation: fadeIn 0.8s ease-out;
+            position: fixed !important;
+            top: 1.5rem !important;
+            right: 2.5rem !important;
+            z-index: 999999 !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 15px !important;
+            animation: fadeIn 0.8s ease-out !important;
         }
 
         .user-glass-card {
-            background: rgba(30, 41, 59, 0.4) !important;
+            background: rgba(15, 23, 42, 0.8) !important;
             backdrop-filter: blur(12px) !important;
-            border: 1px solid rgba(56, 189, 248, 0.3) !important;
+            border: 1px solid rgba(56, 189, 248, 0.5) !important;
             border-radius: 50px !important;
-            padding: 5px 20px 5px 6px !important;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
-            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            padding: 6px 20px 6px 8px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+            transition: all 0.3s ease !important;
         }
 
         .user-glass-card:hover {
-            background: rgba(30, 41, 59, 0.7) !important;
             border-color: #38BDF8 !important;
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(56, 189, 248, 0.2) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 15px 40px rgba(56, 189, 248, 0.3) !important;
         }
 
         .user-avatar-circle {
-            width: 38px;
-            height: 38px;
-            background: linear-gradient(135deg, #38BDF8, #1D4ED8);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 900;
-            font-size: 16px;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+            width: 34px !important;
+            height: 34px !important;
+            background: linear-gradient(135deg, #38BDF8, #1D4ED8) !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: white !important;
+            font-weight: 900 !important;
+            font-size: 15px !important;
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.6) !important;
         }
 
         .google-signin-btn {
@@ -309,21 +312,20 @@ def apply_global_theme():
             gap: 10px !important;
             background: white !important;
             color: #3C4043 !important;
-            padding: 8px 18px !important;
-            border-radius: 8px !important;
+            padding: 10px 22px !important;
+            border-radius: 50px !important;
             font-weight: 600 !important;
             font-size: 14px !important;
             cursor: pointer !important;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
-            transition: all 0.2s;
-            border: none !important;
-            text-decoration: none !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;
+            transition: all 0.3s !important;
+            border: 2px solid #E5E7EB !important;
         }
 
         .google-signin-btn:hover {
-            background: #F8F9FA !important;
-            transform: scale(1.02);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15) !important;
+            border-color: #38BDF8 !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 15px 35px rgba(56, 189, 248, 0.2) !important;
         }
 
         @keyframes fadeIn {
