@@ -124,6 +124,16 @@ def page_biz_cycle():
   50% {{ border-color: rgba(56, 189, 248, 0.8); box-shadow: 0 0 30px rgba(56, 189, 248, 0.4); }}
   100% {{ border-color: rgba(56, 189, 248, 0.2); box-shadow: 0 0 10px rgba(56, 189, 248, 0.1); }}
 }}
+@keyframes pulse-red-tag-glow {{
+  0% {{ box-shadow: 0 0 5px rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.3); }}
+  50% {{ box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); border-color: rgba(239, 68, 68, 0.8); }}
+  100% {{ box-shadow: 0 0 5px rgba(239, 68, 68, 0.2); border-color: rgba(239, 68, 68, 0.3); }}
+}}
+@keyframes pulse-green-tag-glow {{
+  0% {{ box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.3); }}
+  50% {{ box-shadow: 0 0 15px rgba(16, 185, 129, 0.6); border-color: rgba(16, 185, 129, 0.8); }}
+  100% {{ box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.3); }}
+}}
 </style>
 <div style="background:#0F172A; border:4px solid #334155; border-radius:12px; padding:35px; margin-bottom:40px; box-shadow:0 20px 50px rgba(0,0,0,0.6); overflow:hidden;">
 <div style="display:flex; justify-content:space-between; align-items:stretch; gap:25px;">
@@ -190,49 +200,49 @@ def page_biz_cycle():
     
     history_data = [
         {
-            "period": "2025/11/03 - 進行中", "months": float(months_ongoing), "type": "登頂倒數中", 
+            "period": "2025/11/03 - 進行中", "months": float(months_ongoing), "type": "登頂倒數中", "light": "黃紅燈",
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.15)", "status_icon": "🚨",
             "start_date": "2025/11/03 (09月燈號發布後首日)", "start_idx": "28,334",
             "peak_date": "2026/02/11", "peak_idx": "33,606", "gain_pct": "18.6%"
         },
         {
-            "period": "2024/06/03 - 07/11 登頂", "months": 1.3, "type": "極速脈衝型", 
+            "period": "2024/06/03 - 07/11 登頂", "months": 1.3, "type": "極速脈衝型", "light": "黃紅燈",
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
             "start_date": "2024/06/03 (04月燈號發布後首日)", "start_idx": "21,537",
             "peak_date": "2024/07/11", "peak_idx": "24,416", "gain_pct": "13.4%"
         },
         {
-            "period": "2021/02/01 - 2022/01/05 登頂", "months": 11.1, "type": "罕見長線型", 
+            "period": "2021/02/01 - 2022/01/05 登頂", "months": 11.1, "type": "罕見長線型", "light": "黃紅燈",
             "color": "#10B981", "bg": "rgba(16, 185, 129, 0.1)", "status_icon": "✅",
             "start_date": "2021/02/01 (12月燈號發布後首日)", "start_idx": "15,410",
             "peak_date": "2022/01/05", "peak_idx": "18,619", "gain_pct": "20.8%"
         },
         {
-            "period": "2010/01/04 - 2011/01/28 登頂", "months": 12.8, "type": "罕見長線型", 
+            "period": "2010/01/04 - 2011/01/28 登頂", "months": 12.8, "type": "罕見長線型", "light": "黃紅燈",
             "color": "#10B981", "bg": "rgba(16, 185, 129, 0.1)", "status_icon": "✅",
             "start_date": "2010/01/04 (11月燈號發布後首日)", "start_idx": "8,208",
             "peak_date": "2011/01/28", "peak_idx": "9,220", "gain_pct": "12.3%"
         },
         {
-            "period": "2007/11/01 - 10/30 溢價歸零", "months": 0.1, "type": "發布即見頂 (快閃型)", 
+            "period": "2007/11/01 - 10/30 溢價歸零", "months": 0.1, "type": "發布即見頂 (快閃型)", "light": "紅燈",
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "🆘",
             "start_date": "2007/11/01 (09月燈號發布後首日)", "start_idx": "9,598",
             "peak_date": "2007/10/30", "peak_idx": "9,859", "gain_pct": "2.7%"
         },
         {
-            "period": "2004/02/02 - 03/05 登頂", "months": 1.1, "type": "極速脈衝型", 
+            "period": "2004/02/02 - 03/05 登頂", "months": 1.1, "type": "極速脈衝型", "light": "紅燈",
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
             "start_date": "2004/02/02 (12月燈號發布後首日)", "start_idx": "6,320",
             "peak_date": "2004/03/05", "peak_idx": "7,135", "gain_pct": "12.9%"
         },
         {
-            "period": "2000/03/01 - 02/18 溢價歸零", "months": 0.1, "type": "發布即見頂 (快閃型)", 
+            "period": "2000/03/01 - 02/18 溢價歸零", "months": 0.1, "type": "發布即見頂 (快閃型)", "light": "紅燈",
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "🆘",
             "start_date": "2000/03/01 (01月燈號發布後首日)", "start_idx": "9,689",
             "peak_date": "2000/02/18", "peak_idx": "10,393", "gain_pct": "7.3%"
         },
         {
-            "period": "1994/08/01 - 10/03 登頂", "months": 2.1, "type": "極速脈衝型", 
+            "period": "1994/08/01 - 10/03 登頂", "months": 2.1, "type": "極速脈衝型", "light": "紅燈",
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
             "start_date": "1994/08/01 (06月燈號發布後首日)", "start_idx": "6,744",
             "peak_date": "1994/10/03", "peak_idx": "7,228", "gain_pct": "7.2%"
@@ -249,7 +259,36 @@ def page_biz_cycle():
         else:
             tactical_eval, strategy_node = "🆘 極速脈衝：獲利轉瞬", "分批獲利 / 禁止任何追價"
 
-        card_html = f"""<div style="background:#0F172A; border:5px solid #334155; border-radius:12px; margin-bottom:50px; overflow:hidden; width:100%; box-shadow:0 30px 60px rgba(0,0,0,0.5);"><div style="display:flex; justify-content:space-between; align-items:stretch; background:#1E293B; border-bottom:4px solid #475569;"><div style="flex:2.5; padding:35px 30px; border-right:4px solid #475569;"><div style="display:flex; align-items:center; gap:20px; margin-bottom:15px;"><span style="color:{item['color']}; background:{item['bg']}; padding:6px 16px; border-radius:8px; font-size:20px; font-weight:900; border:2px solid {item['color']};">{item['status_icon']} {str(item['type']).split('(')[0].strip()}</span><span style="font-size:24px; color:#94A3B8; font-weight:800; letter-spacing:1px;">攻頂時間紀錄：</span></div><div style="font-size:48px; color:white; font-weight:950; letter-spacing:-1px; line-height:1;">📅 {item['period']}</div></div><div style="flex:1; text-align:center; background:rgba(239, 68, 68, 0.05); padding:40px 20px; display:flex; flex-direction:column; justify-content:center; min-width:300px;"><div style="font-size:20px; color:#FCA5A5; font-weight:900; text-transform:uppercase; margin-bottom:12px; letter-spacing:2px;">距離登頂時長</div><div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:#EF4444; line-height:1;">{m_val:.1f}<span style="font-size:25px; font-weight:800; margin-left:10px; color:#FCA5A5;">M</span></div></div></div><div style="background:#0F172A; padding:35px; border-bottom:4px solid #334155;"><div style="display:flex; justify-content:space-between; align-items:center; font-size:28px; color:#FCA5A5; margin-bottom:15px; font-weight:950; white-space:nowrap;"><span>⌛ 逃命窗口耗竭度 (對標 14 個月)</span><span>{m_val:.1f} / 14 M</span></div><div style="height:20px; background:#020617; border-radius:10px; overflow:hidden; border:2px solid #334155;"><div style="width:{w}%; height:100%; background:linear-gradient(90deg, #1E293B, {item['color']}); box-shadow:0 0 30px {item['color']};"></div></div></div><div style="display:grid; grid-template-columns:1fr 1.2fr 1fr; gap:0; background:#1E293B;"><div style="background:#1E293B; padding:30px; text-align:left; border-right:4px solid #334155;"><div style="font-size:18px; color:#94A3B8; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[階段一] 首次亮燈警戒</div><div style="font-size:14px; color:#64748B; font-weight:800; margin-bottom:5px;">(發生於 {item['start_date']})</div><div style="font-size:36px; font-weight:950; color:white;">{item['start_idx']}</div></div><div style="background:rgba(239, 68, 68, 0.05); padding:30px; text-align:left; border-right:4px solid #334155;"><div style="font-size:18px; color:#EF4444; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[階段二] 波段見最高點</div><div style="font-size:14px; color:#FCA5A5; font-weight:800; margin-bottom:5px;">(發生於 {item['peak_date']})</div><div style="display:flex; align-items:baseline; gap:12px;"><div style="font-size:36px; font-weight:950; color:white;">{item['peak_idx']}</div><div style="font-size:22px; font-weight:900; color:#EF4444;">+{item['gain_pct']}</div></div></div><div style="background:#1E293B; padding:30px; text-align:left;"><div style="font-size:18px; color:#38BDF8; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[階段三] 逃命窗口狀態</div><div style="font-size:14px; color:#64748B; font-weight:800; margin-bottom:5px;">(視角：{tactical_eval.split('：')[0]})</div><div style="font-size:24px; font-weight:950; color:#7DD3FC; line-height:1.3;">{strategy_node}</div></div></div></div>"""
+        # 數據解析與重組
+        s_date_raw = str(item['start_date'])
+        s_date_only = s_date_raw.split('(')[0].strip()
+        p_date_raw = str(item['peak_date']).replace('發生於 ', '').strip()
+        
+        # 轉換日期物件進行比對
+        try:
+            s_dt = datetime.strptime(s_date_only, "%Y/%m/%d")
+            p_dt = datetime.strptime(p_date_raw, "%Y/%m/%d")
+            is_laggy = p_dt < s_dt
+        except:
+            is_laggy = False
+
+        s_idx_val = int(str(item['start_idx']).replace(',', ''))
+        p_idx_val = int(str(item['peak_idx']).replace(',', ''))
+        p_diff = p_idx_val - s_idx_val
+        t_days = int(m_val * 21) if m_val > 0.1 else 0
+        
+        # 處理落後訊號的顯示文案
+        if is_laggy:
+            time_display = "0 個交易日 (訊號落後)"
+            diff_display = "🚫 高點出現早於燈號"
+        else:
+            time_display = f"{t_days} 個交易日"
+            diff_display = f"▲ +{p_diff:,} 點"
+
+        s_month = s_date_raw.split('(')[1].split('月')[0].strip() + "月" if '(' in s_date_raw and '月' in s_date_raw else ""
+        s_full_tag = f"({s_date_only}) {s_month}：{item.get('light', '')}"
+
+        card_html = f"""<div style="background:#0F172A; border:2px solid #334155; border-radius:18px; margin-bottom:70px; overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,0.6);"><div style="display:flex; align-items:stretch; background:#1E293B; padding:0; border-bottom:1px solid #334155;"><div style="flex:1; padding:45px 30px; text-align:center; border-right:1px solid #334155;"><div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:12px;"><span style="background:{item['bg']}; color:{item['color']}; padding:6px 16px; border-radius:6px; font-weight:950; font-size:18px; border:2px solid {item['color']}; box-shadow:0 0 15px {item['color']}44;">{item['status_icon']} {str(item['type']).split('(')[0].strip()}</span><span style="color:#94A3B8; font-size:18px; font-weight:800; letter-spacing:1px;"> 窗口起點偵測 :</span></div><div style="font-size:48px; color:white; font-weight:950; letter-spacing:-1.5px; line-height:1;">📅 {str(item['period']).split('-')[0].strip()}</div></div><div style="flex:1; padding:45px 30px; text-align:center;"><div style="color:#94A3B8; font-size:18px; font-weight:800; margin-bottom:12px; letter-spacing:1px;">末升段衝刺總耗時 :</div><div style="text-align:center;"><div style="color:#EF4444; font-family:'JetBrains Mono', sans-serif; font-size:34px; font-weight:950; margin-bottom:5px; display:flex; align-items:center; justify-content:center; gap:12px;">🚀 {time_display}</div><div style="color:#EF4444; font-family:'JetBrains Mono', sans-serif; font-size:24px; font-weight:900;">{diff_display}</div></div></div></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:0;"><div style="background:#3B0A0A; padding:65px 40px; border-right:2px solid #334155; text-align:center;"><div style="color:#FCA5A5; font-size:22px; font-weight:950; margin-bottom:25px; letter-spacing:2px; opacity:0.9;">[ 階段一 ] 訊號發佈點</div><div style="font-family:'JetBrains Mono'; font-size:68px; font-weight:950; color:white; line-height:1; margin-bottom:20px; text-shadow:0 0 35px rgba(239,68,68,0.5);">{item['start_idx']}</div><div style="background:rgba(239,68,68,0.2); color:#FCA5A5; display:inline-block; padding:6px 18px; border-radius:8px; font-size:17px; font-weight:900; border:1px solid #EF4444; animation: pulse-red-tag-glow 2s infinite;">{s_full_tag}</div></div><div style="background:#042F2E; padding:65px 40px; text-align:center;"><div style="color:#A7F3D0; font-size:22px; font-weight:950; margin-bottom:25px; letter-spacing:2px; opacity:0.9;">[ 階段二 ] 波段最高峰</div><div style="font-family:'JetBrains Mono'; font-size:68px; font-weight:950; color:white; line-height:1; margin-bottom:20px; text-shadow:0 0 35px rgba(16,185,129,0.5);">{item['peak_idx']}</div><div style="background:rgba(16,185,129,0.2); color:#A7F3D0; display:inline-block; padding:4px 14px; border-radius:6px; font-size:17px; font-weight:900; border:1px solid #10B981; animation: pulse-green-tag-glow 2s infinite;">( 發生於 {item['peak_date']} )</div></div></div><div style="background:#0F172A; padding:45px 50px; border-top:3px solid #F97316;"><div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:35px;"><div style="font-size:34px; color:white; font-weight:950; display:flex; align-items:center; gap:15px; line-height:1;">☀️ 極端乖離：波段末升總漲幅</div><div style="font-size:42px; color:#FBBF24; font-weight:950; letter-spacing:-1.5px; line-height:1;">+{item['gain_pct']}</div></div><div style="height:24px; background:rgba(2,6,23,0.9); border-radius:10px; overflow:hidden; border:2.5px solid #F97316; padding:2.5px; box-shadow:inset 0 4px 10px rgba(0,0,0,0.5);"><div style="width:{w}%; height:100%; background:linear-gradient(90deg, #FDE68A 0%, #FBBF24 50%, #F97316 100%); border-radius:8px;"></div></div><div style="margin-top:25px; display:flex; justify-content:flex-end; align-items:center;"><div style="color:#94A3B8; font-family:'JetBrains Mono'; font-size:16px; font-weight:900;">耗竭度 {w:.1f}%</div></div></div></div>"""
         st.markdown(card_html, unsafe_allow_html=True)
 
     st.markdown("<p style='text-align:center; color:#64748B; font-size:14px; margin-top:100px; font-weight:600; letter-spacing:1px;'>系統由 aver5678 量化模組驅動 | 視覺化引擎: Command-Center v8.0 // POST_RELEASE_CALIBRATED</p>", unsafe_allow_html=True)
