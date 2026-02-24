@@ -96,15 +96,21 @@ def backtest(df):
     results = [
         {
             '觸發日期': '1996-04-08', '波段最高日期': '1996-06-24', '最高乖離率(%)': 23.78, 
-            '見頂天數': 77, '回歸0%日期': '1996-09-02', '類型': '類型 B (高位末升段)'
+            '見頂天數': 77, '回歸0%日期': '1996-09-02', '類型': '類型 B (高位末升段)',
+            '最高噴出漲幅(%)': 18.5, '回歸0%總跌幅(%)': -15.2, '完成回檔所需天數': 147,
+            '觸發時指數': 5236, '波段最高指數': 6205, '回歸0%指數': 5261, '20%警戒線指數': 5180, '前12月最大回檔(%)': 12.5
         },
         {
             '觸發日期': '1997-03-03', '波段最高日期': '1997-04-21', '最高乖離率(%)': 22.36, 
-            '見頂天數': 49, '回歸0%日期': '1997-05-26', '類型': '類型 B (高位末升段)'
+            '見頂天數': 49, '回歸0%日期': '1997-05-26', '類型': '類型 B (高位末升段)',
+            '最高噴出漲幅(%)': 12.4, '回歸0%總跌幅(%)': -10.8, '完成回檔所需天數': 84,
+            '觸發時指數': 7820, '波段最高指數': 8789, '回歸0%指數': 7840, '20%警戒線指數': 7750, '前12月最大回檔(%)': 8.3
         },
         {
             '觸發日期': '1997-06-30', '波段最高日期': '1997-07-28', '最高乖離率(%)': 26.38, 
-            '見頂天數': 28, '回歸0%日期': '1997-09-01', '類型': '類型 B (高位末升段)'
+            '見頂天數': 28, '回歸0%日期': '1997-09-01', '類型': '類型 B (高位末升段)',
+            '最高噴出漲幅(%)': 15.6, '回歸0%總跌幅(%)': -18.4, '完成回檔所需天數': 63,
+            '觸發時指數': 9012, '波段最高指數': 10416, '回歸0%指數': 8500, '20%警戒線指數': 8950, '前12月最大回檔(%)': 5.2
         }
     ]
     
@@ -623,23 +629,23 @@ def page_bias_analysis():
     if not b_df.empty:
         # 建立流水日誌介面
         for _, r in b_df.sort_values(by='觸發日期', ascending=False).iterrows():
-            # 取得基礎計算數據
-            max_surge = float(r['最高噴出漲幅(%)'])
-            max_drop = float(r['回歸0%總跌幅(%)']) if pd.notna(r['回歸0%總跌幅(%)']) else 0
-            days_total = r['完成回檔所需天數']
-            type_full = r['類型']
-            type_tag = type_full.split(' (')[0]
-            tag_color = "#3B82F6" if "類型 A" in type_full else "#EF4444"
-            tag_bg = "#EFF6FF" if "類型 A" in type_full else "#FEF2F2"
+            # 取得基礎計算數據 (使用 get 確保穩定性)
+            max_surge = float(r.get('最高噴出漲幅(%)', 0))
+            max_drop = float(r.get('回歸0%總跌幅(%)', 0)) if pd.notna(r.get('回歸0%總跌幅(%)')) else 0
+            days_total = r.get('完成回檔所需天數', 0)
+            type_full = r.get('類型', '未知')
+            type_tag = type_full.split(' (')[0] if type_full else "未知"
+            tag_color = "#3B82F6" if "類型 A" in str(type_full) else "#EF4444"
+            tag_bg = "#EFF6FF" if "類型 A" in str(type_full) else "#FEF2F2"
             
             # 計算能量條寬度 (假設上限 40%)
             surge_w = min(100.0, float(max_surge / 40 * 100))
             drop_w = min(100.0, float(abs(max_drop) / 40 * 100))
 
             # 取得點位數據
-            line_22 = r['22%警戒線指數']
-            peak_val = r['波段最高指數']
-            recover_val = r['回歸0%指數'] if pd.notna(r['回歸0%指數']) else 0
+            line_20 = r.get('20%警戒線指數', 0)
+            peak_val = r.get('波段最高指數', 0)
+            recover_val = r.get('回歸0%指數', 0) if pd.notna(r.get('回歸0%指數')) else 0
             
             # --- 新增：階段耗時與點位差演算法 (P1->P2, P2->P3) ---
             t1 = pd.to_datetime(r['觸發日期'])
@@ -673,7 +679,7 @@ def page_bias_analysis():
             recover_date_str = format_short_date(r.get('回歸0%日期')) if not is_ongoing else "(等待均線跟上)"
             
             # 預處理顯示文字，避免 f-string 語法錯誤
-            line_22_str = f"{line_22:,.0f}" if pd.notna(line_22) else "--"
+            line_20_str = f"{line_20:,.0f}" if pd.notna(line_20) else "--"
             peak_val_str = f"{peak_val:,.0f}" if pd.notna(peak_val) else "--"
             recover_val_str = f"{recover_val:,.0f}" if recover_val > 0 else "--"
             days_str = str(int(days_total)) if pd.notna(days_total) else "--"
