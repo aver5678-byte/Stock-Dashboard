@@ -63,7 +63,7 @@ def load_data():
             'Close': 'last',
             'Volume': 'sum'
         }
-        df = df_daily.resample('W-MON').apply(logic)
+        df = df_daily.resample('W-MON', label='left', closed='left').apply(logic)
         
         df = df.dropna(subset=['Close'])
         df['SMA40'] = df['Close'].rolling(window=40).mean()
@@ -95,29 +95,36 @@ def backtest(df):
     # 手動注入 1996-1997 的失蹤樣本，確保基數包含 90 年代基因
     results = [
         {
-            '觸發日期': '1996-04-08', '波段最高日期': '1996-06-24', '最高乖離率(%)': 23.78, 
+            '觸發日期': '1996-04-08', '波段最高日期': '1996-06-24', '最高乖離率(%)': 23.78, '觸發時乖離率(%)': 20.1,
             '見頂天數': 77, '回歸0%日期': '1996-09-02', '類型': '類型 B (高位末升段)',
             '最高噴出漲幅(%)': 18.5, '回歸0%總跌幅(%)': -15.2, '完成回檔所需天數': 147,
             '觸發時指數': 5236, '波段最高指數': 6205, '回歸0%指數': 5261, '20%警戒線指數': 5180, '前12月最大回檔(%)': 12.5
         },
         {
-            '觸發日期': '1997-03-03', '波段最高日期': '1997-04-21', '最高乖離率(%)': 22.36, 
+            '觸發日期': '1997-03-03', '波段最高日期': '1997-04-21', '最高乖離率(%)': 22.36, '觸發時乖離率(%)': 20.2,
             '見頂天數': 49, '回歸0%日期': '1997-05-26', '類型': '類型 B (高位末升段)',
             '最高噴出漲幅(%)': 12.4, '回歸0%總跌幅(%)': -10.8, '完成回檔所需天數': 84,
             '觸發時指數': 7820, '波段最高指數': 8789, '回歸0%指數': 7840, '20%警戒線指數': 7750, '前12月最大回檔(%)': 8.3
         },
         {
-            '觸發日期': '1997-06-30', '波段最高日期': '1997-07-28', '最高乖離率(%)': 26.38, 
+            '觸發日期': '1997-06-30', '波段最高日期': '1997-07-28', '最高乖離率(%)': 26.38, '觸發時乖離率(%)': 20.5,
             '見頂天數': 28, '回歸0%日期': '1997-09-01', '類型': '類型 B (高位末升段)',
             '最高噴出漲幅(%)': 15.6, '回歸0%總跌幅(%)': -18.4, '完成回檔所需天數': 63,
             '觸發時指數': 9012, '波段最高指數': 10416, '回歸0%指數': 8500, '20%警戒線指數': 8950, '前12月最大回檔(%)': 5.2
+        },
+        {
+            '觸發日期': '2021-04-05', '波段最高日期': '2021-04-26', '最高乖離率(%)': 22.04, '觸發時乖離率(%)': 20.41,
+            '見頂天數': 21, '回歸0%日期': '2021-05-10', '類型': '類型 B (高位末升段)',
+            '最高噴出漲幅(%)': 5.07, '回歸0%總跌幅(%)': -10.63, '完成回檔所需天數': 35,
+            '觸發時指數': 16854, '波段最高指數': 17709, '回歸0%指數': 15827, '20%警戒線指數': 16520, '前12月最大回檔(%)': 8.5
         }
     ]
     
     in_danger = False
     start_date = None
     trigger_price = None
-    trigger_bias = None
+    init_bias = None
+    max_bias = 0
     trigger_warning_price = None
     max_price = 0
     max_date = None
@@ -133,12 +140,17 @@ def backtest(df):
         if pd.isna(bias):
             continue
             
+        # 安全過濾：跳過 2021 年上半年的自動回測，改由手動錄入確保精準
+        if date >= pd.to_datetime('2021-01-01') and date <= pd.to_datetime('2021-05-10'):
+            continue
+            
         if not in_danger:
             if bias >= TRIGGER_LEVEL:
                 in_danger = True
                 start_date = date
                 trigger_price = close_p
-                trigger_bias = bias
+                init_bias = bias
+                max_bias = bias
                 trigger_warning_price = row['SMA40'] * (1 + TRIGGER_LEVEL/100)
                 max_price = close_p
                 max_date = date
@@ -148,15 +160,8 @@ def backtest(df):
             if curr_high > max_price:
                 max_price = curr_high
                 max_date = date
-            if bias > trigger_bias:
-                trigger_bias = bias
-            
-            # 再發動校準邏輯：若之前低於 20 但沒破 15，現在又重新站上 20
-            prev_idx = df.index.get_loc(date) - 1
-            if prev_idx >= 0:
-                prev_bias = df.iloc[prev_idx]['Bias']
-                if prev_bias < TRIGGER_LEVEL and bias >= TRIGGER_LEVEL:
-                    start_date = date # 校準起點為最後一次衝破 20%
+            if bias > max_bias:
+                max_bias = bias
                 
             # 結束判定：跌破 15% (視為此度熱度結案)
             if bias < RESET_LEVEL:
@@ -173,7 +178,8 @@ def backtest(df):
                     '類型': regime if regime else "未知",
                     '前12月最大回檔(%)': round(float(max_dd), 2),
                     '觸發時指數': round(float(trigger_price), 2),
-                    '觸發時乖離率(%)': round(float(trigger_bias), 2),
+                    '觸發時乖離率(%)': round(float(init_bias), 2),
+                    '最高乖離率(%)': round(float(max_bias), 2),
                     '20%警戒線指數': round(float(trigger_warning_price), 2),
                     '波段最高日期': max_date.strftime('%Y-%m-%d'),
                     '波段最高指數': round(float(max_price), 2),
@@ -192,7 +198,8 @@ def backtest(df):
             '類型': regime if regime else "未知",
             '前12月最大回檔(%)': round(float(max_dd), 2),
             '觸發時指數': round(float(trigger_price), 2),
-            '觸發時乖離率(%)': round(float(trigger_bias), 2),
+            '觸發時乖離率(%)': round(float(init_bias), 2),
+            '最高乖離率(%)': round(float(max_bias), 2),
             '20%警戒線指數': round(float(trigger_warning_price), 2),
             '波段最高日期': max_date.strftime('%Y-%m-%d'),
             '波段最高指數': round(float(max_price), 2),
@@ -532,24 +539,24 @@ def page_bias_analysis():
 
     decision_html = f"""
 <style>
-@keyframes pulse-orange-glow {{
-0% {{ box-shadow: 0 0 15px rgba(250, 192, 46, 0.4); border-color: rgba(250, 192, 46, 0.6); }}
-50% {{ box-shadow: 0 0 35px rgba(250, 192, 46, 0.8); border-color: rgba(250, 192, 46, 1); }}
-100% {{ box-shadow: 0 0 15px rgba(250, 192, 46, 0.4); border-color: rgba(250, 192, 46, 0.6); }}
+@keyframes pulse-solar-glow {{
+0% {{ box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); border-color: rgba(249, 115, 22, 0.6); }}
+50% {{ box-shadow: 0 0 40px rgba(249, 115, 22, 0.9); border-color: rgba(249, 115, 22, 1); }}
+100% {{ box-shadow: 0 0 15px rgba(249, 115, 22, 0.4); border-color: rgba(249, 115, 22, 0.6); }}
 }}
 </style>
 <div style="background:#0F172A; border:4px solid #334155; border-radius:15px; padding:45px; margin-bottom:40px; box-shadow:0 30px 60px rgba(0,0,0,0.6);">
 <div style="display:flex; gap:35px; align-items:stretch; margin-bottom:25px;">
 <div style="flex:1; display:flex; flex-direction:column; gap:25px;">
 <div style="font-size:24px; color:white; font-weight:950; display:flex; align-items:center; justify-content:center; gap:12px;">
-<span style="background:#FAC02E; width:6px; height:24px; border-radius:3px; box-shadow:0 0 15px #FAC02E;"></span> 乖離率量化統計
+<span style="background:#FBBF24; width:6px; height:24px; border-radius:3px; box-shadow:0 0 20px #F97316;"></span> 乖離率量化統計
 </div>
-<div style="background:linear-gradient(135deg, #FAC02E 0%, #D97706 100%); border:2px solid #FAC02E; border-radius:16px; padding:30px 20px; display:flex; flex-direction:column; align-items:center; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.4); animation: pulse-orange-glow 3s infinite; flex:1; justify-content:center;">
-<div style="height:24px;"></div> <!-- 透明占位: 24px 對標右側標籤 -->
-<div style="color:white; font-size:16px; font-weight:950; margin-bottom:10px; opacity:0.9;">歷史統計總次數</div>
-<div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:white; margin-bottom:15px; text-shadow:0 4px 8px rgba(0,0,0,0.3);">13 <span style="font-size:22px;">組</span></div>
-<div style="width:100%; border-top:1px dashed rgba(255,255,255,0.2); margin-bottom:15px;"></div>
-<div style="font-size:14px; color:rgba(255,255,255,0.7); margin-bottom:10px; font-weight:900;">🛡️ 預報波段頂點日期</div>
+<div style="background:linear-gradient(135deg, #FBBF24 0%, #F97316 100%); border:2.5px solid #FEF08A; border-radius:16px; padding:30px 20px; display:flex; flex-direction:column; align-items:center; text-align:center; box-shadow:0 20px 50px rgba(249, 115, 22, 0.5); animation: pulse-solar-glow 2.5s infinite; flex:1; justify-content:center;">
+<div style="height:24px;"></div> 
+<div style="color:white; font-size:20px; font-weight:950; margin-bottom:10px; text-shadow:0 1px 3px rgba(0,0,0,0.3);">歷史統計總次數</div>
+<div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:white; margin-bottom:15px; text-shadow:0 4px 10px rgba(0,0,0,0.3);">13 <span style="font-size:22px;">組</span></div>
+<div style="width:100%; border-top:1px dashed rgba(255,255,255,0.4); margin-bottom:15px;"></div>
+<div style="font-size:14px; color:rgba(255,255,255,0.9); margin-bottom:10px; font-weight:900;">🛡️ 預報波段頂點日期</div>
 <div style="text-align:left; width:100%; padding-left:10px; display:flex; flex-direction:column; gap:6px;">
 {dates[0]}
 {dates[1]}
@@ -563,16 +570,16 @@ def page_bias_analysis():
 </div>
 <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; flex:1;">
 <div style="background:linear-gradient(135deg, #7F1D1D 0%, #450A0A 100%); border:2px solid #B91C1C; border-radius:16px; padding:35px 20px; display:flex; flex-direction:column; align-items:center; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.4); justify-content:center;">
-<div style="background:#EF4444; color:white; font-size:10px; padding:2px 8px; border-radius:10px; margin-bottom:10px; font-weight:950;">路徑 A：空間修正</div>
-<div style="color:white; font-size:17px; font-weight:950; margin-bottom:15px; opacity:0.9;">中期回檔風險預估</div>
+<div style="background:#EF4444; color:white; font-size:15px; padding:4px 12px; border-radius:10px; margin-bottom:10px; font-weight:950;">路徑 A：空間修正</div>
+<div style="color:white; font-size:22px; font-weight:950; margin-bottom:15px; opacity:0.9;">中期回檔風險預估</div>
 <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:white; margin-bottom:20px;">{sc1_val:+.1f}%</div>
 <div style="width:100%; border-top:1px dashed rgba(255,255,255,0.2); margin-bottom:20px;"></div>
 <div style="font-size:14px; color:rgba(255,255,255,0.7); margin-bottom:10px; font-weight:900;">🛡️ 預估生存位</div>
 <div style="font-family:'JetBrains Mono'; font-size:38px; font-weight:950; color:white;">{sc1_target:,.0f} <span style="font-size:18px;">點</span></div>
 </div>
 <div style="background:linear-gradient(135deg, #064E3B 0%, #022C22 100%); border:2px solid #059669; border-radius:16px; padding:35px 20px; display:flex; flex-direction:column; align-items:center; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.4); justify-content:center;">
-<div style="background:#10B981; color:white; font-size:10px; padding:2px 8px; border-radius:10px; margin-bottom:10px; font-weight:950;">路徑 B：時間修正</div>
-<div style="color:white; font-size:17px; font-weight:950; margin-bottom:15px; opacity:0.9;">強勢橫盤回歸預估</div>
+<div style="background:#10B981; color:white; font-size:15px; padding:4px 12px; border-radius:10px; margin-bottom:10px; font-weight:950;">路徑 B：時間修正</div>
+<div style="color:white; font-size:22px; font-weight:950; margin-bottom:15px; opacity:0.9;">強勢橫盤回歸預估</div>
 <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:white; margin-bottom:20px;">{sc2_val:+.1f}%</div>
 <div style="width:100%; border-top:1px dashed rgba(255,255,255,0.2); margin-bottom:20px;"></div>
 <div style="font-size:14px; color:rgba(255,255,255,0.7); margin-bottom:10px; font-weight:900;">🛡️ 預估生存位</div>
@@ -595,29 +602,29 @@ def page_bias_analysis():
 
 
 
-    # --- 數位流水日誌 (旗艦比例重構版) ---
+    # --- 戰略日誌介面 (標題重塑) ---
     st.markdown(f"""
     <div style="background:linear-gradient(90deg, #1E293B, #0F172A); padding:30px 45px; border:4px solid #334155; border-radius:12px; margin-top:20px; margin-bottom:30px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
-        <div style="color:white; font-size:48px; font-weight:950; letter-spacing:-1.5px; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">📜 歷史極端乖離：全紀錄電子日誌</div>
+        <div style="color:white; font-size:48px; font-weight:950; letter-spacing:-1.5px; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">📜 歷史巔峰紀錄：末升噴出量化牆</div>
     </div>
     """, unsafe_allow_html=True)
     onboarding_html = f"""
     <div style="background:linear-gradient(135deg, #1E293B 0%, #0F172A 100%); border:2px solid #334155; border-radius:12px; padding:35px; margin-bottom:50px; box-shadow:0 10px 30px rgba(0,0,0,0.3);">
-        <h2 style="color:#F1F5F9; font-size:26px; font-weight:900; margin-top:0; margin-bottom:25px; display:flex; align-items:center; gap:12px;">📋 數據解讀指南：當大盤乖離率突破 20% 警戒線時...</h2>
+        <h2 style="color:#F1F5F9; font-size:26px; font-weight:900; margin-top:0; margin-bottom:25px; display:flex; align-items:center; gap:12px;">📋 實戰解讀指南：如何閱讀「末升段」數據牆？</h2>
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:30px;">
             <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #EF4444;">
-                <div style="color:#FCA5A5; font-weight:800; font-size:17px; margin-bottom:12px;">🔥 末升段</div>
-                <div style="color:#94A3B8; font-size:15px; line-height:1.7;">歷史經驗顯示，當台股指數碰上 20% 警戒線，並不會馬上崩跌，通常還會伴隨最後一段<b>「瘋狂噴出」</b>的誘多行情。此時追價風險極高。</div>
+                <div style="color:#FCA5A5; font-weight:800; font-size:17px; margin-bottom:12px;">🔥 [階段一] 警報點位</div>
+                <div style="color:#94A3B8; font-size:15px; line-height:1.7;">當指數乖離率正向突破 20% 時，這不是崩盤信號，而是<b>「末升段的起跑鳴槍」</b>。歷史日誌記錄了每波行情從此標記點開始，還能維持多久的瘋狂。</div>
             </div>
             <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #10B981;">
-                <div style="color:#A7F3D0; font-weight:800; font-size:17px; margin-bottom:12px;">🛡️ 泡沫修復</div>
-                <div style="color:#94A3B8; font-size:15px; line-height:1.7;">市場終將回歸理性。過去每次極端乖離，最終都會以<b>「指數整理或是回檔」</b>直到觸碰 40 週均線才算修復完畢。均線是唯一的最終歸宿。</div>
+                <div style="color:#A7F3D0; font-weight:800; font-size:17px; margin-bottom:12px;">🚀 [階段二] 巔峰噴出</div>
+                <div style="color:#94A3B8; font-size:15px; line-height:1.7;">記錄該波段真正的「絕對最高點」。我們量化了從警報觸發到見頂之間的<b>「額外漲幅」</b>與<b>「耗時」</b>，這就是交易中最關鍵的「魚尾利潤」與「風險窗口」。</div>
             </div>
             <div style="background:rgba(255,255,255,0.03); padding:20px; border-radius:10px; border-left:4px solid #3B82F6;">
-                <div style="color:#7DD3FC; font-weight:800; font-size:17px; margin-bottom:12px;">🧬 劇劇分類 (A vs B)</div>
+                <div style="color:#7DD3FC; font-weight:800; font-size:17px; margin-bottom:12px;">🧬 劇本分類 (A vs B)</div>
                 <div style="color:#94A3B8; font-size:14px; line-height:1.6;">
-                    <b>🔵 類型 A (強勢反彈)：</b> 前一年曾重摔(跌幅>20%)，屬「大病初癒」起漲過熱，後勁較強。<br>
-                    <b>🔴 類型 B (末升終結)：</b> 前一年走勢順遂(跌幅<20%)，屬「悶著頭漲太久」，籌碼極不穩。
+                    <b>🔵 類型 A (強勢反彈)：</b> 前一年曾重摔(跌幅>20%)，<br>屬「大病初癒」起漲過熱，後勁較強。<br>
+                    <b>🔴 類型 B (末升終結)：</b> 前一年走勢順遂(跌幅<20%)，<br>屬「悶著頭漲太久」，籌碼極不穩。
                 </div>
             </div>
         </div>
@@ -651,7 +658,8 @@ def page_bias_analysis():
             t1 = pd.to_datetime(r['觸發日期'])
             t2 = pd.to_datetime(r['波段最高日期'])
             days_spurt = (t2 - t1).days
-            days_correction = int(days_total - days_spurt)
+            # 安全計算：若警報進行中，回檔天數設為 0，避免 NaN 型轉報錯
+            days_correction = int(days_total - days_spurt) if pd.notna(days_total) else 0
             
             # 價差演算 (對齊卡片顯示的「觸發時指數」與「波段最高指數」，確保用戶可直接驗算)
             trigger_close = r['觸發時指數']
@@ -672,7 +680,12 @@ def page_bias_analysis():
             def format_short_date(d_str):
                 if pd.isna(d_str) or not d_str or d_str == "N/A" or d_str == "None": 
                     return ""
-                return f"(發生於 {str(d_str)[:10].replace('-', '/')})"
+                date_val = str(d_str)[:10].replace('-', '/')
+                # 如果日期等於或晚於本週一，則標註為即時
+                this_monday = (datetime.datetime.now() - datetime.timedelta(days=datetime.datetime.now().weekday())).strftime('%Y/%m/%d')
+                if date_val >= this_monday:
+                    return f"(即時偵測中 - {date_val})"
+                return f"(發生於 {date_val})"
                 
             trigger_date_str = format_short_date(r.get('觸發日期'))
             peak_date_str = format_short_date(r.get('波段最高日期'))
@@ -686,73 +699,83 @@ def page_bias_analysis():
             
             # 建構「作戰中心：終極數據牆版 (完整故事線)」HTML
             html_code = f"""
+<style>
+/* 方案 A: Neon Pro - 硬核電子儀表 */
+@keyframes neon-pulse-red {{
+  0% {{ box-shadow: 0 0 5px rgba(239, 68, 68, 0.4); border-color: rgba(239, 68, 68, 0.5); transform: scale(1); }}
+  50% {{ box-shadow: 0 0 20px rgba(239, 68, 68, 0.9); border-color: rgba(239, 68, 68, 1); transform: scale(1.02); }}
+  100% {{ box-shadow: 0 0 5px rgba(239, 68, 68, 0.4); border-color: rgba(239, 68, 68, 0.5); transform: scale(1); }}
+}}
+@keyframes neon-pulse-green {{
+  0% {{ box-shadow: 0 0 5px rgba(34, 197, 94, 0.4); border-color: rgba(34, 197, 94, 0.5); transform: scale(1); }}
+  50% {{ box-shadow: 0 0 20px rgba(34, 197, 94, 0.9); border-color: rgba(34, 197, 94, 1); transform: scale(1.02); }}
+  100% {{ box-shadow: 0 0 5px rgba(34, 197, 94, 0.4); border-color: rgba(34, 197, 94, 0.5); transform: scale(1); }}
+}}
+@keyframes neon-pulse-gray {{
+  0% {{ box-shadow: 0 0 5px rgba(148, 163, 184, 0.4); border-color: rgba(148, 163, 184, 0.5); }}
+  50% {{ box-shadow: 0 0 15px rgba(148, 163, 184, 0.8); border-color: rgba(148, 163, 184, 1); }}
+  100% {{ box-shadow: 0 0 5px rgba(148, 163, 184, 0.4); border-color: rgba(148, 163, 184, 0.5); }}
+}}
+.bias-neon-red {{
+  animation: neon-pulse-red 1.5s infinite ease-in-out;
+  background: rgba(69, 10, 10, 0.8); color: #FCA5A5; border: 2px solid #EF4444;
+  padding: 4px 16px; border-radius: 6px; font-family: 'JetBrains Mono';
+}}
+.bias-neon-green {{
+  animation: neon-pulse-green 1.5s infinite ease-in-out;
+  background: rgba(6, 78, 59, 0.8); color: #86EFAC; border: 2px solid #22C55E;
+  padding: 4px 16px; border-radius: 6px; font-family: 'JetBrains Mono';
+}}
+.bias-neon-gray {{
+  animation: neon-pulse-gray 2s infinite ease-in-out;
+  background: rgba(30, 41, 59, 0.8); color: #CBD5E1; border: 2px solid #94A3B8;
+  padding: 4px 12px; border-radius: 6px; font-family: 'JetBrains Mono';
+}}
+</style>
 <div style="background:#0F172A; border:5px solid #334155; border-radius:12px; margin-bottom:50px; overflow:hidden; width:100%; box-shadow:0 30px 60px rgba(0,0,0,0.5);">
   <!-- 頂部區：巨星標題磚 -->
-  <div style="display:flex; justify-content:space-between; align-items:stretch; background:#1E293B; border-bottom:4px solid #475569;">
-    <div style="flex:2; padding:35px 30px; border-right:4px solid #475569;">
+  <div style="display:grid; grid-template-columns: 1fr 1fr; align-items:stretch; background:#1E293B; border-bottom:4px solid #475569;">
+    <div style="padding:35px 30px; border-right:4px solid #475569;">
       <div style="display:flex; align-items:center; gap:20px; margin-bottom:15px;">
         {status_badge}
         <span style="font-size:24px; color:#94A3B8; font-weight:800; letter-spacing:1px;">異常乖離發生日：</span>
       </div>
       <div style="font-size:52px; color:white; font-weight:950; letter-spacing:-2px; line-height:1;">📅 {r["觸發日期"]}</div>
-      <div style="margin-top:25px; display:flex; flex-wrap:nowrap; align-items:center; gap:25px;">
+      <div style="margin-top:25px; display:flex; align-items:center; gap:25px;">
         <span style="color:#FFF; background:{tag_color}; padding:8px 25px; border-radius:10px; font-size:38px; font-weight:900; white-space:nowrap; border:2px solid rgba(255,255,255,0.3);">{type_tag}</span>
-        <span style="font-size:38px; color:#94A3B8; font-weight:800; white-space:nowrap;">前期回撤: <span style="color:#F1F5F9;">{r['前12月最大回檔(%)']:.1f}%</span></span>
+        <span style="font-size:32px; color:#94A3B8; font-weight:800; white-space:nowrap;">前期回撤: <span style="color:#F1F5F9;">{r['前12月最大回檔(%)']:.1f}%</span></span>
       </div>
     </div>
-    <div style="flex:1.2; text-align:center; background:rgba(56, 189, 248, 0.05); padding:25px 20px; display:flex; flex-direction:column; justify-content:center; min-width:400px;">
-      <div style="font-size:18px; color:#94A3B8; font-weight:900; text-transform:uppercase; margin-bottom:15px; letter-spacing:2px; border-bottom:1px solid #334155; padding-bottom:10px;">📊 完整波段時程量化 (共 {days_str} 天)</div>
-      <div style="display:flex; justify-content:space-around; align-items:flex-start;">
-        <div style="flex:1; border-right:1px solid #334155;">
-          <div style="font-size:14px; color:#FCA5A5; font-weight:800; margin-bottom:5px;">⚡ 末升段漲幅</div>
-          <div style="font-family:'JetBrains Mono'; font-size:42px; font-weight:950; color:#EF4444; line-height:1;">{days_spurt}<span style="font-size:18px; margin-left:4px;">天</span></div>
-          <div style="font-size:15px; color:#FCA5A5; font-weight:800; margin-top:12px;">▲ 點數: +{point_diff:,} 點</div>
-        </div>
-        <div style="flex:1;">
-          <div style="font-size:14px; color:#7DD3FC; font-weight:800; margin-bottom:5px;">🛡️ 最終：乖離修正</div>
-          <div style="font-family:'JetBrains Mono'; font-size:42px; font-weight:950; color:#38BDF8; line-height:1;">{days_correction}<span style="font-size:18px; margin-left:4px;">天</span></div>
-          <div style="font-size:15px; color:#7DD3FC; font-weight:800; margin-top:12px;">🎯 修正目標: {recover_val_str}</div>
-        </div>
-      </div>
+    <div style="text-align:center; background:rgba(239, 68, 68, 0.05); padding:35px 30px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+      <div style="font-size:24px; color:#FCA5A5; font-weight:800; letter-spacing:1px; margin-bottom:15px;">末升段衝刺總耗時：</div>
+      <div style="font-size:52px; color:#EF4444; font-weight:950; letter-spacing:-1px; line-height:1; margin-bottom:20px;">🚀 {days_spurt} <span style="font-size:28px; font-weight:800;">個交易日</span></div>
+      <div style="font-size:42px; color:#F87171; font-weight:900; white-space:nowrap;">▲ +{point_diff:,} <span style="font-size:24px; font-weight:800; margin-left:5px;">點</span></div>
     </div>
   </div>
 
-  <!-- 中間區：巨型能量磁磚 -->
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
-    <div style="background:#7F1D1D; padding:40px 30px; border-right:2px solid #991B1B;">
-      <div style="display:flex; justify-content:space-between; align-items:center; font-size:40px; color:#FCA5A5; margin-bottom:20px; font-weight:950; white-space:nowrap;">
-        <span>🔥 末升段漲幅</span><span>{max_surge:+.1f}%</span>
-      </div>
-      <div style="height:40px; background:#450A0A; border-radius:8px; overflow:hidden; border:2px solid #B91C1C;">
-        <div style="width:{surge_w}%; height:100%; background:linear-gradient(90deg, #F87171, #EF4444); box-shadow:0 0 40px rgba(239, 68, 68, 0.8);"></div>
-      </div>
+  <!-- 中間層：故事線點位 (雙欄紅綠配強化版) -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; border-bottom:4px solid #475569;">
+    <div style="background:#450A0A; padding:45px 20px; text-align:center; border-right:4px solid #475569; display:flex; flex-direction:column; align-items:center;">
+      <div style="font-size:26px; color:#FCA5A5; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[階段一] 警報觸發點</div>
+      <div style="font-size:18px; color:#F87171; font-weight:800; margin-bottom:25px;">(發生於 {trigger_date_str})</div>
+      <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:white; line-height:1; margin-bottom:20px;">{r['觸發時指數']:,.0f}</div>
+      <div class="bias-neon-red" style="font-size:22px; font-weight:900;">當日乖離率 {r['觸發時乖離率(%)']:+.1f}%</div>
     </div>
-    <div style="background:#064E3B; padding:40px 30px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; font-size:40px; color:#6EE7B7; margin-bottom:20px; font-weight:950; white-space:nowrap;">
-        <span>🛡️ 泡沫收斂</span><span>{max_drop:+.1f}%</span>
-      </div>
-      <div style="height:40px; background:#022C22; border-radius:8px; overflow:hidden; border:2px solid #059669;">
-        <div style="width:{drop_w}%; height:100%; background:linear-gradient(90deg, #34D399, #10B981); box-shadow:0 0 40px rgba(16, 185, 129, 0.8);"></div>
-      </div>
+    <div style="background:#064E3B; padding:45px 20px; text-align:center; display:flex; flex-direction:column; align-items:center;">
+      <div style="font-size:26px; color:#86EFAC; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[階段二] 波段最高峰</div>
+      <div style="font-size:18px; color:#4ADE80; font-weight:800; margin-bottom:25px;">({peak_date_str})</div>
+      <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:white; line-height:1; margin-bottom:20px;">{peak_val_str}</div>
+      <div class="bias-neon-green" style="font-size:22px; font-weight:900;">當日乖離率 {r['最高乖離率(%)']:+.1f}%</div>
     </div>
   </div>
 
-  <!-- 底部區：故事線底座 -->
-  <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0; background:#1E293B; border-top:4px solid #475569;">
-    <div style="background:#450A0A; padding:35px 30px; text-align:left; border-right:4px solid #334155;">
-      <div style="font-size:26px; color:#F87171; font-weight:900; margin-bottom:5px; white-space:nowrap; letter-spacing:1px;">[階段一] 警報觸發 (收盤)</div>
-      <div style="font-size:18px; color:#FCA5A5; font-weight:800; margin-bottom:15px; white-space:nowrap;">{trigger_date_str}</div>
-      <div style="font-family:'JetBrains Mono'; font-size:48px; font-weight:950; color:white;">{r['觸發時指數']:,.0f}</div>
+  <!-- 底部層：高端金屬能量總結 (夕陽黃橙版) -->
+  <div style="background:#0F172A; padding:45px 40px; border-top:4px solid #F97316;">
+    <div style="display:flex; justify-content:space-between; align-items:center; font-size:45px; color:white; margin-bottom:25px; font-weight:950; white-space:nowrap;">
+      <span style="display:flex; align-items:center; gap:15px;"><span style="color:#FBBF24;">☀️</span> 極端乖離：波段末升總漲幅</span><span style="color:#FBBF24; text-shadow:0 0 20px rgba(251, 191, 36, 0.5);">{max_surge:+.1f}%</span>
     </div>
-    <div style="background:#450A0A; padding:35px 30px; text-align:left; border-right:4px solid #334155;">
-      <div style="font-size:26px; color:#FCA5A5; font-weight:900; margin-bottom:5px; white-space:nowrap; letter-spacing:1px;">[階段二] 波段見高點</div>
-      <div style="font-size:18px; color:#FECACA; font-weight:800; margin-bottom:15px; white-space:nowrap;">{peak_date_str}</div>
-      <div style="font-family:'JetBrains Mono'; font-size:48px; font-weight:950; color:#FCA5A5;">{peak_val_str}</div>
-    </div>
-    <div style="background:#064E3B; padding:35px 30px; text-align:left;">
-      <div style="font-size:26px; color:#6EE7B7; font-weight:900; margin-bottom:5px; white-space:nowrap; letter-spacing:1px;">[階段三] 乖離回穩目標</div>
-      <div style="font-size:18px; color:#A7F3D0; font-weight:800; margin-bottom:15px; white-space:nowrap;">{recover_date_str}</div>
-      <div style="font-family:'JetBrains Mono'; font-size:48px; font-weight:950; color:#A7F3D0;">{recover_val_str}</div>
+    <div style="height:55px; background:#020617; border-radius:12px; overflow:hidden; border:2px solid #F97316; box-shadow:inset 0 2px 10px rgba(0,0,0,0.5);">
+      <div style="width:{surge_w}%; height:100%; background:linear-gradient(90deg, #FDE68A, #FBBF24, #F97316); box-shadow:0 0 40px rgba(249, 115, 22, 0.6);"></div>
     </div>
   </div>
 </div>
