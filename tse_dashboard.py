@@ -15,7 +15,8 @@ import datetime
 from page_biz_cycle import page_biz_cycle
 from ui_chatbot import inject_chatbot
 
-st.set_page_config(page_title="台股預警儀表板 | 40週乖離率監控", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="台股預警儀表板 | v8.1", layout="wide", initial_sidebar_state="expanded")
+# Sync Trigger: 2026-02-26 00:43
 
 # 初始化模擬資料庫 (存在 session_state 中)
 if 'user_role' not in st.session_state:
