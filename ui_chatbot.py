@@ -11,48 +11,76 @@ def inject_chatbot(token=None):
     if 'chatbot_visible' not in st.session_state:
         st.session_state.chatbot_visible = False
 
-    # --- 1. 定義切換標籤與動畫樣式 ---
-    st.markdown(f"""
-        <style>
-            /* 主畫面容器動力學調整 */
-            .main .block-container {{
-                max-width: { 'calc(100% - 400px)' if st.session_state.chatbot_visible else '100%' } !important;
-                margin-right: { '400px' if st.session_state.chatbot_visible else '0px' } !important;
-                transition: all 0.3s ease-in-out !important;
-            }}
-            
-            /* 修正 Streamlit 預設佈局對排版的限制 */
-            [data-testid="stAppViewContainer"] {{
-                display: flex;
-                flex-direction: row;
-            }}
-        </style>
-    """, unsafe_allow_html=True)
+    # --- 1. 定義全局 CSS 動力學 ---
+    # 這是為了確保左側主畫面在 AI 開啟時會「主動讓位」
+    if st.session_state.chatbot_visible:
+        st.markdown("""
+            <style>
+                /* 強制主畫面容器縮小並偏移 */
+                .main .block-container {
+                    max-width: calc(100% - 420px) !important;
+                    margin-left: 0 !important;
+                    margin-right: 420px !important;
+                    transition: all 0.3s ease-in-out !important;
+                }
+                /* 隱藏原生右側滾動條，避免雙滾動條出現 */
+                [data-testid="stSidebar"] + section {
+                    overflow-x: hidden !important;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+    else:
+        st.markdown("""
+            <style>
+                .main .block-container {
+                    max-width: 100% !important;
+                    margin-right: 0px !important;
+                    transition: all 0.3s ease-in-out !important;
+                }
+            </style>
+        """, unsafe_allow_html=True)
 
-    # --- 2. 顯示按鈕 ---
+    # --- 2. 側邊欄控制按鈕 ---
     with st.sidebar:
         st.markdown("---")
-        if st.button("🤖 AI 助理" + (" (關閉)" if st.session_state.chatbot_visible else " (開啟)"), key="btn_toggle_ai"):
+        # 增加一個更亮眼的按鈕樣式
+        label = "❌ 關閉 AI 助理" if st.session_state.chatbot_visible else "🤖 開啟 AI 戰情室"
+        if st.button(label, key="btn_toggle_ai", use_container_width=True):
             st.session_state.chatbot_visible = not st.session_state.chatbot_visible
             st.rerun()
 
-    # --- 3. 如果開啟，顯示 Dify 視窗 ---
+    # --- 3. 渲染右側面板 (使用絕對定位組件) ---
     if st.session_state.chatbot_visible:
-        # 建立帶有邊界感的 HTML 內核
-        chatbot_html = """
-        <div style="position: fixed; right: 0; top: 0; width: 400px; height: 100vh; background: #0F172A; border-left: 2px solid #38BDF8; z-index: 1000000; display: flex; flex-direction: column; box-shadow: -15px 0 35px rgba(0,0,0,0.6);">
-            <!-- 分隔裝飾線 -->
-            <div style="position: absolute; left: 0; top: 0; width: 1px; height: 100%; background: linear-gradient(to bottom, transparent, #38BDF8, transparent); box-shadow: 0 0 15px #38BDF8;"></div>
-            
-            <div style="padding: 15px; background: #1E293B; color: white; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;">
+        # 使用一個絕對定位的容器，高度設為 0 以免在頁面底部佔位
+        full_panel_html = """
+        <div style="position: fixed; right: 0; top: 0; width: 400px; height: 100vh; background: #0F172A; border-left: 2px solid #38BDF8; z-index: 999999; display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.5);">
+            <div style="padding: 15px; background: #1E293B; color: white; border-bottom: 2px solid #334155; font-family: sans-serif; display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-weight: bold; letter-spacing: 1px;">🤖 AI 戰情分析專區</span>
-                <span style="color: #38BDF8; font-size: 10px; font-weight: bold;">LIVE</span>
+                <span style="color: #38BDF8; font-size: 11px; font-weight: bold; padding: 2px 6px; border: 1px solid #38BDF8; border-radius: 4px;">LIVE</span>
             </div>
             <iframe
                 src="https://udify.app/chatbot/YUWIdfFrAFOsIJ8s"
                 style="width: 100%; flex-grow: 1; border: none;"
+                frameborder="0"
                 allow="microphone">
             </iframe>
         </div>
         """
-        st.markdown(chatbot_html, unsafe_allow_html=True)
+        # 關鍵：這裡必須用 components.html 且給予足夠權限，或者直接 markdown 執行
+        # 為了解決程式碼裸露，我們使用 st.components.v1.html 的沙盒渲染
+        st.components.v1.html(full_panel_html, height=1000)
+        
+        # 同時注入一段 CSS 修正沙盒本身的定位，讓它真正浮在最右邊
+        st.markdown("""
+            <style>
+                iframe[title="st.components.v1.html"] {
+                    position: fixed !important;
+                    right: 0 !important;
+                    top: 0 !important;
+                    width: 400px !important;
+                    height: 100vh !important;
+                    z-index: 1000000 !important;
+                    border: none !important;
+                }
+            </style>
+        """, unsafe_allow_html=True)
