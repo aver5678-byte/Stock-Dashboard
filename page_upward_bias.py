@@ -14,9 +14,17 @@ def load_upward_data(ticker_symbol):
     # 使用 7% 轉折模型 (跌 7% 確認頭部，漲 7% 確認底部)
     waves = analyze_waves(df, reversal_percent=7.0)
     
-    # 取出所有向上波段 (type == 'up')
-    up_waves = [w for w in waves if w['type'] == 'up']
-    
+    # 取出所有向上波段 (type == 'up') 並加入前波清洗度
+    up_waves = []
+    for i, w in enumerate(waves):
+        if w['type'] == 'up':
+            prev_w = waves[i-1] if i > 0 else None
+            pre_dd = 0.0
+            if prev_w and prev_w['type'] == 'down':
+                pre_dd = (prev_w['lowest_price'] - prev_w['highest_price']) / prev_w['highest_price'] * 100
+            w['pre_drawdown'] = pre_dd
+            up_waves.append(w)
+            
     if not up_waves:
         return pd.DataFrame(), pd.DataFrame(), {}
         
@@ -37,11 +45,12 @@ def load_upward_data(ticker_symbol):
         results.append({
             '起漲日期 (前波破底)': start_date_str,
             '最高日期 (下波前高)': end_date_str,
-            '起漲價格': round(float(start_price), 2) if start_price is not None else 0.0,
-            '最高價格': round(float(end_price), 2) if end_price is not None else 0.0,
-            '漲幅(%)': round(float(gain_pct), 2) if gain_pct is not None else 0.0,
+            '起漲價格': float(start_price) if start_price is not None else 0.0,
+            '最高價格': float(end_price) if end_price is not None else 0.0,
+            '漲幅(%)': float(gain_pct) if gain_pct is not None else 0.0,
             '花費天數': int(days),
-            '狀態': status
+            '狀態': status,
+            '前波清洗度(%)': w.get('pre_drawdown', 0.0)
         })
         
     up_df = pd.DataFrame(results)
@@ -135,24 +144,78 @@ def page_upward_bias():
             status = r['狀態']
             # Scale 0-70%
             w = min(100.0, (gain / 70) * 100)
-            tag_color = "#10B981" if status == '已完結' else "#3B82F6"
-            tag_bg = "#F0FDF4" if status == '已完結' else "#EFF6FF"
+            tag_color = "#10B981" if status == '已完結' else "#EF4444"
+            tag_bg = "rgba(16, 185, 129, 0.15)" if status == '已完結' else "rgba(239, 68, 68, 0.15)"
+            icon = "✅" if status == '已完結' else "🚀"
             
-            st.markdown(f'''
-                <div class="log-item">
-                    <div class="log-date" style="min-width:140px;">📅 {r['起漲日期 (前波破底)']}</div>
-                    <div style="flex: 1;">
-                        <span class="log-type-tag" style="color:{tag_color}; background:{tag_bg};">{status}</span>
-                        <div style="display:flex; align-items:center; gap:20px; margin-top:10px;">
-                            <div class="energy-bar-container" style="flex:1;"><div class="energy-bar-fill-up" style="width:{w}%;"></div></div>
-                            <div style="font-family:'JetBrains Mono'; font-weight:800; font-size:18px; color:#111827;">{gain:+.1f}%</div>
-                        </div>
-                    </div>
-                    <div style="text-align:right; min-width:100px;">
-                        <div style="font-size:11px; color:#9CA3AF;">歷時</div>
-                        <div style="font-family:'JetBrains Mono'; font-weight:800; color:#4B5563;">{days}天</div>
-                    </div>
+            # --- 自訂欄位邏輯 ---
+            # 左下角標籤：依漲幅判斷
+            is_strong = gain >= 20.0
+            custom_tag_text = "強勢多頭" if is_strong else "一般反彈"
+            custom_tag_bg = "#EF4444" if is_strong else "#06B6D4" # 紅色代表強勢多頭，青色一般反彈
+            
+            pre_dd = r.get('前波清洗度(%)', 0)
+            pre_dd_display = f"{pre_dd:.1f}%" if pre_dd < 0 else "N/A"
+            
+            top_right_bg = "rgba(16, 185, 129, 0.05)" if gain > 0 else "rgba(239, 68, 68, 0.05)"
+            top_right_val_color = "#10B981" if gain > 0 else "#EF4444"
+            
+            # 建立專屬 HTML
+            card_html = f"""
+            <div style="background:#0F172A; border:5px solid #334155; border-radius:12px; margin-bottom:50px; overflow:hidden; width:100%; box-shadow:0 30px 60px rgba(0,0,0,0.5);">
+              <!-- 頂部區：巨星標題磚 -->
+              <div style="display:grid; grid-template-columns: 1fr 1fr; align-items:stretch; background:#1E293B; border-bottom:4px solid #475569;">
+                <div style="padding:35px 30px; border-right:4px solid #475569;">
+                  <div style="display:flex; align-items:center; gap:20px; margin-bottom:15px;">
+                    <span style="background:{tag_bg}; color:{tag_color}; padding:6px 16px; border-radius:6px; font-weight:950; font-size:18px; border:2px solid {tag_color}; box-shadow:0 0 15px {tag_color}44;">{icon} {status}</span>
+                    <span style="font-size:24px; color:#94A3B8; font-weight:800; letter-spacing:1px;">波段起漲確認日：</span>
+                  </div>
+                  <div style="font-size:52px; color:white; font-weight:950; letter-spacing:-2px; line-height:1;">📅 {r['起漲日期 (前波破底)']}</div>
+                  <div style="margin-top:25px; display:flex; align-items:center; gap:25px;">
+                    <span style="color:#FFF; background:{custom_tag_bg}; padding:8px 25px; border-radius:10px; font-size:38px; font-weight:900; white-space:nowrap; border:2px solid rgba(255,255,255,0.3);">{custom_tag_text}</span>
+                    <span style="font-size:32px; color:#94A3B8; font-weight:800; white-space:nowrap;">前波清洗度: <span style="color:#F1F5F9;">{pre_dd_display}</span></span>
+                  </div>
                 </div>
-            ''', unsafe_allow_html=True)
+                <div style="text-align:center; background:{top_right_bg}; padding:35px 30px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                  <div style="font-size:24px; color:#94A3B8; font-weight:800; letter-spacing:1px; margin-bottom:15px;">波段噴發總週期：</div>
+                  <div style="font-size:52px; color:{top_right_val_color}; font-weight:950; letter-spacing:-1px; line-height:1; margin-bottom:20px;">🔥 {days} <span style="font-size:28px; font-weight:800;">天</span></div>
+<div style="font-size:42px; color:#10B981; font-weight:900; white-space:nowrap;">▲ {gain:+.1f}%</div>
+                </div>
+              </div>
+
+              <!-- 中間層：故事線點位 -->
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; border-bottom:4px solid #475569;">
+                <div style="background:#450A0A; padding:45px 20px; text-align:center; border-right:4px solid #475569; display:flex; flex-direction:column; align-items:center;">
+                  <div style="font-size:26px; color:#FCA5A5; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[階段一] 波段起漲點</div>
+                  <div style="font-size:18px; color:#F87171; font-weight:800; margin-bottom:25px;">(起漲於 {r['起漲日期 (前波破底)']})</div>
+                  <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:white; line-height:1; margin-bottom:20px;">{r['起漲價格']:,.0f}</div>
+                  <div style="background: rgba(69, 10, 10, 0.8); color: #FCA5A5; border: 2px solid #EF4444; padding: 4px 16px; border-radius: 6px; font-family: 'JetBrains Mono'; font-size:22px; font-weight:900;">跌勢終結</div>
+                </div>
+                <div style="background:#064E3B; padding:45px 20px; text-align:center; display:flex; flex-direction:column; align-items:center;">
+                  <div style="font-size:26px; color:#86EFAC; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[階段二] 波段最高點</div>
+                  <div style="font-size:18px; color:#4ADE80; font-weight:800; margin-bottom:25px;">(攻頂於 {r['最高日期 (下波前高)']})</div>
+                  <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:white; line-height:1; margin-bottom:20px;">{r['最高價格']:,.0f}</div>
+                  <div style="background: rgba(6, 78, 59, 0.8); color: #86EFAC; border: 2px solid #22C55E; padding: 4px 16px; border-radius: 6px; font-family: 'JetBrains Mono'; font-size:22px; font-weight:900;">多頭盛極轉折</div>
+                </div>
+              </div>
+
+              <!-- 底部層：能量總結 -->
+              <div style="background:#0F172A; padding:45px 50px; border:3px solid #10B981; margin:0;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:35px;">
+                  <div style="font-size:34px; color:white; font-weight:950; display:flex; align-items:center; gap:15px; line-height:1;">🔥 波段爆發能量展示：</div>
+                  <div style="font-size:42px; color:#34D399; font-weight:950; letter-spacing:-1.5px; line-height:1; text-shadow: 0 0 20px rgba(52, 211, 153, 0.4); display:flex; align-items:baseline; gap:15px;">
+                    <span>+{gain:.1f}%</span>
+                  </div>
+                </div>
+                <div style="height:38px; background:rgba(2,6,23,0.95); border-radius:12px; overflow:hidden; border:3px solid #10B981; padding:3px; box-shadow:inset 0 4px 10px rgba(0,0,0,0.6);">
+                  <div style="width:{w}%; height:100%; background:linear-gradient(90deg, #A7F3D0 0%, #34D399 50%, #10B981 100%); border-radius:8px; box-shadow:0 0 25px rgba(16, 185, 129, 0.4);"></div>
+                </div>
+                <div style="margin-top:25px; display:flex; justify-content:flex-end; align-items:center;">
+                  <div style="color:#94A3B8; font-family:'JetBrains Mono'; font-size:16px; font-weight:900;">爆發里程 {w:.1f}%</div>
+                </div>
+              </div>
+            </div>
+            """
+            st.markdown(card_html, unsafe_allow_html=True)
 
     st.write("<p style='text-align:center; color:#9CA3AF; font-size:12px; margin-top:80px;'>系統由 aver5678 量化模組驅動 | 上漲爆發力引擎: Wave-Analyzer v2.1</p>", unsafe_allow_html=True)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import yfinance as yf
 import pandas as pd
 
@@ -13,7 +14,7 @@ def fetch_data(ticker, start_date="2000-01-01"):
         pd.DataFrame: DataFrame containing Date, High, Low, Close prices.
     """
     print(f"Fetching data for {ticker} from {start_date}...")
-    df = yf.download(ticker, start=start_date)
+    df = yf.download(ticker, start=start_date, threads=False, progress=False)
     
     if df.empty:
         raise ValueError(f"No data found for ticker {ticker}.")

@@ -186,8 +186,8 @@ def page_biz_cycle():
     
     history_data = [
         {
-            "period": f"{research_start.strftime('%Y/%m/%d')} - 進行中", "months": float(months_ongoing), "type": "登頂倒數中", "light": "紅燈",
-            "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.15)", "status_icon": "🚨",
+            "period": f"{research_start.strftime('%Y/%m/%d')} - 進行中", "months": float(months_ongoing), "type": "登頂倒數中", "light": "黃紅燈",
+            "color": "#EAB308", "bg": "rgba(234, 179, 8, 0.15)", "status_icon": "⚠️",
             "start_date": f"{research_start.strftime('%Y/%m/%d')} (12月燈號發布後首日)", "start_idx": "29,350",
             "peak_date": now.strftime("%Y/%m/%d"), "peak_idx": "35,522", "gain_pct": "21.0%", "bias_pct": "+33.6%"
         },
@@ -274,48 +274,73 @@ def page_biz_cycle():
         s_month = s_date_raw.split('(')[1].split('月')[0].strip() + "月" if '(' in s_date_raw and '月' in s_date_raw else ""
         s_full_tag = f"({s_date_only}) {s_month}：{item.get('light', '')}"
 
-        card_html = f"""<div style="background:#0F172A; border:2px solid #334155; border-radius:18px; margin-bottom:70px; overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,0.6);">
-  <div style="display:grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; background:#1E293B; border-bottom:1px solid #334155;">
-    <!-- 格子 1 -->
-    <div style="padding:65px 40px; text-align:center; border-right:1px solid #334155; border-bottom:1px solid #334155; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-      <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:12px;">
-        <span style="background:{item['bg']}; color:{item['color']}; padding:6px 16px; border-radius:6px; font-weight:950; font-size:18px; border:2px solid {item['color']}; box-shadow:0 0 15px {item['color']}44;">{item['status_icon']} {str(item['type']).split('(')[0].strip()}</span>
-        <span style="color:#94A3B8; font-size:18px; font-weight:800; letter-spacing:1px;"> 窗口起點偵測 :</span>
-      </div>
-      <div style="font-size:38px; color:white; font-weight:950; letter-spacing:-1.5px; line-height:1;">📅 {str(item['period']).split('-')[0].strip()}</div>
-    </div>
-    <!-- 格子 2 -->
-    <div style="padding:65px 40px; text-align:center; border-bottom:1px solid #334155; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-      <div style="color:#94A3B8; font-size:18px; font-weight:800; margin-bottom:12px; letter-spacing:1px;">末升段衝刺總耗時 :</div>
-      <div style="color:#EF4444; font-family:'JetBrains Mono', sans-serif; font-size:34px; font-weight:950; margin-bottom:5px; display:flex; align-items:center; justify-content:center; gap:12px;">🚀 {time_display}</div>
-      <div style="color:#EF4444; font-family:'JetBrains Mono', sans-serif; font-size:24px; font-weight:900;">{diff_display}</div>
-    </div>
-    <!-- 格子 3 -->
-    <div style="background:#3B0A0A; padding:65px 40px; border-right:1px solid #334155; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-      <div style="color:#FCA5A5; font-size:22px; font-weight:950; margin-bottom:25px; letter-spacing:2px; opacity:0.9;">[ 階段一 ] 訊號發佈點</div>
-      <div style="font-family:'JetBrains Mono'; font-size:68px; font-weight:950; color:white; line-height:1; margin-bottom:20px; text-shadow:0 0 35px rgba(239,68,68,0.5);">{item['start_idx']}</div>
-      <div style="background:rgba(239,68,68,0.2); color:#FCA5A5; display:inline-block; padding:6px 18px; border-radius:8px; font-size:17px; font-weight:900; border:1px solid #EF4444; animation: pulse-red-tag-glow 2s infinite;">{s_full_tag}</div>
-    </div>
-    <!-- 格子 4 -->
-    <div style="background:#042F2E; padding:65px 40px; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-      <div style="color:#A7F3D0; font-size:22px; font-weight:950; margin-bottom:25px; letter-spacing:2px; opacity:0.9;">[ 階段二 ] 波段最高峰</div>
-      <div style="font-family:'JetBrains Mono'; font-size:68px; font-weight:950; color:white; line-height:1; margin-bottom:20px; text-shadow:0 0 35px rgba(16,185,129,0.5);">{item['peak_idx']}</div>
-      <div style="background:rgba(16,185,129,0.2); color:#A7F3D0; display:inline-block; padding:8px 20px; border-radius:8px; font-size:17px; font-weight:900; border:1px solid #10B981; animation: pulse-green-tag-glow 2s infinite; line-height:1.5;">( 發生於 {item['peak_date']} )</div>
-    </div>
-  </div>
-  <div style="background:#0F172A; padding:45px 50px; border:3px solid #F97316; margin:0;">
-    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:35px;">
-      <div style="font-size:34px; color:white; font-weight:950; display:flex; align-items:center; gap:15px; line-height:1;">☀️ 燈號極端漲幅：</div>
-      <div style="font-size:42px; color:#FBBF24; font-weight:950; letter-spacing:-1.5px; line-height:1; text-shadow: 0 0 20px rgba(251, 191, 36, 0.4); display:flex; align-items:baseline; gap:15px;"><span>+{p_diff:.0f} ｜ +{item['gain_pct']}</span></div>
-    </div>
-    <div style="height:38px; background:rgba(2,6,23,0.95); border-radius:12px; overflow:hidden; border:3px solid #F97316; padding:3px; box-shadow:inset 0 4px 10px rgba(0,0,0,0.6);">
-      <div style="width:{w}%; height:100%; background:linear-gradient(90deg, #FDE68A 0%, #FBBF24 50%, #F97316 100%); border-radius:8px; box-shadow:0 0 25px rgba(249, 115, 22, 0.4);"></div>
-    </div>
-    <div style="margin-top:25px; display:flex; justify-content:flex-end; align-items:center;">
-      <div style="color:#94A3B8; font-family:'JetBrains Mono'; font-size:16px; font-weight:900;">耗竭度 {w:.1f}%</div>
-    </div>
-  </div>
-</div>"""
+        # Determine labels based on status
+        label_status_bg = "rgba(239, 68, 68, 0.15)" if m_val > 0.1 else "rgba(148, 163, 184, 0.1)"
+        label_status_color = "#EF4444" if m_val > 0.1 else "#94A3B8"
+        label_status_icon = "🚨" if current_score >= 38 else "⚠️" 
+        label_status_text = str(item['status_icon']) + " " + str(item['type'])
+
+        custom_tag_text = f"{item.get('light', '紅燈')}"
+        custom_tag_bg = "#EF4444" if "紅" in str(item.get('light', '紅燈')) else "#F59E0B"
+        if "黃" in str(item.get('light', '')): custom_tag_bg = "#EAB308"
+        
+        custom_sub_text = f"與高點時差: 落後 {abs(int(p_diff))} 點" if is_laggy else ""
+
+        card_html = f"""
+        <div style="background:#0F172A; border:5px solid #334155; border-radius:12px; margin-bottom:50px; overflow:hidden; width:100%; box-shadow:0 30px 60px rgba(0,0,0,0.5);">
+          <!-- 頂部區：巨星標題磚 -->
+          <div style="display:grid; grid-template-columns: 1fr 1fr; align-items:stretch; background:#1E293B; border-bottom:4px solid #475569;">
+            <div style="padding:35px 30px; border-right:4px solid #475569;">
+              <div style="display:flex; align-items:center; gap:20px; margin-bottom:15px;">
+                <span style="background:{label_status_bg}; color:{label_status_color}; padding:6px 16px; border-radius:6px; font-weight:950; font-size:18px; border:2px solid {label_status_color}; box-shadow:0 0 15px {label_status_color}44;">{label_status_text}</span>
+                <span style="font-size:24px; color:#94A3B8; font-weight:800; letter-spacing:1px;">景氣高溫訊號發布日：</span>
+              </div>
+              <div style="font-size:52px; color:white; font-weight:950; letter-spacing:-2px; line-height:1;">📅 {s_date_only}</div>
+              <div style="margin-top:25px; display:flex; align-items:center; gap:25px;">
+                <span style="color:#FFF; background:{custom_tag_bg}; padding:8px 25px; border-radius:10px; font-size:38px; font-weight:900; white-space:nowrap; border:2px solid rgba(255,255,255,0.3);">{custom_tag_text}</span>
+                <span style="font-size:32px; color:#94A3B8; font-weight:800; white-space:nowrap;">{custom_sub_text}</span>
+              </div>
+            </div>
+            <div style="text-align:center; background:rgba(239, 68, 68, 0.05); padding:35px 30px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+              <div style="font-size:24px; color:#FCA5A5; font-weight:800; letter-spacing:1px; margin-bottom:15px;">末升段衝刺總耗時：</div>
+              <div style="font-size:52px; color:#EF4444; font-weight:950; letter-spacing:-1px; line-height:1; margin-bottom:20px;">🚀 {t_days} <span style="font-size:28px; font-weight:800;">個交易日</span></div>
+              <div style="font-size:42px; color:#F87171; font-weight:900; white-space:nowrap;">▲ {int(p_diff):+,} <span style="font-size:24px; font-weight:800; margin-left:5px;">點</span></div>
+            </div>
+          </div>
+
+          <!-- 中間層：故事線點位 -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; border-bottom:4px solid #475569;">
+            <div style="background:#450A0A; padding:45px 20px; text-align:center; border-right:4px solid #475569; display:flex; flex-direction:column; align-items:center;">
+              <div style="font-size:26px; color:#FCA5A5; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[階段一] 訊號發佈點</div>
+              <div style="font-size:18px; color:#F87171; font-weight:800; margin-bottom:25px;">(發布於 {s_date_only})</div>
+              <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:white; line-height:1; margin-bottom:20px;">{s_idx_val:,.0f}</div>
+              <div style="background: rgba(69, 10, 10, 0.8); color: #FCA5A5; border: 2px solid #EF4444; padding: 4px 16px; border-radius: 6px; font-family: 'JetBrains Mono'; font-size:22px; font-weight:900;">當月燈號: {item.get('light', '')}</div>
+            </div>
+            <div style="background:#064E3B; padding:45px 20px; text-align:center; display:flex; flex-direction:column; align-items:center;">
+              <div style="font-size:26px; color:#86EFAC; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[階段二] 波段最高峰</div>
+              <div style="font-size:18px; color:#4ADE80; font-weight:800; margin-bottom:25px;">(發生於 {p_date_raw})</div>
+              <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:white; line-height:1; margin-bottom:20px;">{p_idx_val:,.0f}</div>
+              <div style="background: rgba(6, 78, 59, 0.8); color: #86EFAC; border: 2px solid #22C55E; padding: 4px 16px; border-radius: 6px; font-family: 'JetBrains Mono'; font-size:22px; font-weight:900;">極端漲勢終點</div>
+            </div>
+          </div>
+
+          <!-- 底部層：高端金屬能量總結 (夕陽黃橙版) -->
+          <div style="background:#0F172A; padding:45px 50px; border:3px solid #F97316; margin:0;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:35px;">
+              <div style="font-size:34px; color:white; font-weight:950; display:flex; align-items:center; gap:15px; line-height:1;">☀️ 燈號極端漲幅：</div>
+              <div style="font-size:42px; color:#FBBF24; font-weight:950; letter-spacing:-1.5px; line-height:1; text-shadow: 0 0 20px rgba(251, 191, 36, 0.4); display:flex; align-items:baseline; gap:15px;">
+                <span>+{int(p_diff):,} ｜ +{item.get('gain_pct', '0%')}</span>
+              </div>
+            </div>
+            <div style="height:38px; background:rgba(2,6,23,0.95); border-radius:12px; overflow:hidden; border:3px solid #F97316; padding:3px; box-shadow:inset 0 4px 10px rgba(0,0,0,0.6);">
+              <div style="width:{w}%; height:100%; background:linear-gradient(90deg, #FDE68A 0%, #FBBF24 50%, #F97316 100%); border-radius:8px; box-shadow:0 0 25px rgba(249, 115, 22, 0.4);"></div>
+            </div>
+            <div style="margin-top:25px; display:flex; justify-content:flex-end; align-items:center;">
+              <div style="color:#94A3B8; font-family:'JetBrains Mono'; font-size:16px; font-weight:900;">耗竭度 {w:.1f}%</div>
+            </div>
+          </div>
+        </div>
+        """
         st.markdown(card_html, unsafe_allow_html=True)
 
     st.markdown("<p style='text-align:center; color:#64748B; font-size:14px; margin-top:100px; font-weight:600; letter-spacing:1px;'>系統由 aver5678 量化模組驅動 | 視覺化引擎: Command-Center v8.0 // POST_RELEASE_CALIBRATED</p>", unsafe_allow_html=True)

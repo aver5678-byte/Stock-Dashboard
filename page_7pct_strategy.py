@@ -125,4 +125,94 @@ def page_7pct_strategy():
 
     display_cols = ['觸發日期', '前高日期', '破底日期', '解套日期', 
                     '最大跌幅(%)', '剩餘跌幅(%)', '破底花費天數', '解套花費天數', '狀態']
-    st.dataframe(events_df[display_cols].sort_values(by='觸發日期', ascending=False), height=400)
+
+    # 隱藏預設表格，改用高質感戰情室卡片
+    sorted_events = events_df.sort_values(by='觸發日期', ascending=False)
+    for _, r in sorted_events.iterrows():
+        status = r.get('狀態', '進行中')
+        trigger_date = r.get('觸發日期', 'N/A')
+        peak_date = r.get('前高日期', 'N/A')
+        peak_price = r.get('前高價格', 0)
+        trigger_price = r.get('觸發價格', 0)
+        bottom_date = r.get('破底日期', 'N/A')
+        bottom_price = r.get('破底最低價', 0)
+        max_dd = r.get('最大跌幅(%)', 0)
+        res_dd = r.get('剩餘跌幅(%)', 0)
+        days_to_bottom = r.get('觸發到破底天數', 0)
+        days_total = r.get('解套總耗時', 0)
+        recover_type = r.get('解套形式', '')
+
+        # UI 變數設計
+        is_recovered = (status == "已解套")
+        
+        # 狀態標籤
+        label_status_bg = "rgba(16, 185, 129, 0.15)" if is_recovered else "rgba(239, 68, 68, 0.15)"
+        label_status_color = "#10B981" if is_recovered else "#EF4444"
+        label_status_icon = "✅" if is_recovered else "🚨"
+        label_status_text = f"{label_status_icon} {status}"
+
+        # 下拉標籤 (深度洗盤/一般回檔)
+        is_deep = max_dd >= 15.0
+        custom_tag_text = "深度洗盤" if is_deep else "一般回檔"
+        custom_tag_bg = "#8B5CF6" if is_deep else "#06B6D4" # 紫色代表深度洗盤，青色一般回檔
+        if max_dd >= 20.0: custom_tag_bg = "#EF4444" # 崩盤級別用紅色
+
+        # 頂部右側數值 (剩餘跌幅)
+        top_right_bg = "rgba(239, 68, 68, 0.05)" if res_dd > 10 else "rgba(16, 185, 129, 0.05)"
+        top_right_val_color = "#EF4444" if res_dd > 10 else "#10B981"
+        res_dd_display = f"-{res_dd:.1f}%" if res_dd > 0 else f"{res_dd:.1f}%"
+        
+        # 底部面板的霓虹樣式
+        bot_right_neon_text = f"最大跌幅 -{max_dd:.1f}%"
+        
+        # 建立專屬 HTML
+        card_html = f"""
+        <div style="background:#0F172A; border:5px solid #334155; border-radius:12px; margin-bottom:50px; overflow:hidden; width:100%; box-shadow:0 30px 60px rgba(0,0,0,0.5);">
+          <!-- 頂部區：巨星標題磚 -->
+          <div style="display:grid; grid-template-columns: 1fr 1fr; align-items:stretch; background:#1E293B; border-bottom:4px solid #475569;">
+            <div style="padding:35px 30px; border-right:4px solid #475569;">
+              <div style="display:flex; align-items:center; gap:20px; margin-bottom:15px;">
+                <span style="background:{label_status_bg}; color:{label_status_color}; padding:6px 16px; border-radius:6px; font-weight:950; font-size:18px; border:2px solid {label_status_color}; box-shadow:0 0 15px {label_status_color}44;">{label_status_text}</span>
+                <span style="font-size:24px; color:#94A3B8; font-weight:800; letter-spacing:1px;">觸發 7% 修正日：</span>
+              </div>
+              <div style="font-size:52px; color:white; font-weight:950; letter-spacing:-2px; line-height:1;">📅 {trigger_date}</div>
+              <div style="margin-top:25px; display:flex; align-items:center; gap:25px;">
+                <span style="color:#FFF; background:{custom_tag_bg}; padding:8px 25px; border-radius:10px; font-size:38px; font-weight:900; white-space:nowrap; border:2px solid rgba(255,255,255,0.3);">{custom_tag_text}</span>
+                <span style="font-size:32px; color:#94A3B8; font-weight:800; white-space:nowrap;">前高位階: <span style="color:#F1F5F9;">{peak_price:,.0f} 點</span></span>
+              </div>
+            </div>
+            <div style="text-align:center; background:{top_right_bg}; padding:35px 30px; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+              <div style="font-size:24px; color:#94A3B8; font-weight:800; letter-spacing:1px; margin-bottom:15px;">觸發後剩餘最深跌幅：</div>
+              <div style="font-size:52px; color:{top_right_val_color}; font-weight:950; letter-spacing:-1px; line-height:1; margin-bottom:20px;">📉 {res_dd_display}</div>
+              <div style="font-size:32px; color:#64748B; font-weight:900; white-space:nowrap;">觸發後再耗 <span style="color:#F87171;">{days_to_bottom}</span> 天見底</div>
+            </div>
+          </div>
+
+          <!-- 中間層：故事線點位 -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; border-bottom:4px solid #475569;">
+            <div style="background:#450A0A; padding:45px 20px; text-align:center; border-right:4px solid #475569; display:flex; flex-direction:column; align-items:center;">
+              <div style="font-size:26px; color:#FCA5A5; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[階段一] 觸發警報點</div>
+              <div style="font-size:18px; color:#F87171; font-weight:800; margin-bottom:25px;">(發生於 {trigger_date})</div>
+              <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:white; line-height:1; margin-bottom:20px;">{trigger_price:,.0f}</div>
+              <div style="background: rgba(69, 10, 10, 0.8); color: #FCA5A5; border: 2px solid #EF4444; padding: 4px 16px; border-radius: 6px; font-family: 'JetBrains Mono'; font-size:22px; font-weight:900;">距離前高約 -7%</div>
+            </div>
+            <div style="background:#0F172A; padding:45px 20px; text-align:center; display:flex; flex-direction:column; align-items:center;">
+              <div style="font-size:26px; color:#A7F3D0; font-weight:900; margin-bottom:10px; letter-spacing:1px;">[階段二] 波段最低谷</div>
+              <div style="font-size:18px; color:#34D399; font-weight:800; margin-bottom:25px;">(發生於 {bottom_date})</div>
+              <div style="font-family:'JetBrains Mono'; font-size:52px; font-weight:950; color:white; line-height:1; margin-bottom:20px;">{bottom_price:,.0f}</div>
+              <div style="background: rgba(30, 41, 59, 0.8); color: #CBD5E1; border: 2px solid #94A3B8; padding: 4px 16px; border-radius: 6px; font-family: 'JetBrains Mono'; font-size:22px; font-weight:900;">{bot_right_neon_text}</div>
+            </div>
+          </div>
+
+          <!-- 底部層：最終處置 -->
+          <div style="background:#0F172A; padding:35px 50px; border:3px solid #3B82F6; margin:0;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="font-size:30px; color:white; font-weight:950; display:flex; align-items:center; gap:15px; line-height:1;">⚖️ 波段最終處置：</div>
+              <div style="font-size:36px; color:#60A5FA; font-weight:950; letter-spacing:-1px; line-height:1; display:flex; align-items:baseline; gap:15px;">
+                <span>{recover_type} ({days_total} 天)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        """
+        st.markdown(card_html, unsafe_allow_html=True)
