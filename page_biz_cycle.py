@@ -33,7 +33,7 @@ def page_biz_cycle():
     
     # 時間邏輯：改採實戰起點 (2025/11/03) 計算耗竭進度
     now = datetime.now()
-    research_start = datetime(2025, 11, 3) 
+    research_start = datetime(2025, 12, 29) 
     diff = (now - research_start).days
     months_ongoing = diff / 30.44
     if months_ongoing < 0.1: months_ongoing = 0.1
@@ -157,20 +157,6 @@ def page_biz_cycle():
 <div style="display:flex; flex-direction:column; gap:18px;">
 <div style="background:rgba(16, 185, 129, 0.1); padding:12px; border-radius:10px; border:1px solid rgba(16, 185, 129, 0.2);">
 <div style="font-size:12px; color:#A7F3D0; font-weight:900; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
-<span><span style="background:#10B981; width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:5px;"></span> 主流劇本 (72%)</span>
-<span style="background:#EF4444; color:white; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:900;">剩餘 {days_left} DAY</span>
-</div>
-<div style="font-family:'JetBrains Mono'; font-size:24px; color:white; font-weight:950; letter-spacing:-0.5px;">2025.11 - 2026.02</div>
-</div>
-<div style="padding:0 12px;">
-<div style="font-size:12px; color:#34D399; font-weight:900; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-<span style="background:#10B981; width:8px; height:8px; border-radius:50%; box-shadow:0 0 8px #10B981;"></span> 稀有擴張劇本 (28%)
-</div>
-<div style="font-family:'JetBrains Mono'; font-size:24px; color:#94A3B8; font-weight:950; letter-spacing:-0.5px;">2026.08 - 2026.12</div>
-</div>
-</div>
-</div>
-<!-- 右側：月份燈號鏈 (Score Path) -->
 <div style="flex:1; background:{path_bg}; border:2px solid #38BDF8; border-radius:15px; padding:25px 20px; animation: pulse-blue-path-glow 4s infinite; display:flex; flex-direction:column; gap:15px; box-shadow:inset 0 0 20px rgba(0,0,0,0.5); backdrop-filter:blur(10px);">
 <div style="width:100%; border-bottom:1px solid rgba(56, 189, 248, 0.3); margin-bottom:10px; padding-bottom:10px;">
 <div style="font-family:'JetBrains Mono'; font-size:13px; color:#38BDF8; font-weight:800; letter-spacing:1px;">SCORE_PATH_LINK // 景氣指標路徑</div>
@@ -200,22 +186,22 @@ def page_biz_cycle():
     
     history_data = [
         {
-            "period": "2025/11/03 - 進行中", "months": float(months_ongoing), "type": "登頂倒數中", "light": "黃紅燈",
+            "period": f"{research_start.strftime('%Y/%m/%d')} - 進行中", "months": float(months_ongoing), "type": "登頂倒數中", "light": "紅燈",
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.15)", "status_icon": "🚨",
-            "start_date": "2025/11/03 (09月燈號發布後首日)", "start_idx": "28,334",
-            "peak_date": "2026/02/11", "peak_idx": "33,606", "gain_pct": "18.6%"
+            "start_date": f"{research_start.strftime('%Y/%m/%d')} (12月燈號發布後首日)", "start_idx": "29,350",
+            "peak_date": now.strftime("%Y/%m/%d"), "peak_idx": "35,522", "gain_pct": "21.0%", "bias_pct": "+33.6%"
         },
         {
             "period": "2024/06/03 - 07/11 登頂", "months": 1.3, "type": "極速脈衝型", "light": "黃紅燈",
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
             "start_date": "2024/06/03 (04月燈號發布後首日)", "start_idx": "21,537",
-            "peak_date": "2024/07/11", "peak_idx": "24,416", "gain_pct": "13.4%"
+            "peak_date": "2024/07/11", "peak_idx": "24,416", "gain_pct": "13.4%", "bias_pct": "+28.2%"
         },
         {
             "period": "2021/02/01 - 2022/01/05 登頂", "months": 11.1, "type": "罕見長線型", "light": "黃紅燈",
             "color": "#10B981", "bg": "rgba(16, 185, 129, 0.1)", "status_icon": "✅",
             "start_date": "2021/02/01 (12月燈號發布後首日)", "start_idx": "15,410",
-            "peak_date": "2022/01/05", "peak_idx": "18,619", "gain_pct": "20.8%"
+            "peak_date": "2022/01/05", "peak_idx": "18,619", "gain_pct": "20.8%", "bias_pct": "+42.5%"
         },
         {
             "period": "2010/01/04 - 2011/01/28 登頂", "months": 12.8, "type": "罕見長線型", "light": "黃紅燈",
@@ -227,25 +213,25 @@ def page_biz_cycle():
             "period": "2007/11/01 - 10/30 溢價歸零", "months": 0.1, "type": "發布即見頂 (快閃型)", "light": "紅燈",
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "🆘",
             "start_date": "2007/11/01 (09月燈號發布後首日)", "start_idx": "9,598",
-            "peak_date": "2007/10/30", "peak_idx": "9,859", "gain_pct": "2.7%"
+            "peak_date": "2007/10/30", "peak_idx": "9,859", "gain_pct": "2.7%", "bias_pct": "+31.2%"
         },
         {
             "period": "2004/02/02 - 03/05 登頂", "months": 1.1, "type": "極速脈衝型", "light": "紅燈",
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
             "start_date": "2004/02/02 (12月燈號發布後首日)", "start_idx": "6,320",
-            "peak_date": "2004/03/05", "peak_idx": "7,135", "gain_pct": "12.9%"
+            "peak_date": "2004/03/05", "peak_idx": "7,135", "gain_pct": "12.9%", "bias_pct": "+26.8%"
         },
         {
             "period": "2000/03/01 - 02/18 溢價歸零", "months": 0.1, "type": "發布即見頂 (快閃型)", "light": "紅燈",
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "🆘",
             "start_date": "2000/03/01 (01月燈號發布後首日)", "start_idx": "9,689",
-            "peak_date": "2000/02/18", "peak_idx": "10,393", "gain_pct": "7.3%"
+            "peak_date": "2000/02/18", "peak_idx": "10,393", "gain_pct": "7.3%", "bias_pct": "+35.1%"
         },
         {
             "period": "1994/08/01 - 10/03 登頂", "months": 2.1, "type": "極速脈衝型", "light": "紅燈",
             "color": "#EF4444", "bg": "rgba(239, 68, 68, 0.1)", "status_icon": "⚠️",
             "start_date": "1994/08/01 (06月燈號發布後首日)", "start_idx": "6,744",
-            "peak_date": "1994/10/03", "peak_idx": "7,228", "gain_pct": "7.2%"
+            "peak_date": "1994/10/03", "peak_idx": "7,228", "gain_pct": "7.2%", "bias_pct": "+29.4%"
         },
     ]
 
@@ -288,7 +274,48 @@ def page_biz_cycle():
         s_month = s_date_raw.split('(')[1].split('月')[0].strip() + "月" if '(' in s_date_raw and '月' in s_date_raw else ""
         s_full_tag = f"({s_date_only}) {s_month}：{item.get('light', '')}"
 
-        card_html = f"""<div style="background:#0F172A; border:2px solid #334155; border-radius:18px; margin-bottom:70px; overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,0.6);"><div style="display:flex; align-items:stretch; background:#1E293B; padding:0; border-bottom:1px solid #334155;"><div style="flex:1; padding:45px 30px; text-align:center; border-right:1px solid #334155;"><div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:12px;"><span style="background:{item['bg']}; color:{item['color']}; padding:6px 16px; border-radius:6px; font-weight:950; font-size:18px; border:2px solid {item['color']}; box-shadow:0 0 15px {item['color']}44;">{item['status_icon']} {str(item['type']).split('(')[0].strip()}</span><span style="color:#94A3B8; font-size:18px; font-weight:800; letter-spacing:1px;"> 窗口起點偵測 :</span></div><div style="font-size:48px; color:white; font-weight:950; letter-spacing:-1.5px; line-height:1;">📅 {str(item['period']).split('-')[0].strip()}</div></div><div style="flex:1; padding:45px 30px; text-align:center;"><div style="color:#94A3B8; font-size:18px; font-weight:800; margin-bottom:12px; letter-spacing:1px;">末升段衝刺總耗時 :</div><div style="text-align:center;"><div style="color:#EF4444; font-family:'JetBrains Mono', sans-serif; font-size:34px; font-weight:950; margin-bottom:5px; display:flex; align-items:center; justify-content:center; gap:12px;">🚀 {time_display}</div><div style="color:#EF4444; font-family:'JetBrains Mono', sans-serif; font-size:24px; font-weight:900;">{diff_display}</div></div></div></div><div style="display:grid; grid-template-columns:1fr 1fr; gap:0;"><div style="background:#3B0A0A; padding:65px 40px; border-right:2px solid #334155; text-align:center;"><div style="color:#FCA5A5; font-size:22px; font-weight:950; margin-bottom:25px; letter-spacing:2px; opacity:0.9;">[ 階段一 ] 訊號發佈點</div><div style="font-family:'JetBrains Mono'; font-size:68px; font-weight:950; color:white; line-height:1; margin-bottom:20px; text-shadow:0 0 35px rgba(239,68,68,0.5);">{item['start_idx']}</div><div style="background:rgba(239,68,68,0.2); color:#FCA5A5; display:inline-block; padding:6px 18px; border-radius:8px; font-size:17px; font-weight:900; border:1px solid #EF4444; animation: pulse-red-tag-glow 2s infinite;">{s_full_tag}</div></div><div style="background:#042F2E; padding:65px 40px; text-align:center;"><div style="color:#A7F3D0; font-size:22px; font-weight:950; margin-bottom:25px; letter-spacing:2px; opacity:0.9;">[ 階段二 ] 波段最高峰</div><div style="font-family:'JetBrains Mono'; font-size:68px; font-weight:950; color:white; line-height:1; margin-bottom:20px; text-shadow:0 0 35px rgba(16,185,129,0.5);">{item['peak_idx']}</div><div style="background:rgba(16,185,129,0.2); color:#A7F3D0; display:inline-block; padding:4px 14px; border-radius:6px; font-size:17px; font-weight:900; border:1px solid #10B981; animation: pulse-green-tag-glow 2s infinite;">( 發生於 {item['peak_date']} )</div></div></div><div style="background:#0F172A; padding:45px 50px; border-top:3px solid #F97316;"><div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:35px;"><div style="font-size:34px; color:white; font-weight:950; display:flex; align-items:center; gap:15px; line-height:1;">☀️ 極端乖離：波段末升總漲幅</div><div style="font-size:42px; color:#FBBF24; font-weight:950; letter-spacing:-1.5px; line-height:1;">+{item['gain_pct']}</div></div><div style="height:24px; background:rgba(2,6,23,0.9); border-radius:10px; overflow:hidden; border:2.5px solid #F97316; padding:2.5px; box-shadow:inset 0 4px 10px rgba(0,0,0,0.5);"><div style="width:{w}%; height:100%; background:linear-gradient(90deg, #FDE68A 0%, #FBBF24 50%, #F97316 100%); border-radius:8px;"></div></div><div style="margin-top:25px; display:flex; justify-content:flex-end; align-items:center;"><div style="color:#94A3B8; font-family:'JetBrains Mono'; font-size:16px; font-weight:900;">耗竭度 {w:.1f}%</div></div></div></div>"""
+        card_html = f"""<div style="background:#0F172A; border:2px solid #334155; border-radius:18px; margin-bottom:70px; overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,0.6);">
+  <div style="display:grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; background:#1E293B; border-bottom:1px solid #334155;">
+    <!-- 格子 1 -->
+    <div style="padding:65px 40px; text-align:center; border-right:1px solid #334155; border-bottom:1px solid #334155; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+      <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:12px;">
+        <span style="background:{item['bg']}; color:{item['color']}; padding:6px 16px; border-radius:6px; font-weight:950; font-size:18px; border:2px solid {item['color']}; box-shadow:0 0 15px {item['color']}44;">{item['status_icon']} {str(item['type']).split('(')[0].strip()}</span>
+        <span style="color:#94A3B8; font-size:18px; font-weight:800; letter-spacing:1px;"> 窗口起點偵測 :</span>
+      </div>
+      <div style="font-size:38px; color:white; font-weight:950; letter-spacing:-1.5px; line-height:1;">📅 {str(item['period']).split('-')[0].strip()}</div>
+    </div>
+    <!-- 格子 2 -->
+    <div style="padding:65px 40px; text-align:center; border-bottom:1px solid #334155; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+      <div style="color:#94A3B8; font-size:18px; font-weight:800; margin-bottom:12px; letter-spacing:1px;">末升段衝刺總耗時 :</div>
+      <div style="color:#EF4444; font-family:'JetBrains Mono', sans-serif; font-size:34px; font-weight:950; margin-bottom:5px; display:flex; align-items:center; justify-content:center; gap:12px;">🚀 {time_display}</div>
+      <div style="color:#EF4444; font-family:'JetBrains Mono', sans-serif; font-size:24px; font-weight:900;">{diff_display}</div>
+    </div>
+    <!-- 格子 3 -->
+    <div style="background:#3B0A0A; padding:65px 40px; border-right:1px solid #334155; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+      <div style="color:#FCA5A5; font-size:22px; font-weight:950; margin-bottom:25px; letter-spacing:2px; opacity:0.9;">[ 階段一 ] 訊號發佈點</div>
+      <div style="font-family:'JetBrains Mono'; font-size:68px; font-weight:950; color:white; line-height:1; margin-bottom:20px; text-shadow:0 0 35px rgba(239,68,68,0.5);">{item['start_idx']}</div>
+      <div style="background:rgba(239,68,68,0.2); color:#FCA5A5; display:inline-block; padding:6px 18px; border-radius:8px; font-size:17px; font-weight:900; border:1px solid #EF4444; animation: pulse-red-tag-glow 2s infinite;">{s_full_tag}</div>
+    </div>
+    <!-- 格子 4 -->
+    <div style="background:#042F2E; padding:65px 40px; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+      <div style="color:#A7F3D0; font-size:22px; font-weight:950; margin-bottom:25px; letter-spacing:2px; opacity:0.9;">[ 階段二 ] 波段最高峰</div>
+      <div style="font-family:'JetBrains Mono'; font-size:68px; font-weight:950; color:white; line-height:1; margin-bottom:20px; text-shadow:0 0 35px rgba(16,185,129,0.5);">{item['peak_idx']}</div>
+      <div style="background:rgba(16,185,129,0.2); color:#A7F3D0; display:inline-block; padding:8px 20px; border-radius:8px; font-size:17px; font-weight:900; border:1px solid #10B981; animation: pulse-green-tag-glow 2s infinite; line-height:1.5;">( 發生於 {item['peak_date']} )</div>
+    </div>
+  </div>
+  <div style="background:#0F172A; padding:45px 50px; border:3px solid #F97316; margin:0;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:35px;">
+      <div style="font-size:34px; color:white; font-weight:950; display:flex; align-items:center; gap:15px; line-height:1;">☀️ 燈號極端漲幅：</div>
+      <div style="font-size:42px; color:#FBBF24; font-weight:950; letter-spacing:-1.5px; line-height:1; text-shadow: 0 0 20px rgba(251, 191, 36, 0.4); display:flex; align-items:baseline; gap:15px;"><span>+{p_diff:.0f} ｜ +{item['gain_pct']}</span></div>
+    </div>
+    <div style="height:38px; background:rgba(2,6,23,0.95); border-radius:12px; overflow:hidden; border:3px solid #F97316; padding:3px; box-shadow:inset 0 4px 10px rgba(0,0,0,0.6);">
+      <div style="width:{w}%; height:100%; background:linear-gradient(90deg, #FDE68A 0%, #FBBF24 50%, #F97316 100%); border-radius:8px; box-shadow:0 0 25px rgba(249, 115, 22, 0.4);"></div>
+    </div>
+    <div style="margin-top:25px; display:flex; justify-content:flex-end; align-items:center;">
+      <div style="color:#94A3B8; font-family:'JetBrains Mono'; font-size:16px; font-weight:900;">耗竭度 {w:.1f}%</div>
+    </div>
+  </div>
+</div>"""
         st.markdown(card_html, unsafe_allow_html=True)
 
     st.markdown("<p style='text-align:center; color:#64748B; font-size:14px; margin-top:100px; font-weight:600; letter-spacing:1px;'>系統由 aver5678 量化模組驅動 | 視覺化引擎: Command-Center v8.0 // POST_RELEASE_CALIBRATED</p>", unsafe_allow_html=True)

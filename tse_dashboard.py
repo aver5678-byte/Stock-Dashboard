@@ -43,7 +43,7 @@ ADMIN_EMAIL = "aver5678@gmail.com"
 apply_global_theme()
 
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=600) # 縮短為 10 分鐘，增加即時感
 def load_data():
     ticker = "^TWII"
     try:
@@ -55,6 +55,9 @@ def load_data():
         if isinstance(df_daily.columns, pd.MultiIndex):
             df_daily.columns = df_daily.columns.get_level_values(0)
             
+        # 紀錄最後一個交易日的日期 (例如 2/24 或 2/25)
+        latest_trade_date = df_daily.index[-1]
+            
         # 將日線轉換為週線 (以週一為基準)，確保數據與週線策略一致但具備日線即時性
         logic = {
             'Open': 'first',
@@ -65,12 +68,26 @@ def load_data():
         }
         df = df_daily.resample('W-MON', label='left', closed='left').apply(logic)
         
+        # 計算每週實際交易日期範圍 (例如 02/23 ~ 02/25)
+        # 建立一個暫存欄位存日期
+        df_daily['temp_date'] = df_daily.index
+        week_info = df_daily.resample('W-MON', label='left', closed='left')['temp_date'].agg(['min', 'max'])
+        
+        # 格式化為：2026/02/23 ~ 02/25
+        # 增加判斷以防 NaT (空資料) 導致崩潰
+        df['WeekRange'] = week_info.apply(
+            lambda x: f"{x['min'].strftime('%Y/%m/%d')} ~ {x['max'].strftime('%m/%d')}" 
+            if pd.notna(x['min']) and pd.notna(x['max']) and x['min'] != x['max']
+            else (f"{x['min'].strftime('%Y/%m/%d')}" if pd.notna(x['min']) else "N/A"), axis=1
+        )
+        
         df = df.dropna(subset=['Close'])
         df['SMA40'] = df['Close'].rolling(window=40).mean()
         df['Bias'] = (df['Close'] - df['SMA40']) / df['SMA40'] * 100
         
         # 額外存儲最後更新時間，供 UI 顯示
         df.attrs['last_update'] = datetime.datetime.now()
+        df.attrs['latest_trade_date'] = latest_trade_date
         return df
     except Exception as e:
         st.error(f"獲取資料時發生錯誤：{e}")
@@ -279,6 +296,7 @@ def page_bias_analysis():
     status_text = "🚨 極度危險 (乖離 ≥ 20%)" if latest_bias >= 20 else "⚠️ 警戒區域 (乖離 ≥ 15%)" if latest_bias >= 15 else "✅ 穩定區間"
 
     update_time = df.attrs.get('last_update', datetime.datetime.now()).strftime("%m/%d %H:%M")
+    latest_trade_date_str = df.attrs.get('latest_trade_date', df.index[-1]).strftime("%Y/%m/%d")
     
     # --- 呼吸動畫與樣式動態判定 ---
     alert_anim_style = ""
@@ -318,7 +336,7 @@ def page_bias_analysis():
 <div style="width:2px; background:linear-gradient(to bottom, transparent, #334155, transparent); margin:0 50px; opacity:0.6;"></div>
 <div style="flex:1 1 0; width:0; min-width:0; background:linear-gradient(135deg, #0F172A 0%, #1E293B 100%); border:2px solid #334155; border-radius:15px; padding:30px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:25px; animation: cyber-scan-pulse 3s ease-in-out infinite;">
 <div style="font-size:14px; color:#94A3B8; font-weight:900; display:flex; align-items:center; gap:8px; opacity:0.8;">
-<span style="width:8px; height:8px; background:#10B981; border-radius:50%; display:inline-block; box-shadow:0 0 10px #10B981;"></span> 定時更新: {update_time}
+<span style="width:8px; height:8px; background:#10B981; border-radius:50%; display:inline-block; box-shadow:0 0 10px #10B981;"></span> 數據統計至: {latest_trade_date_str} (即時更新)
 </div>
 <div style="display:flex; gap:35px; align-items:flex-end;">
 <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
@@ -366,12 +384,12 @@ def page_bias_analysis():
                         subplot_titles=('<b style="font-size:24px; color:#F1F5F9; font-family:\'JetBrains Mono\';">📡 歷史雷達觀測圖 (K線 vs 乖離率同步掃描)</b>', '<b style="color:#94A3B8; font-family:\'JetBrains Mono\';">40週乖離率 (%)</b>'),
                         row_width=[0.3, 0.7])
 
-    fig.add_trace(go.Candlestick(x=df.index.strftime('%Y-%m-%d'),
+    fig.add_trace(go.Candlestick(x=df['WeekRange'],
                     open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'],
                     customdata=np.stack((df['Bias'], df['WarningText']), axis=-1),
                     name='加權指數',
                     increasing_line_color='#10B981', decreasing_line_color='#EF4444',
-                    hovertemplate='<b style="color:#F8FAFC;">時間: %{x|%Y/%m/%d}</b><br><br>' +
+                    hovertemplate='<b style="color:#F8FAFC;">週區間: %{x}</b><br><br>' +
                                   '開: %{open:,.2f}<br>' +
                                   '高: %{high:,.2f}<br>' +
                                   '低: %{low:,.2f}<br>' +
@@ -379,7 +397,7 @@ def page_bias_analysis():
                                   '<b style="color:#38BDF8;">👉 乖離率同步: %{customdata[0]:.2f}%</b>' +
                                   '%{customdata[1]}<extra></extra>'), row=1, col=1)
                     
-    fig.add_trace(go.Scatter(x=df.index.strftime('%Y-%m-%d'), y=df['SMA40'], 
+    fig.add_trace(go.Scatter(x=df['WeekRange'], y=df['SMA40'], 
                              line={'color': '#94A3B8', 'width': 2}, 
                              name='40週均線',
                              hovertemplate='均線點位: %{y:.2f}<extra></extra>'), row=1, col=1)
@@ -389,7 +407,7 @@ def page_bias_analysis():
     if danger_mask.any():
         danger_points = df[danger_mask]
         fig.add_trace(go.Scatter(
-            x=danger_points.index.strftime('%Y-%m-%d'),
+            x=danger_points['WeekRange'],
             y=danger_points['Low'] * 0.97, # 放在最低點下方 3%
             mode='markers',
             name='高壓警報',
@@ -402,29 +420,26 @@ def page_bias_analysis():
             hoverinfo='skip' 
         ), row=1, col=1)
                              
-    fig.add_trace(go.Scatter(x=df.index.strftime('%Y-%m-%d'), y=df['Bias'], 
+    fig.add_trace(go.Scatter(x=df['WeekRange'], y=df['Bias'], 
                              line={'color': '#38BDF8', 'width': 2}, 
                              name='乖離率',
                              fill='tozeroy', fillcolor='rgba(56, 189, 248, 0.1)',
                              hovertemplate='乖離率: %{y:.2f}%<extra></extra>'), row=2, col=1)
                              
     if not b_df.empty:
-        # 修正：Series 需要透過 .dt 才能呼叫 strftime
-        type_a_series = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 A')]['觸發日期'])
-        type_b_series = pd.to_datetime(b_df[b_df['類型'].str.contains('類型 B')]['觸發日期'])
+        # 使用 WeekRange 對齊歷史標記
+        type_a_indices = b_df[b_df['類型'].str.contains('類型 A')].index
+        type_b_indices = b_df[b_df['類型'].str.contains('類型 B')].index
         
-        type_a_dates = type_a_series.dt.strftime('%Y-%m-%d').tolist()
-        type_b_dates = type_b_series.dt.strftime('%Y-%m-%d').tolist()
-        
-        # 篩選存在於 df 中的點
-        valid_a = [d for d in type_a_dates if d in df.index.strftime('%Y-%m-%d')]
-        valid_b = [d for d in type_b_dates if d in df.index.strftime('%Y-%m-%d')]
+        # 從 df 中抓取對應的 WeekRange 名稱
+        valid_a_df = df[df.index.isin(type_a_indices)]
+        valid_b_df = df[df.index.isin(type_b_indices)]
 
-        fig.add_trace(go.Scatter(x=valid_a, y=df.loc[pd.to_datetime(valid_a)]['Bias'],
+        fig.add_trace(go.Scatter(x=valid_a_df['WeekRange'], y=valid_a_df['Bias'],
                                  mode='markers', marker={'color': '#10B981', 'size': 10, 'symbol': 'circle', 'line': {'width': 2, 'color': '#047857'}},
                                  name='類型 A (歷史低點)'), row=2, col=1)
                                  
-        fig.add_trace(go.Scatter(x=valid_b, y=df.loc[pd.to_datetime(valid_b)]['Bias'],
+        fig.add_trace(go.Scatter(x=valid_b_df['WeekRange'], y=valid_b_df['Bias'],
                                  mode='markers', marker={'color': '#EF4444', 'size': 10, 'symbol': 'circle', 'line': {'width': 2, 'color': '#B91C1C'}},
                                  name='類型 B (歷史極端)'), row=2, col=1)
 
@@ -445,6 +460,7 @@ def page_bias_analysis():
                       dragmode="pan") # 預設平移，配合滾輪縮放
                       
     fig.update_xaxes(type='category', showgrid=True, gridwidth=1, gridcolor='#1E293B', 
+                     showticklabels=False, # 隱藏底部的日期區間標籤，資訊已整合進 Hover 視窗
                      showspikes=True, spikemode="across", spikesnap="cursor", 
                      showline=False, spikedash="solid", spikethickness=1, spikecolor="#38BDF8",
                      # 初始顯示範圍 (使用索引)
@@ -680,10 +696,16 @@ def page_bias_analysis():
             def format_short_date(d_str):
                 if pd.isna(d_str) or not d_str or d_str == "N/A" or d_str == "None": 
                     return ""
-                date_val = str(d_str)[:10].replace('-', '/')
-                # 如果日期等於或晚於本週一，則標註為即時
-                this_monday = (datetime.datetime.now() - datetime.timedelta(days=datetime.datetime.now().weekday())).strftime('%Y/%m/%d')
-                if date_val >= this_monday:
+                
+                # 將輸入轉為日期物件以便比較
+                target_date = pd.to_datetime(d_str)
+                date_val = target_date.strftime('%Y/%m/%d')
+                
+                # 取得資料庫中最後一個交易日
+                latest_trade_date = df.attrs.get('latest_trade_date', df.index[-1])
+                
+                # 如果該日期就是最後一個交易日且事件進行中，則標註為即時
+                if target_date.date() >= latest_trade_date.date():
                     return f"即時偵測中 - {date_val}"
                 return f"發生於 {date_val}"
                 
@@ -770,12 +792,15 @@ def page_bias_analysis():
   </div>
 
   <!-- 底部層：高端金屬能量總結 (夕陽黃橙版) -->
-  <div style="background:#0F172A; padding:45px 40px; border-top:4px solid #F97316;">
-    <div style="display:flex; justify-content:space-between; align-items:center; font-size:45px; color:white; margin-bottom:25px; font-weight:950; white-space:nowrap;">
-      <span style="display:flex; align-items:center; gap:15px;"><span style="color:#FBBF24;">☀️</span> 極端乖離：波段末升總漲幅</span><span style="color:#FBBF24; text-shadow:0 0 20px rgba(251, 191, 36, 0.5);">{max_surge:+.1f}%</span>
+  <div style="background:#0F172A; padding:45px 50px; border:3px solid #F97316; margin:0;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:35px;">
+      <div style="font-size:34px; color:white; font-weight:950; display:flex; align-items:center; gap:15px; line-height:1;">☀️ 乖離極端漲幅：</div>
+      <div style="font-size:42px; color:#FBBF24; font-weight:950; letter-spacing:-1.5px; line-height:1; text-shadow: 0 0 20px rgba(251, 191, 36, 0.4); display:flex; align-items:baseline; gap:15px;">
+        <span>{max_surge:+.1f}%</span>
+      </div>
     </div>
-    <div style="height:55px; background:#020617; border-radius:12px; overflow:hidden; border:2px solid #F97316; box-shadow:inset 0 2px 10px rgba(0,0,0,0.5);">
-      <div style="width:{surge_w}%; height:100%; background:linear-gradient(90deg, #FDE68A, #FBBF24, #F97316); box-shadow:0 0 40px rgba(249, 115, 22, 0.6);"></div>
+    <div style="height:38px; background:rgba(2,6,23,0.95); border-radius:12px; overflow:hidden; border:3px solid #F97316; padding:3px; box-shadow:inset 0 4px 10px rgba(0,0,0,0.6);">
+      <div style="width:{surge_w}%; height:100%; background:linear-gradient(90deg, #FDE68A 0%, #FBBF24 50%, #F97316 100%); border-radius:8px; box-shadow:0 0 25px rgba(249, 115, 22, 0.4);"></div>
     </div>
   </div>
 </div>
@@ -908,6 +933,93 @@ def page_upward_bias():
         st.warning("目前尚無足夠歷史數據可供分析。")
         return
 
+    # --- [ 手動波段整合區：根據 USER 精確大局觀進行修正 ] ---
+    if not up_df.empty:
+        # 1. 處理 2024-08-06 至 2025-01-07 的大整合
+        target_indices = up_df[up_df['起漲日期 (前波破底)'].isin(['2024-08-06', '2024-09-04'])].index.tolist()
+        if len(target_indices) >= 2:
+            base_idx = target_indices[0] if up_df.loc[target_indices[0], '起漲日期 (前波破底)'] == '2024-08-06' else target_indices[1]
+            tail_idx = target_indices[1] if base_idx == target_indices[0] else target_indices[0]
+            up_df.at[base_idx, '最高價格 (或現價)'] = max(up_df.loc[base_idx, '最高價格 (或現價)'], up_df.loc[tail_idx, '最高價格 (或現價)'])
+            up_df.at[base_idx, '最高日期 (下波前高)'] = up_df.loc[tail_idx, '最高日期 (下波前高)']
+            up_df.at[base_idx, '狀態'] = up_df.loc[tail_idx, '狀態']
+            p_start = up_df.loc[base_idx, '起漲價格']
+            p_end = up_df.loc[base_idx, '最高價格 (或現價)']
+            up_df.at[base_idx, '漲幅(%)'] = (p_end - p_start) / p_start * 100
+            d_start = pd.to_datetime(up_df.loc[base_idx, '起漲日期 (前波破底)'])
+            d_end_raw = up_df.loc[base_idx, '最高日期 (下波前高)']
+            if '(' in d_end_raw:
+                d_end_str = d_end_raw.split('(')[1].split(')')[0]
+                d_end = pd.to_datetime(f"2025-{d_end_str.replace('/', '-')}")
+            else:
+                d_end = pd.to_datetime(d_end_raw)
+            up_df.at[base_idx, '花費天數'] = (d_end - d_start).days
+            up_df = up_df.drop(tail_idx)
+
+        # 2. 手動移除特定碎步波段
+        remove_dates = [
+            '2022-07-12', '2022-05-12', '2021-08-20', '2021-05-12', '2018-10-26', 
+            '2011-08-22', '2011-08-09', '2008-12-24', '2008-12-05', '2008-11-21', 
+            '2008-10-28', '2008-10-13', '2008-09-18', '2008-09-05', '2008-08-05', 
+            '2008-07-16', '2008-01-09', '2007-12-18', '2007-11-27', '2006-06-09',
+            '2004-05-17', '2003-04-01', '2003-03-11', '2002-08-06', '2002-07-03', 
+            '2002-05-07', '2001-05-21', '2001-03-02', '2001-02-08', '2000-11-21', 
+            '2000-11-02', '2000-10-19', '2000-10-13', '2000-10-05', '2000-08-08', 
+            '2000-07-05', '2000-05-26', '2000-05-11', '2000-04-17'
+        ]
+        up_df = up_df[~up_df['起漲日期 (前波破底)'].isin(remove_dates)]
+
+        # 3. 手動修正波段終點
+        target_2020 = up_df[up_df['起漲日期 (前波破底)'] == '2020-03-19'].index
+        if not target_2020.empty:
+            idx = target_2020[0]
+            try:
+                hist_data = fetch_data("^TWII", start_date="2020-07-20", end_date="2020-08-01")
+                if not hist_data.empty and '2020-07-28' in hist_data.index.strftime('%Y-%m-%d'):
+                    new_price = hist_data.loc[hist_data.index.strftime('%Y-%m-%d') == '2020-07-28', 'Close'].iloc[0]
+                    up_df.at[idx, '最高日期 (下波前高)'] = '2020-07-28'
+                    up_df.at[idx, '最高價格 (或現價)'] = round(float(new_price), 2)
+                    p_start = up_df.loc[idx, '起漲價格']
+                    up_df.at[idx, '漲幅(%)'] = round((new_price - p_start) / p_start * 100, 2)
+                    up_df.at[idx, '花費天數'] = (pd.to_datetime('2020-07-28') - pd.to_datetime('2020-03-19')).days
+            except: pass
+
+        # 4. 手動修正波段起點
+        target_2012 = up_df[up_df['起漲日期 (前波破底)'] == '2012-06-04'].index
+        if not target_2012.empty:
+            idx = target_2012[0]
+            try:
+                hist_data_2012 = fetch_data("^TWII", start_date="2012-07-20", end_date="2012-08-01")
+                if not hist_data_2012.empty and '2012-07-25' in hist_data_2012.index.strftime('%Y-%m-%d'):
+                    new_start_price = hist_data_2012.loc[hist_data_2012.index.strftime('%Y-%m-%d') == '2012-07-25', 'Close'].iloc[0]
+                    up_df.at[idx, '起漲日期 (前波破底)'] = '2012-07-25'
+                    up_df.at[idx, '起漲價格'] = round(float(new_start_price), 2)
+                    p_end = up_df.loc[idx, '最高價格 (或現價)']
+                    up_df.at[idx, '漲幅(%)'] = round((p_end - new_start_price) / new_start_price * 100, 2)
+                    up_df.at[idx, '花費天數'] = (pd.to_datetime(up_df.loc[idx, '最高日期 (下波前高)']) - pd.to_datetime('2012-07-25')).days
+            except: pass
+
+        # 5. 手動拆解波段
+        target_2005 = up_df[up_df['起漲日期 (前波破底)'] == '2005-10-28'].index
+        if not target_2005.empty:
+            idx = target_2005[0]
+            try:
+                p_data = fetch_data("^TWII", start_date="2005-10-20", end_date="2006-05-15")
+                if not p_data.empty:
+                    def get_p(d_str):
+                        mask = p_data.index.strftime('%Y-%m-%d') == d_str
+                        return p_data.loc[mask, 'Close'].iloc[0] if any(mask) else None
+                    p_0112, p_0324, p_0509 = get_p("2006-01-12"), get_p("2006-03-24"), get_p("2006-05-09")
+                    if p_0112 and p_0324 and p_0509:
+                        p_start1 = up_df.loc[idx, '起漲價格']
+                        up_df.at[idx, '最高日期 (下波前高)'] = '2006-01-12'
+                        up_df.at[idx, '最高價格 (或現價)'] = round(float(p_0112), 2)
+                        up_df.at[idx, '漲幅(%)'] = round((p_0112 - p_start1) / p_start1 * 100, 2)
+                        up_df.at[idx, '花費天數'] = (pd.to_datetime('2006-01-12') - pd.to_datetime('2005-10-28')).days
+                        new_wave = {'起漲日期 (前波破底)': '2006-03-24','最高日期 (下波前高)': '2006-05-09','起漲價格': round(float(p_0324), 2),'最高價格 (或現價)': round(float(p_0509), 2),'漲幅(%)': round((p_0509 - p_0324) / p_0324 * 100, 2),'花費天數': (pd.to_datetime('2006-05-09') - pd.to_datetime('2006-03-24')).days,'狀態': '已完結'}
+                        up_df = pd.concat([up_df, pd.DataFrame([new_wave])], ignore_index=True)
+            except: pass
+
     # 檢查是否有進行中的反彈波段
     is_ongoing = False
     if not up_df.empty and up_df.iloc[-1]['狀態'] == '進行中':
@@ -923,7 +1035,7 @@ def page_upward_bias():
             <div style="font-family:'Inter', 'Microsoft JhengHei', sans-serif; font-size:13px; color:#64748B; letter-spacing:1px; font-weight:800;">🛰️ 系統即時監控中 // 大盤漲幅量化模組</div>
             <div style="background:{status_pill_color}; color:white; padding:4px 12px; border-radius:6px; font-family:'Microsoft JhengHei', sans-serif; font-size:12px; font-weight:900; box-shadow:0 0 15px {status_pill_color};">● {status_pill_text}</div>
         </div>
-        <h1 style="color:white; font-size:48px; font-weight:950; margin:0; letter-spacing:-1.5px; line-height:1.2; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">🚀 大盤上漲：漲幅統計</h1>
+        <h1 style="color:white; font-size:48px; font-weight:950; margin:0; letter-spacing:-1.5px; line-height:1.2; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">🚀 大盤上漲：上漲統計</h1>
         <div style="margin-top:20px; color:#94A3B8; font-size:17px; font-weight:600; line-height:1.8; max-width:1100px; border-left:4px solid #334155; padding-left:20px;">
             獨立戰略分析模組：專門量化大盤從谷底起跳的真實漲幅。我們從每一波修正後的最低點算起，直到市場再度發生「7% 回檔」時，回頭確認該次漲幅的最高點。透過這項數據，我們能量化過去二十年每一場「多頭攻勢」的攻頂高度與耗時，協助您判斷當前波段的剩餘潛力。
         </div>
@@ -956,129 +1068,96 @@ def page_upward_bias():
     # --- 2. 戰鬥控制台：Macro HUD ---
     st.markdown('<div style="margin-top:-20px;"></div>', unsafe_allow_html=True)
     
-    score_color = "#10B981" if current_bounce >= 7.0 else "#475569"
-    score_label = "✅ 趨勢成型 (已達 7%)" if current_bounce >= 7.0 else "📉 尚未成型 (未達 7%)"
+    # 動態決定儀表板核心顏色 (與下方的階梯配色完全對齊)
+    if current_bounce >= 50:
+        score_color = "#A855F7" # 紫色 (極端)
+        score_label = "🌌 宇宙極端區 (>=50%)"
+    elif current_bounce >= 40:
+        score_color = "#EF4444" # 紅色 (警戒)
+        score_label = "☢️ 高度警戒區 (>=40%)"
+    elif current_bounce >= 30:
+        score_color = "#F59E0B" # 橘黃色 (警告)
+        score_label = "⚠️ 警示收割區 (>=30%)"
+    elif current_bounce >= 7.0:
+        score_color = "#10B981" # 綠色 (動能)
+        score_label = "🚀 噴發中 (>=7%)"
+    else:
+        score_color = "#475569" # 灰色 (待機)
+        score_label = "⚓ 谷底探測 (未達 7%)"
     
-    avg_gain = metrics.get('平均漲幅(%)', 0)
-    avg_days = metrics.get('平均花費天數', 0)
-    total_waves = metrics.get('總完整波段數', 0)
+    # 修正：樣本總數必須反映清洗後的結果
+    final_waves = up_df[up_df['狀態'] == '已完結']
+    total_waves = len(up_df)
+    total_finished = len(final_waves)
+    
+    # 重新計算機率以對齊清洗後的筆數
+    p10 = round(len(final_waves[final_waves['漲幅(%)'] >= 10]) / total_finished * 100, 1) if total_finished > 0 else 0
+    p20 = round(len(final_waves[final_waves['漲幅(%)'] >= 20]) / total_finished * 100, 1) if total_finished > 0 else 0
+    p30 = round(len(final_waves[final_waves['漲幅(%)'] >= 30]) / total_finished * 100, 1) if total_finished > 0 else 0
+    p40 = round(len(final_waves[final_waves['漲幅(%)'] >= 40]) / total_finished * 100, 1) if total_finished > 0 else 0
+    p50 = round(len(final_waves[final_waves['漲幅(%)'] >= 50]) / total_finished * 100, 1) if total_finished > 0 else 0
+    
+    match_prob = p10 if current_bounce < 20 else (p20 if current_bounce < 30 else (p30 if current_bounce < 40 else (p40 if current_bounce < 50 else p50)))
 
-    # 取得階梯機率
-    p10 = metrics.get('漲幅超過 10% 機率', 0)
-    p20 = metrics.get('漲幅超過 20% 機率', 0)
-    p30 = metrics.get('漲幅超過 30% 機率', 0)
-    p40 = metrics.get('漲幅超過 40% 機率', 0)
-    p50 = metrics.get('漲幅超過 50% 機率', 0)
+    # 注入呼吸燈 CSS
+    st.markdown(f"""
+    <style>
+    @keyframes hub-frame-breathe-up {{
+      0% {{ border-color: #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }}
+      50% {{ border-color: {score_color}; box-shadow: 0 0 45px {score_color}33; }}
+      100% {{ border-color: #334155; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }}
+    }}
+    @keyframes circle-glow-breathe-up {{
+      0% {{ filter: drop-shadow(0 0 10px {score_color}22); transform: scale(1); opacity: 0.7; }}
+      50% {{ filter: drop-shadow(0 0 60px {score_color}FF); transform: scale(1.05); opacity: 1; }}
+      100% {{ filter: drop-shadow(0 0 10px {score_color}22); transform: scale(1); opacity: 0.7; }}
+    }}
+    .hud-main-frame-up {{ animation: hub-frame-breathe-up 4s infinite ease-in-out; }}
+    .gauge-circle-breathe-up {{ animation: circle-glow-breathe-up 3s infinite ease-in-out; transform-origin: center; }}
+    </style>
+    """, unsafe_allow_html=True)
 
     def get_step_style(threshold, active_color):
-        # 極致霓虹發光感 (強化 alpha 值與擴散半徑)
         glow_css = f"box-shadow: 0 0 35px {active_color}99, 0 0 65px {active_color}55, inset 0 0 15px rgba(255,255,255,0.15);"
         if current_bounce >= threshold:
-            # 已征服：強力亮燈感 (實心 + 白粗邊 + 極致擴散發光)
             return f"background:{active_color}; color:white; border:3px solid white; box-shadow: 0 0 60px {active_color}, 0 0 25px rgba(255,255,255,0.5); filter: brightness(1.2); font-weight:1000; opacity:1; transform:scale(1.05); z-index:3;"
-        # 待機狀態：標準亮色 + 穩定發光
         return f"background:{active_color}; color:white; border:1px solid rgba(255,255,255,0.35); {glow_css} font-weight:950; opacity:0.95; transform:scale(1.0);"
 
     def get_arrow(threshold):
         next_thresholds = {10: 20, 20: 30, 30: 40, 40: 50, 50: 999}
         if current_bounce >= threshold and current_bounce < next_thresholds[threshold]:
-            # 醒目的黃色三角指標
             return f'<div style="position:absolute; top:-35px; left:50%; transform:translateX(-50%); color:#FACC15; font-size:24px; text-shadow:0 0 15px #FACC15; font-weight:950; z-index:10;">▼</div>'
         return ""
 
-    steps_html = f"""
-<div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:12px; margin-top:45px; position:relative;">
-<div style="{get_step_style(10, '#10B981')} padding:22px 5px; border-radius:12px; text-align:center; position:relative; transition: all 0.4s ease;">
-{get_arrow(10)}
-<div style="font-size:13px; margin-bottom:8px; font-weight:950;">>=10% 漲幅</div>
-<div style="font-family:'JetBrains Mono'; font-size:26px;">{p10}%</div>
-</div>
-<div style="{get_step_style(20, '#10B981')} padding:22px 5px; border-radius:12px; text-align:center; position:relative; transition: all 0.4s ease;">
-{get_arrow(20)}
-<div style="font-size:13px; margin-bottom:8px; font-weight:950;">>=20% 漲幅</div>
-<div style="font-family:'JetBrains Mono'; font-size:26px;">{p20}%</div>
-</div>
-<div style="{get_step_style(30, '#F59E0B')} padding:22px 5px; border-radius:12px; text-align:center; position:relative; transition: all 0.4s ease;">
-{get_arrow(30)}
-<div style="font-size:13px; margin-bottom:8px; font-weight:950;">>=30% 警告</div>
-<div style="font-family:'JetBrains Mono'; font-size:26px;">{p30}%</div>
-</div>
-<div style="{get_step_style(40, '#EF4444')} padding:22px 5px; border-radius:12px; text-align:center; position:relative; transition: all 0.4s ease;">
-{get_arrow(40)}
-<div style="font-size:13px; margin-bottom:8px; font-weight:950;">>=40% 警戒</div>
-<div style="font-family:'JetBrains Mono'; font-size:26px;">{p40}%</div>
-</div>
-<div style="{get_step_style(50, '#A855F7')} padding:22px 5px; border-radius:12px; text-align:center; position:relative; transition: all 0.4s ease;">
-{get_arrow(50)}
-<div style="font-size:13px; margin-bottom:8px; font-weight:950;">>=50% 極端</div>
-<div style="font-family:'JetBrains Mono'; font-size:26px;">{p50}%</div>
-</div>
-</div>""".strip()
+    steps_html = f"""<div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:12px; margin-top:45px; position:relative;">
+<div style="{get_step_style(10, '#10B981')} padding:22px 5px; border-radius:12px; text-align:center; position:relative; transition: all 0.4s ease;">{get_arrow(10)}<div style="font-size:13px; margin-bottom:8px; font-weight:950;">>=10% 漲幅</div><div style="font-family:'JetBrains Mono'; font-size:26px;">{p10}%</div></div>
+<div style="{get_step_style(20, '#10B981')} padding:22px 5px; border-radius:12px; text-align:center; position:relative; transition: all 0.4s ease;">{get_arrow(20)}<div style="font-size:13px; margin-bottom:8px; font-weight:950;">>=20% 漲幅</div><div style="font-family:'JetBrains Mono'; font-size:26px;">{p20}%</div></div>
+<div style="{get_step_style(30, '#F59E0B')} padding:22px 5px; border-radius:12px; text-align:center; position:relative; transition: all 0.4s ease;">{get_arrow(30)}<div style="font-size:13px; margin-bottom:8px; font-weight:950;">>=30% 警告</div><div style="font-family:'JetBrains Mono'; font-size:26px;">{p30}%</div></div>
+<div style="{get_step_style(40, '#EF4444')} padding:22px 5px; border-radius:12px; text-align:center; position:relative; transition: all 0.4s ease;">{get_arrow(40)}<div style="font-size:13px; margin-bottom:8px; font-weight:950;">>=40% 警戒</div><div style="font-family:'JetBrains Mono'; font-size:26px;">{p40}%</div></div>
+<div style="{get_step_style(50, '#A855F7')} padding:22px 5px; border-radius:12px; text-align:center; position:relative; transition: all 0.4s ease;">{get_arrow(50)}<div style="font-size:13px; margin-bottom:8px; font-weight:950;">>=50% 極端</div><div style="font-family:'JetBrains Mono'; font-size:26px;">{p50}%</div></div></div>"""
 
-    # 預先計算動態文字與機率
-    if current_bounce >= 50:
-        stage_text = "🌌 宇宙極端區"
-    elif current_bounce >= 40:
-        stage_text = "☢️ 高度警戒區"
-    elif current_bounce >= 30:
-        stage_text = "⚠️ 警示收割區"
-    elif current_bounce >= 20:
-        stage_text = "🚀 進入噴發區"
-    elif current_bounce >= 7:
-        stage_text = "📈 動能推升中"
-    else:
-        stage_text = "⚓ 谷底蓄勢中"
-
-    if current_bounce < 20:
-        match_prob = p10
-    elif current_bounce < 30:
-        match_prob = p20
-    elif current_bounce < 40:
-        match_prob = p30
-    elif current_bounce < 50:
-        match_prob = p40
-    else:
-        match_prob = p50
-
-    # 方案 A 儀表盤數據計算
-    # 以 50% 為儀表板上限 (100% 進度)
-    progress_cap = 50 
+    progress_cap, circumference = 50, 565.48
     clamped_bounce = min(current_bounce, progress_cap)
-    # SVG 圓環參數 (R=90, C=565.48)
-    circumference = 565.48
     dash_offset = circumference * (1 - clamped_bounce / progress_cap)
 
     hud_content = f"""
-<div style="background:#0F172A; border:4px solid #334155; border-radius:16px; padding:50px; margin-bottom:40px; box-shadow:0 30px 60px rgba(0,0,0,0.6); overflow:hidden; position:relative;">
+<div class="hud-main-frame-up" style="background:#0F172A; border:4px solid #334155; border-radius:16px; padding:50px; margin-bottom:40px; box-shadow:0 30px 60px rgba(0,0,0,0.6); overflow:hidden; position:relative;">
 <div style="display:flex; justify-content:space-between; align-items:center; gap:60px;">
-<!-- 左側：航行儀表盤 (方案 A) -->
-<div style="flex:1.2; position:relative; display:flex; justify-content:center; align-items:center; min-height:350px;">
-<!-- 背景雷達掃描線 -->
+<div style="flex:1.2; position:relative; display:flex; justify-content:center; align-items:center; min-height:400px;">
 <div style="position:absolute; width:300px; height:300px; border:1px solid rgba(255,255,255,0.05); border-radius:50%;"></div>
-<div style="position:absolute; width:200px; height:200px; border:1px solid rgba(255,255,255,0.05); border-radius:50%;"></div>
-<div style="position:absolute; width:300px; height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); transform:rotate(45deg);"></div>
-<div style="position:absolute; width:300px; height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); transform:rotate(-45deg);"></div>
-
-<!-- SVG 進度環 -->
-<svg width="320" height="320" viewBox="0 0 200 200" style="transform: rotate(-90deg); filter: drop-shadow(0 0 15px {score_color}66);">
+<div class="gauge-circle-breathe-up" style="position:relative; width:340px; height:340px;">
+<svg width="340" height="340" viewBox="0 0 200 200" style="transform: rotate(-90deg);">
 <circle cx="100" cy="100" r="90" fill="transparent" stroke="rgba(255,255,255,0.03)" stroke-width="12" />
 <circle cx="100" cy="100" r="90" fill="transparent" stroke="{score_color}" stroke-width="12" stroke-dasharray="{circumference}" stroke-dashoffset="{dash_offset}" stroke-linecap="round" style="transition: stroke-dashoffset 1s ease-out, stroke 0.5s;" />
 </svg>
-
-<!-- 中心數據面板 -->
+</div>
 <div style="position:absolute; display:flex; flex-direction:column; align-items:center; text-align:center;">
 <div style="font-size:14px; color:#94A3B8; font-weight:800; letter-spacing:2px; margin-bottom:5px;">CURRENT BOUNCE</div>
 <div style="font-family:'JetBrains Mono'; font-size:62px; font-weight:950; color:{score_color}; line-height:1; letter-spacing:-2px; text-shadow:0 0 20px {score_color}88;">+{current_bounce:.1f}%</div>
-<div style="margin-top:15px; padding:6px 15px; background:{score_color}; color:white; border-radius:6px; font-size:15px; font-weight:900; box-shadow:0 10px 20px {score_color}44;">
-{stage_text}
-</div>
-<div style="margin-top:10px; font-size:12px; color:#64748B; font-weight:800;">
-歷史相似達成率：<span style="color:{score_color};">{match_prob}%</span>
+<div style="margin-top:15px; padding:8px 20px; background:{score_color}; color:white; border-radius:6px; font-size:16px; font-weight:900; box-shadow:0 10px 20px {score_color}44;">{score_label}</div>
+<div style="margin-top:10px; font-size:12px; color:#64748B; font-weight:800;">歷史相似達成率：<span style="color:{score_color};">{match_prob}%</span></div>
 </div>
 </div>
-</div>
-
-<!-- 右側：亮燈階梯 (保持不變) -->
 <div style="flex:1.8; background:rgba(255,255,255,0.02); padding:35px; border-radius:16px; border:1px solid rgba(56, 189, 248, 0.15); align-self:stretch;">
 <div style="font-size:24px; color:#38BDF8; font-weight:950; margin-bottom:20px; display:flex; align-items:center; gap:12px; border-bottom:2px solid rgba(56, 189, 248, 0.3); padding-bottom:15px;">
 <span style="font-size:30px;">🛰️</span> 波段階梯上漲機率 <span style="font-size:16px; color:#94A3B8; font-weight:500;">(歷史樣本 {total_waves} 次)</span>
@@ -1090,7 +1169,7 @@ def page_upward_bias():
 </div>
 </div>
 </div>
-</div>""".strip()
+</div>"""
     st.markdown(hud_content, unsafe_allow_html=True)
 
     # (已根據要求暫時移除歷史反彈漲幅區間分布圖表)
@@ -1102,135 +1181,11 @@ def page_upward_bias():
         <div style="font-family:'JetBrains Mono'; font-size:16px; color:#64748B; font-weight:800; border:1px solid #334155; padding:5px 15px; border-radius:6px;">LOG_SYSTEM // SURGE_RECORDS_v4.2</div>
     </div>
     """, unsafe_allow_html=True)
-
-    # --- [ 手動波段整合區：根據 USER 精確大局觀進行修正 ] ---
-    if not up_df.empty:
-        # 1. 處理 2024-08-06 至 2025-01-07 的大整合
-        target_indices = up_df[up_df['起漲日期 (前波破底)'].isin(['2024-08-06', '2024-09-04'])].index.tolist()
-        if len(target_indices) >= 2:
-            # 以第一筆(最早)為基準
-            base_idx = target_indices[0] if up_df.loc[target_indices[0], '起漲日期 (前波破底)'] == '2024-08-06' else target_indices[1]
-            tail_idx = target_indices[1] if base_idx == target_indices[0] else target_indices[0]
-            
-            # 整合數據：取最早日期，最晚日期，最高價格
-            up_df.at[base_idx, '最高價格 (或現價)'] = max(up_df.loc[base_idx, '最高價格 (或現價)'], up_df.loc[tail_idx, '最高價格 (或現價)'])
-            up_df.at[base_idx, '最高日期 (下波前高)'] = up_df.loc[tail_idx, '最高日期 (下波前高)']
-            up_df.at[base_idx, '狀態'] = up_df.loc[tail_idx, '狀態']
-            
-            # 重新計算整合後的報酬與天數
-            p_start = up_df.loc[base_idx, '起漲價格']
-            p_end = up_df.loc[base_idx, '最高價格 (或現價)']
-            up_df.at[base_idx, '漲幅(%)'] = (p_end - p_start) / p_start * 100
-            
-            d_start = pd.to_datetime(up_df.loc[base_idx, '起漲日期 (前波破底)'])
-            # 處理可能帶有「至今」字樣的日期
-            d_end_raw = up_df.loc[base_idx, '最高日期 (下波前高)']
-            if '(' in d_end_raw:
-                d_end_str = d_end_raw.split('(')[1].split(')')[0]
-                # 假設年份 (如果格式是 MM/DD，需補上年份，這裡簡化處理)
-                d_end = pd.to_datetime(f"2025-{d_end_str.replace('/', '-')}")
-            else:
-                d_end = pd.to_datetime(d_end_raw)
-            up_df.at[base_idx, '花費天數'] = (d_end - d_start).days
-            
-            # 移除被合併的後面那一筆
-            up_df = up_df.drop(tail_idx)
-
-        # 2. 手動移除特定碎步波段 (根據 USER 精確大局觀)
-        remove_dates = [
-            '2022-07-12', '2022-05-12', '2021-08-20', '2021-05-12', '2018-10-26', 
-            '2011-08-22', '2011-08-09', '2008-12-24', '2008-12-05', '2008-11-21', 
-            '2008-10-28', '2008-10-13', '2008-09-18', '2008-09-05', '2008-08-05', 
-            '2008-07-16', '2008-01-09', '2007-12-18', '2007-11-27', '2006-06-09',
-            '2004-05-17', '2003-04-01', '2003-03-11', '2002-08-06', '2002-07-03', 
-            '2002-05-07', '2001-05-21', '2001-03-02', '2001-02-08', '2000-11-21', 
-            '2000-11-02', '2000-10-19', '2000-10-13', '2000-10-05', '2000-08-08', 
-            '2000-07-05', '2000-05-26', '2000-05-11', '2000-04-17'
-        ]
-        up_df = up_df[~up_df['起漲日期 (前波破底)'].isin(remove_dates)]
-
-        # 3. 手動修正波段終點：2020-03-19 改為 2020-07-28
-        target_2020 = up_df[up_df['起漲日期 (前波破底)'] == '2020-03-19'].index
-        if not target_2020.empty:
-            idx = target_2020[0]
-            # 獲取 2020-07-28 的精確價格 (透過 yfinance fetch 或已知數據)
-            try:
-                # 重新獲取資料以確保價格精確
-                hist_data = fetch_data("^TWII", start_date="2020-07-20", end_date="2020-08-01")
-                if not hist_data.empty and '2020-07-28' in hist_data.index.strftime('%Y-%m-%d'):
-                    new_price = hist_data.loc[hist_data.index.strftime('%Y-%m-%d') == '2020-07-28', 'Close'].iloc[0]
-                    up_df.at[idx, '最高日期 (下波前高)'] = '2020-07-28'
-                    up_df.at[idx, '最高價格 (或現價)'] = round(float(new_price), 2)
-                    
-                    # 重新計算
-                    p_start = up_df.loc[idx, '起漲價格']
-                    up_df.at[idx, '漲幅(%)'] = round((new_price - p_start) / p_start * 100, 2)
-                    up_df.at[idx, '花費天數'] = (pd.to_datetime('2020-07-28') - pd.to_datetime('2020-03-19')).days
-            except:
-                pass 
-
-        # 4. 手動修正波段起點：2012-06-04 改為 2012-07-25
-        target_2012 = up_df[up_df['起漲日期 (前波破底)'] == '2012-06-04'].index
-        if not target_2012.empty:
-            idx = target_2012[0]
-            try:
-                # 獲取 2012-07-25 的精確價格
-                hist_data_2012 = fetch_data("^TWII", start_date="2012-07-20", end_date="2012-08-01")
-                if not hist_data_2012.empty and '2012-07-25' in hist_data_2012.index.strftime('%Y-%m-%d'):
-                    new_start_price = hist_data_2012.loc[hist_data_2012.index.strftime('%Y-%m-%d') == '2012-07-25', 'Close'].iloc[0]
-                    up_df.at[idx, '起漲日期 (前波破底)'] = '2012-07-25'
-                    up_df.at[idx, '起漲價格'] = round(float(new_start_price), 2)
-                    
-                    # 重新計算 (終點維持不變)
-                    p_end = up_df.loc[idx, '最高價格 (或現價)']
-                    up_df.at[idx, '漲幅(%)'] = round((p_end - new_start_price) / new_start_price * 100, 2)
-                    up_df.at[idx, '花費天數'] = (pd.to_datetime(up_df.loc[idx, '最高日期 (下波前高)']) - pd.to_datetime('2012-07-25')).days
-            except:
-                pass
-
-        # 5. 手動拆解波段：2005-10-28 ➔ 2006-05-09 拆成兩波
-        target_2005 = up_df[up_df['起漲日期 (前波破底)'] == '2005-10-28'].index
-        if not target_2005.empty:
-            idx = target_2005[0]
-            try:
-                # 獲取拆點與終點價格
-                split_dates = ["2006-01-12", "2006-03-24", "2006-05-09"]
-                p_data = fetch_data("^TWII", start_date="2005-10-20", end_date="2006-05-15")
-                if not p_data.empty:
-                    def get_p(d_str):
-                        mask = p_data.index.strftime('%Y-%m-%d') == d_str
-                        return p_data.loc[mask, 'Close'].iloc[0] if any(mask) else None
-                    
-                    p_0112 = get_p("2006-01-12")
-                    p_0324 = get_p("2006-03-24")
-                    p_0509 = get_p("2006-05-09")
-                    
-                    if p_0112 and p_0324 and p_0509:
-                        # (A) 修正第一波：10/28 ➔ 01/12
-                        p_start1 = up_df.loc[idx, '起漲價格']
-                        up_df.at[idx, '最高日期 (下波前高)'] = '2006-01-12'
-                        up_df.at[idx, '最高價格 (或現價)'] = round(float(p_0112), 2)
-                        up_df.at[idx, '漲幅(%)'] = round((p_0112 - p_start1) / p_start1 * 100, 2)
-                        up_df.at[idx, '花費天數'] = (pd.to_datetime('2006-01-12') - pd.to_datetime('2005-10-28')).days
-                        
-                        # (B) 新增第二波：03/24 ➔ 05/09
-                        new_wave = {
-                            '起漲日期 (前波破底)': '2006-03-24',
-                            '最高日期 (下波前高)': '2006-05-09',
-                            '起漲價格': round(float(p_0324), 2),
-                            '最高價格 (或現價)': round(float(p_0509), 2),
-                            '漲幅(%)': round((p_0509 - p_0324) / p_0324 * 100, 2),
-                            '花費天數': (pd.to_datetime('2006-05-09') - pd.to_datetime('2006-03-24')).days,
-                            '狀態': '已完結'
-                        }
-                        up_df = pd.concat([up_df, pd.DataFrame([new_wave])], ignore_index=True)
-            except:
-                pass
-
     sorted_waves = up_df.sort_values(by='起漲日期 (前波破底)', ascending=False)
     
     for _, r in sorted_waves.iterrows():
         gain = float(r['漲幅(%)'])
+        pts_gain = float(r['最高價格 (或現價)']) - float(r['起漲價格'])
         days = int(r['花費天數'])
         status = r['狀態']
         
@@ -1244,49 +1199,50 @@ def page_upward_bias():
             status_badge = '<span style="color:#64748B; background:rgba(100, 116, 139, 0.1); padding:6px 16px; border-radius:8px; font-size:20px; font-weight:900; border:2px solid rgba(100, 116, 139, 0.3);">✅ 🎯 波段已收割</span>'
             date_display = f"{r['起漲日期 (前波破底)']} ➔ {r['最高日期 (下波前高)']}"
 
-        html_log = f"""<div style="background:#0F172A; border:1px solid #334155; border-radius:16px; margin-bottom:60px; overflow:hidden; box-shadow:0 35px 70px rgba(0,0,0,0.6);">
-<div style="display:grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; min-height:300px;">
+        html_log = f"""<div style="background:#0F172A; border:3px solid #334155; border-radius:18px; margin-bottom:70px; overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,0.6);">
+<div style="display:grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; border-bottom:1px solid #334155;">
 <!-- 巨幕格子 1: 歷程日期 -->
-<div style="padding:45px 35px; background:#111827; border-right:1px solid #334155; border-bottom:1px solid #334155; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:20px;">
+<div style="padding:55px 40px; background:rgba(17, 24, 39, 0.8); border-right:1px solid #334155; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:12px;">
     <div style="display:flex; align-items:center; justify-content:center; gap:12px;">
         <span style="background:rgba(16, 185, 129, 0.1); color:#10B981; padding:6px 16px; border-radius:6px; font-weight:950; font-size:18px; border:2px solid #10B981;">
             {'🟢 進行中' if status == '進行中' else '✅ 已結束'}
         </span>
         <span style="color:#94A3B8; font-size:18px; font-weight:800; letter-spacing:1px;">波段上漲紀錄 :</span>
     </div>
-    <div style="font-size:48px; color:white; font-weight:950; letter-spacing:-1.5px; line-height:1; display:flex; align-items:center; gap:15px;">
+    <div style="font-size:38px; color:white; font-weight:950; letter-spacing:-1.5px; line-height:1; display:flex; align-items:center; gap:10px;">
         📅 {date_display.replace("<span style='color:#38BDF8;'>", "").replace("</span>", "")}
     </div>
 </div>
 
 <!-- 巨幕格子 2: 耗時天數 -->
-<div style="padding:55px; background:#111827; border-bottom:1px solid #334155; text-align:center; display:flex; flex-direction:column; justify-content:space-around; align-items:center;">
+<div style="padding:55px 40px; background:rgba(17, 24, 39, 0.8); text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center;">
     <div style="color:#94A3B8; font-size:16px; font-weight:800; letter-spacing:1px;">波段噴發總週期</div>
-    <div style="color:#38BDF8; font-family:'JetBrains Mono'; font-size:68px; font-weight:1000; filter: drop-shadow(0 0 15px rgba(56,189,248,0.5)); text-shadow: 0 0 30px rgba(56,189,248,0.4);">🚀 {days}<span style="font-size:28px; margin-left:10px;">DAYS</span></div>
-    <div style="height:35px;"></div> <!-- 保持四格重心對稱的預留空間 -->
+    <div style="color:#38BDF8; font-family:'JetBrains Mono'; font-size:68px; font-weight:1000; filter: drop-shadow(0 0 15px rgba(56,189,248,0.5)); text-shadow: 0 0 30px rgba(56,189,248,0.4);">🚀 {days}<span style="font-size:24px; margin-left:8px;">DAYS</span></div>
 </div>
 
 <!-- 巨幕格子 3: 起漲價格 -->
-<div style="background:#450a0a; padding:55px; border-right:1px solid #334155; text-align:center; display:flex; flex-direction:column; justify-content:space-between; align-items:center;">
-    <div style="color:#FCA5A5; font-size:16px; font-weight:800; letter-spacing:1px; opacity:0.9;">[ 階段一 ] 波段起漲點</div>
-    <div style="font-family:'JetBrains Mono'; font-size:72px; font-weight:1000; color:white; line-height:1; text-shadow:0 0 40px rgba(239, 68, 68, 0.7);">{r['起漲價格']:,.0f}</div>
-    <div style="background:rgba(239, 68, 68, 0.2); color:#FCA5A5; padding:6px 20px; border-radius:40px; font-size:15px; font-weight:800; border:1px solid rgba(239, 68, 68, 0.4);">起漲於 {r['起漲日期 (前波破底)']}</div>
+<div style="background:#450a0a; padding:55px 40px; border-right:1px solid #334155; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+    <div style="color:#FCA5A5; font-size:22px; font-weight:950; margin-bottom:25px; letter-spacing:2px; opacity:0.9;">[ 階段一 ] 波段起漲點</div>
+    <div style="font-family:'JetBrains Mono'; font-size:68px; font-weight:1000; color:white; line-height:1; text-shadow:0 0 40px rgba(239, 68, 68, 0.7);">{r['起漲價格']:,.0f}</div>
+    <div style="background:rgba(239, 68, 68, 0.2); color:#FCA5A5; padding:6px 18px; border-radius:8px; font-size:17px; font-weight:900; border:1px solid rgba(239, 68, 68, 0.4);">起漲於 {r['起漲日期 (前波破底)']}</div>
 </div>
 
 <!-- 巨幕格子 4: 最高價格 -->
-<div style="background:#064e3b; padding:55px; text-align:center; display:flex; flex-direction:column; justify-content:space-between; align-items:center;">
-    <div style="color:#6EE7B7; font-size:16px; font-weight:800; letter-spacing:1px; opacity:0.9;">[ 階段二 ] 波段最高點</div>
-    <div style="font-family:'JetBrains Mono'; font-size:72px; font-weight:1000; color:white; line-height:1; text-shadow:0 0 40px rgba(16, 185, 129, 0.7);">{r['最高價格 (或現價)']:,.0f}</div>
-    <div style="background:rgba(16, 185, 129, 0.2); color:#6EE7B7; padding:6px 20px; border-radius:40px; font-size:15px; font-weight:800; border:1px solid rgba(16, 185, 129, 0.4);">攻頂於 {r['最高日期 (下波前高)']}</div>
+<div style="background:#064e3b; padding:55px 40px; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+    <div style="color:#6EE7B7; font-size:22px; font-weight:950; margin-bottom:25px; letter-spacing:2px; opacity:0.9;">[ 階段二 ] 波段最高點</div>
+    <div style="font-family:'JetBrains Mono'; font-size:68px; font-weight:1000; color:white; line-height:1; text-shadow:0 0 40px rgba(16, 185, 129, 0.7);">{r['最高價格 (或現價)']:,.0f}</div>
+    <div style="background:rgba(16, 185, 129, 0.2); color:#6EE7B7; padding:6px 18px; border-radius:8px; font-size:17px; font-weight:900; border:1px solid rgba(16, 185, 129, 0.4);">攻頂於 {r['最高日期 (下波前高)']}</div>
 </div>
 </div>
-<div style="background:#0F172A; padding:45px 50px; border-top:3px solid #F97316;">
+<div style="background:#0F172A; padding:45px 55px; border:3px solid #F97316; margin:0;">
 <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:35px;">
-<div style="font-size:26px; color:white; font-weight:950; display:flex; align-items:center; gap:15px; line-height:1;">⚡ 波段動能總回報</div>
-<div style="font-size:42px; color:#FBBF24; font-weight:950; letter-spacing:-1.5px; line-height:1; text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);">+{gain:.1f}%</div>
+<div style="font-size:34px; color:white; font-weight:950; display:flex; align-items:center; gap:12px; line-height:1;">⚡ 波段上漲幅度</div>
+<div style="font-size:42px; color:#FBBF24; font-weight:950; letter-spacing:-1.5px; line-height:1; text-shadow: 0 0 20px rgba(251, 191, 36, 0.4); display:flex; align-items:baseline; gap:15px;">
+    <span>+{pts_gain:.0f} ｜ +{gain:.1f}%</span>
 </div>
-<div style="height:24px; background:rgba(2,6,23,0.9); border-radius:10px; overflow:hidden; border:2.5px solid #F97316; padding:2.5px; box-shadow:inset 0 4px 10px rgba(0,0,0,0.5);">
-<div style="width:{energy_w}%; height:100%; background:linear-gradient(90deg, #FDE68A 0%, #FBBF24 50%, #F97316 100%); border-radius:8px; box-shadow:0 0 20px rgba(251, 191, 36, 0.4);"></div>
+</div>
+<div style="height:38px; background:rgba(2,6,23,0.95); border-radius:12px; overflow:hidden; border:3px solid #F97316; padding:3px; box-shadow:inset 0 4px 10px rgba(0,0,0,0.6);">
+<div style="width:{energy_w}%; height:100%; background:linear-gradient(90deg, #FDE68A 0%, #FBBF24 50%, #F97316 100%); border-radius:8px; box-shadow:0 0 25px rgba(249, 115, 22, 0.4);"></div>
 </div>
 <div style="margin-top:25px; text-align:right;">
 <span style="color:#64748B; font-family:'JetBrains Mono'; font-size:14px; font-weight:700;">MOMENTUM_STRENGTH: {energy_w:.1f}% / 50%_EXTREME</span>
@@ -1344,7 +1300,7 @@ def page_downward_bias():
     status_pill_color = "#EF4444" if current_dd >= 7.0 else "#10B981"
     status_pill_text = "DANGER: HIGH RISK" if current_dd >= 7.0 else "SAFE: CRUISING"
     
-    hero_header_html = f"""<div style="background:#0F172A; border:4px solid #475569; border-radius:12px; padding:35px; margin-bottom:30px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><div style="font-family:'Inter', 'Microsoft JhengHei', sans-serif; font-size:13px; color:#64748B; letter-spacing:1px; font-weight:800;">🛰️ 系統即時監控中 // 大盤回檔量化模組</div><div style="background:{status_pill_color}; color:white; padding:4px 12px; border-radius:6px; font-family:'Microsoft JhengHei', sans-serif; font-size:12px; font-weight:900; box-shadow:0 0 15px {status_pill_color};">● {status_pill_text}</div></div><h1 style="color:white; font-size:48px; font-weight:950; margin:0; letter-spacing:-1.5px; line-height:1.2; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">🚀 大盤下跌：強度統計 [v2]</h1><div style="margin-top:20px; color:#94A3B8; font-size:17px; font-weight:600; line-height:1.8; max-width:1100px; border-left:4px solid #334155; padding-left:20px;"><b>獨立戰略分析模組</b>：專門量化大盤從波段頂峰反轉後的「真實跌幅」。我們從每一波修正前的高點算起，直到市場正式跌破「7% 關鍵防線」時，確認該次下殺的剩餘路徑與最終落落地點。透過這項數據，「空頭修復」的破壞力與耗時，協助您判斷當前波段的剩餘下修空間。</div></div>"""
+    hero_header_html = f"""<div style="background:#0F172A; border:4px solid #475569; border-radius:12px; padding:35px; margin-bottom:30px; box-shadow:0 20px 40px rgba(0,0,0,0.5);"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><div style="font-family:'Inter', 'Microsoft JhengHei', sans-serif; font-size:13px; color:#64748B; letter-spacing:1px; font-weight:800;">🛰️ 系統即時監控中 // 大盤回檔量化模組</div><div style="background:{status_pill_color}; color:white; padding:4px 12px; border-radius:6px; font-family:'Microsoft JhengHei', sans-serif; font-size:12px; font-weight:900; box-shadow:0 0 15px {status_pill_color};">● {status_pill_text}</div></div><h1 style="color:white; font-size:48px; font-weight:950; margin:0; letter-spacing:-1.5px; line-height:1.2; text-shadow:0 0 30px rgba(56, 189, 248, 0.4);">🚀 大盤下跌：下跌統計 [v2]</h1><div style="margin-top:20px; color:#94A3B8; font-size:17px; font-weight:600; line-height:1.8; max-width:1100px; border-left:4px solid #334155; padding-left:20px;"><b>獨立戰略分析模組</b>：專門量化大盤從波段頂峰反轉後的「真實跌幅」。我們從每一波修正前的高點算起，直到市場正式跌破「7% 關鍵防線」時，確認該次下殺的剩餘路徑與最終落落地點。透過這項數據，「空頭修復」的破壞力與耗時，協助您判斷當前波段的剩餘下修空間。</div></div>"""
     st.markdown(hero_header_html, unsafe_allow_html=True)
 
     # --- 戰略導讀 (一)：新手避坑指南 ---
@@ -1370,7 +1326,24 @@ def page_downward_bias():
     st.markdown(onboarding_html, unsafe_allow_html=True)
 
     # --- 3. 戰鬥控制台：Macro HUD ---
-    score_color = status_pill_color
+    if current_dd >= 50:
+        score_color = "#A855F7" # 紫色 (大崩盤)
+        dd_label = "💀 恐佈大崩盤 (>=50%)"
+    elif current_dd >= 30:
+        score_color = "#DC2626" # 深紅 (危機)
+        dd_label = "🚨 極度危險區 (>=30%)"
+    elif current_dd >= 20:
+        score_color = "#EF4444" # 紅色 (重挫)
+        dd_label = "☢️ 大家都賠慘了 (>=20%)"
+    elif current_dd >= 15:
+        score_color = "#F59E0B" # 橘黃 (感冒)
+        dd_label = "⚠️ 下跌警戒區 (>=15%)"
+    elif current_dd >= 10:
+        score_color = "#10B981" # 綠色 (回檔)
+        dd_label = "📉 市場小感冒 (>=10%)"
+    else:
+        score_color = "#475569" # 灰色 (區間)
+        dd_label = "⚓ 目前還安全 (<10%)"
     
     # 從 metrics 讀取真實數據
     avg_resid_val = metrics.get('Avg Residual Drawdown (%)', 0)
@@ -1533,8 +1506,14 @@ def page_downward_bias():
           50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.8); border-color: rgba(16, 185, 129, 1); opacity: 1; }
           100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.2); border-color: rgba(16, 185, 129, 0.4); opacity: 0.8; }
         }
+        @keyframes text-glow-red {
+          0% { text-shadow: 0 0 10px rgba(255, 61, 61, 0.3); }
+          50% { text-shadow: 0 0 35px rgba(255, 61, 61, 0.8); }
+          100% { text-shadow: 0 0 10px rgba(255, 61, 61, 0.3); }
+        }
         .breathe-red-node { animation: breathe-red 2.5s infinite ease-in-out; }
         .breathe-green-node { animation: breathe-green 2.5s infinite ease-in-out; }
+        .text-glow-val-red { animation: text-glow-red 3s infinite ease-in-out; }
         </style>
         """, unsafe_allow_html=True)
 
@@ -1553,6 +1532,7 @@ def page_downward_bias():
             trigger_price = float(r['觸發價格'])
             peak_price = float(r['前高價格'])
             bottom_price = float(r['破底最低價'])
+            pts_drop = peak_price - bottom_price
             
             w = min(100.0, (abs(total_dd) / 30) * 100) # 修正為 30% 滿版
             
@@ -1576,41 +1556,43 @@ def page_downward_bias():
                 state_3_sub = "套牢中"
 
             card_html = f"""
-<div style="background:#0F172A; border:5px solid #334155; border-radius:18px; margin-bottom:70px; overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,0.6);">
-  <div style="display:flex; align-items:stretch; background:#1E293B; padding:0; border-bottom:1px solid #334155;">
-    <div style="flex:1; padding:45px 30px; text-align:center; border-right:1px solid #334155;">
+<div style="background:#0F172A; border:3px solid #334155; border-radius:18px; margin-bottom:70px; overflow:hidden; box-shadow:0 40px 80px rgba(0,0,0,0.6);">
+  <div style="display:grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; background:#1E293B; border-bottom:1px solid #334155;">
+    <!-- 格子 1 -->
+    <div style="padding:55px 40px; text-align:center; border-right:1px solid #334155; display:flex; flex-direction:column; justify-content:center; align-items:center;">
       <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:12px;">
         <span style="background:{tag_bg}; color:{tag_color}; padding:6px 16px; border-radius:6px; font-weight:950; font-size:18px; border:2px solid {tag_color};">{status_icon} {status}</span>
         <span style="color:#94A3B8; font-size:18px; font-weight:800; letter-spacing:1px;">波段回檔紀錄 :</span>
       </div>
-      <div style="font-size:48px; color:white; font-weight:950; letter-spacing:-1.5px; line-height:1;">📅 {period_str}</div>
+      <div style="font-size:38px; color:white; font-weight:950; letter-spacing:-1.5px; line-height:1;">📅 {period_str}</div>
     </div>
-    <div style="flex:1; padding:45px 30px; text-align:center;">
+    <!-- 格子 2 -->
+    <div style="padding:55px 40px; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center;">
       <div style="color:#94A3B8; font-size:18px; font-weight:800; margin-bottom:12px; letter-spacing:1px;">下跌修正總耗時 :</div>
-      <div style="text-align:center; display:flex; flex-direction:column; justify-content:center; height:100px;">
-        <div style="color:#EF4444; font-family:'JetBrains Mono', sans-serif; font-size:34px; font-weight:950; margin-bottom:5px; display:flex; align-items:center; justify-content:center; gap:12px;">🚀 總耗時 {days_to_bottom} 天</div>
-      </div>
+      <div style="color:#EF4444; font-family:'JetBrains Mono', sans-serif; font-size:34px; font-weight:950; margin-bottom:5px; display:flex; align-items:center; justify-content:center; gap:12px;">🚀 總耗時 {days_to_bottom} 天</div>
     </div>
-  </div>
-  <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
-    <div style="background:#3B0A0A; padding:65px 40px; border-right:2px solid #334155; text-align:center;">
+    <!-- 格子 3 -->
+    <div style="background:#3B0A0A; padding:55px 40px; border-right:1px solid #334155; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center;">
       <div style="color:#FCA5A5; font-size:22px; font-weight:950; margin-bottom:25px; letter-spacing:2px; opacity:0.9;">[ 階段一 ] 波段最高峰</div>
       <div style="font-family:'JetBrains Mono'; font-size:68px; font-weight:950; color:white; line-height:1; margin-bottom:20px; text-shadow:0 0 35px rgba(239,68,68,0.5);">{peak_price:,.0f}</div>
       <div style="background:rgba(239,68,68,0.2); color:#FCA5A5; display:inline-block; padding:6px 18px; border-radius:8px; font-size:17px; font-weight:900; border:1px solid #EF4444;">( 攻頂於 {peak_date} )</div>
     </div>
-    <div style="background:#042F2E; padding:65px 40px; text-align:center;">
+    <!-- 格子 4 -->
+    <div style="background:#042F2E; padding:55px 40px; text-align:center; display:flex; flex-direction:column; justify-content:center; align-items:center;">
       <div style="color:#A7F3D0; font-size:22px; font-weight:950; margin-bottom:25px; letter-spacing:2px; opacity:0.9;">[ 階段二 ] 觸發 -7% 警戒</div>
       <div style="font-family:'JetBrains Mono'; font-size:68px; font-weight:950; color:white; line-height:1; margin-bottom:20px; text-shadow:0 0 35px rgba(16,185,129,0.5);">{trigger_price:,.0f}</div>
-      <div class="breathe-green-node" style="background:rgba(16,185,129,0.2); color:#A7F3D0; display:inline-block; padding:6px 18px; border-radius:8px; font-size:17px; font-weight:900; border:1px solid #10B981;">( 發生於 {trigger_date}，前高 {peak_price:,.0f} )</div>
+      <div class="breathe-green-node" style="background:rgba(16,185,129,0.2); color:#A7F3D0; display:inline-block; padding:6px 18px; border-radius:8px; font-size:17px; font-weight:900; border:1px solid #10B981;">( 發生於 {trigger_date} )</div>
     </div>
   </div>
-  <div style="background:#0F172A; padding:45px 50px; border-top:3px solid #F97316;">
-    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:35px;">
-      <div style="font-size:34px; color:white; font-weight:950; display:flex; align-items:center; gap:15px; line-height:1;">☀️ {state_3_sub}</div>
-      <div style="font-size:42px; color:#FBBF24; font-weight:950; letter-spacing:-1.5px; line-height:1;">{state_3_val}</div>
-    </div>
-    <div style="height:24px; background:rgba(2,6,23,0.9); border-radius:10px; overflow:hidden; border:2.5px solid #F97316; padding:2.5px; box-shadow:inset 0 4px 10px rgba(0,0,0,0.5);">
-      <div style="width:{w}%; height:100%; background:linear-gradient(90deg, #FDE68A 0%, #FBBF24 50%, #F97316 100%); border-radius:8px; box-shadow:0 0 20px rgba(251, 191, 36, 0.4);"></div>
+      <div style="background:#0F172A; padding:45px 55px; border:3px solid #F97316; margin:0;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:35px;">
+          <div style="font-size:34px; color:white; font-weight:950; display:flex; align-items:center; gap:12px; line-height:1;">☄️ 波段下跌幅度</div>
+          <div class="text-glow-val-red" style="font-size:42px; color:#FF3D3D; font-weight:1000; letter-spacing:-1.5px; display:flex; align-items:baseline; gap:15px;">
+            <span>-{pts_drop:.0f} ｜ {total_dd:.1f}%</span>
+          </div>
+        </div>
+    <div style="height:38px; background:rgba(2,6,23,0.95); border-radius:12px; overflow:hidden; border:3px solid #F97316; padding:3px; box-shadow:inset 0 4px 10px rgba(0,0,0,0.6);">
+      <div style="width:{w}%; height:100%; background:linear-gradient(90deg, #FDE68A 0%, #FBBF24 50%, #F97316 100%); border-radius:8px; box-shadow:0 0 25px rgba(249, 115, 22, 0.4);"></div>
     </div>
     <div style="margin-top:25px; display:flex; justify-content:flex-end; align-items:center;">
       <div class="breathe-green-node" style="color:#94A3B8; font-family:'JetBrains Mono'; font-size:16px; font-weight:900; padding:4px 12px; border-radius:6px;">波段點位 {bottom_price:,.0f} ({bottom_date}) | 跌幅 -{abs(total_dd):.1f}%</div>
