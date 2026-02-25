@@ -2,56 +2,49 @@ import streamlit as st
 
 def inject_chatbot(token=None):
     """
-    將 Dify 聊天機器人直接嵌入在左側選單下方。
-    這能確保在任何環境下（地端/雲端）都能 100% 正常顯示。
+    實作絕對定位 (Absolute Positioning) 的右側浮動視窗。
+    完全不干擾 Streamlit 原生的 main container 寬度，達成疊加效果。
     """
     
-    with st.sidebar:
-        st.markdown("---")
-        # 建立一個美觀的小卡片作為提示
-        st.markdown("""
-            <div style="background: rgba(56, 189, 248, 0.1); border: 2px solid #38BDF8; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 10px;">
-                <div style="font-size: 24px; margin-bottom: 5px;">🤖</div>
-                <div style="color: white; font-weight: 800; font-size: 14px;">AI 戰情助理</div>
-                <div style="color: #94A3B8; font-size: 11px;">指標教學與數據詢問</div>
+    # 這個 HTML 會生成一個固定在畫面右側的區塊
+    overlay_html = """
+    <div id="ai-sidebar-container" style="position: fixed; top: 80px; right: 20px; width: 380px; height: calc(100vh - 100px); z-index: 999999; display: flex; flex-direction: column; background: transparent; pointer-events: none;">
+        
+        <!-- 頂部卡片 (需要可以點擊或有背景所以設為 auto) -->
+        <div style="background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); border: 1px solid #38BDF8; border-radius: 12px 12px 0 0; padding: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0, 191, 255, 0.2); pointer-events: auto;">
+            <div style="font-size: 18px; font-weight: bold; color: white; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                🤖 AI 戰情分析師
             </div>
+            <div style="color: #94A3B8; font-size: 11px; margin-top: 4px;">由 SiliconFlow 驅動</div>
+        </div>
+        
+        <!-- 聊天機器人 iframe (需要可以對話所以設為 auto) -->
+        <div style="flex-grow: 1; pointer-events: auto; border: 1px solid rgba(0, 191, 255, 0.3); border-top: none; border-radius: 0 0 12px 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); background: #ffffff;">
+            <iframe
+                src="https://udify.app/chatbot/YUWIdfFrAFOsIJ8s"
+                style="width: 100%; height: 100%;"
+                frameborder="0"
+                allow="microphone">
+            </iframe>
+        </div>
+    </div>
+    """
+    
+    # 注入這個覆蓋層。高度設為 0 以避免佔用 Streamlit 的標準文件流空間
+    st.components.v1.html(overlay_html, height=0)
+    
+    # 在全域 CSS 中替主畫面增加 padding-right，避免圖表最右邊的數據被 AI 視窗蓋住
+    st.markdown("""
+        <style>
+            /* 給 Streamlit 主容器增加右側邊距，相當於為 AI 視窗留出專屬軌道 */
+            .block-container {
+                padding-right: 420px !important; 
+            }
             
-            <style>
-            /* 1. 微調側邊欄寬度，給機器人多一點呼吸空間才不會被切掉右邊 */
-            [data-testid="stSidebar"] {
-                min-width: 360px !important;
+            /* 修正 iframe 容器在某些情況下的錯位 */
+            div[data-testid="stHtml"] {
+                position: relative;
+                z-index: 999999;
             }
-            /* 2. 讓 Expander 裡面的內容沒有多餘內距，盡可能撐滿 */
-            [data-testid="stExpanderDetails"] {
-                padding-left: 0.5rem !important;
-                padding-right: 0.5rem !important;
-            }
-            </style>
-        """, unsafe_allow_html=True)
-        
-        # 使用 Streamlit 的摺疊按鈕功能，點開後顯示對話視窗
-        with st.expander("💬 點擊展開：智能對話視窗", expanded=False):
-            # 建立零邊距的 HTML 內核，徹底根除「白色外框」與「擠壓裁切」的問題
-            seamless_html = """
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <style>
-                    /* 消除預設黑白邊距與滾動條 */
-                    body { margin: 0 !important; padding: 0 !important; background-color: transparent !important; overflow: hidden !important; }
-                    iframe { border: none !important; border-radius: 8px; }
-                </style>
-            </head>
-            <body>
-                <iframe
-                    src="https://udify.app/chatbot/YUWIdfFrAFOsIJ8s"
-                    style="width: 100%; height: 600px;"
-                    frameborder="0"
-                    allow="microphone">
-                </iframe>
-            </body>
-            </html>
-            """
-            st.components.v1.html(seamless_html, height=600, scrolling=False)
-        
-        st.markdown('<p style="color: #64748B; font-size: 10px; text-align: center; margin-top:15px;">Powered by SiliconFlow & aver5678</p>', unsafe_allow_html=True)
+        </style>
+    """, unsafe_allow_html=True)
