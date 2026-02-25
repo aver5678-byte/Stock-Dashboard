@@ -1698,7 +1698,7 @@ def main():
     # 執行對應的頁面函數 (主要圖表區保持全寬)
     pages[selection]()
     
-    # 4. 注入 Dify Chatbot (利用 CSS 固定在右側的專屬獨立視窗)
+    # 4. 注入 Dify Chatbot
     inject_chatbot()
 
 if __name__ == "__main__":
