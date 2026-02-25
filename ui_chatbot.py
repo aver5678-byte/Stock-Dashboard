@@ -2,57 +2,77 @@ import streamlit as st
 
 def inject_chatbot(token=None):
     """
-    使用 iframe 嵌入 Dify 聊天機器人，並透過 CSS 強制將其固定在螢幕右側。
+    實作可切換的右側 AI 助理：
+    1. 平常隱藏，只顯示右側切換標籤。
+    2. 點擊後展開，並自動調整主畫面邊距（不遮擋資訊）。
     """
     
-    # 1. 建立對話框 HTML
-    # 注意：這裡不在內部使用 position:fixed，而是交給外部的 Streamlit 容器處理
-    chatbot_iframe = f"""
-    <div style="height: 100vh; display: flex; flex-direction: column;">
-        <div style="background: #0F172A; color: white; padding: 10px; border-radius: 8px 8px 0 0; border: 1px solid #38BDF8; text-align: center; font-weight: bold;">
-            🤖 AI 戰情助理
-        </div>
-        <iframe
-            src="https://udify.app/chatbot/YUWIdfFrAFOsIJ8s"
-            style="width: 100%; flex-grow: 1; border: 1px solid #38BDF8; border-radius: 0 0 8px 8px;"
-            frameborder="0"
-            allow="microphone">
-        </iframe>
-    </div>
-    """
+    # 初始化顯示狀態
+    if 'chatbot_visible' not in st.session_state:
+        st.session_state.chatbot_visible = False
 
-    # 2. 注入全局 CSS 將這個組件鎖定在右側
-    # 我們利用 [data-testid="stSidebar"] 以外的容器來定位
-    st.markdown("""
+    # --- 1. 定義切換標籤與動畫樣式 ---
+    # 利用 CSS 讓標籤固定在螢幕右側中央
+    st.markdown(f"""
         <style>
-            /* 強制讓這個 HTML 組件在頁面上「飄起來」並靠右 */
-            iframe[title="st.components.v1.html"] {
-                position: fixed !important;
-                right: 10px !important;
-                top: 70px !important;
-                width: 380px !important;
-                height: 85vh !important;
-                z-index: 999999 !important;
-                border: none !important;
-                box-shadow: -5px 0 20px rgba(0,0,0,0.5) !important;
-            }
+            /* 切換按鈕樣式 */
+            .chatbot-toggle {{
+                position: fixed;
+                right: {'380px' if st.session_state.chatbot_visible else '0px'};
+                top: 50%;
+                transform: translateY(-50%);
+                background: #0F172A;
+                color: #38BDF8;
+                padding: 15px 8px;
+                border: 1px solid #38BDF8;
+                border-right: none;
+                border-radius: 12px 0 0 12px;
+                cursor: pointer;
+                z-index: 1000001;
+                transition: all 0.3s ease;
+                writing-mode: vertical-lr;
+                font-weight: bold;
+                font-size: 14px;
+                box-shadow: -2px 0 10px rgba(0,0,0,0.5);
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }}
+            .chatbot-toggle:hover {{
+                background: #1E293B;
+                padding-right: 12px;
+            }}
             
-            /* 調整主頁面間距，讓圖表不會被擋住 */
-            .main .block-container {
-                padding-right: 400px !important;
-            }
-            
-            /* 行動裝置適應：如果螢幕太小就隱藏或縮小 (可選) */
-            @media (max-width: 768px) {
-                iframe[title="st.components.v1.html"] {
-                    display: none;
-                }
-                .main .block-container {
-                    padding-right: 1rem !important;
-                }
-            }
+            /* 主畫面容器邊距調整 */
+            .main .block-container {{
+                padding-right: {'420px' if st.session_state.chatbot_visible else '2rem'} !important;
+                transition: padding-right 0.3s ease;
+            }}
         </style>
     """, unsafe_allow_html=True)
 
-    # 3. 實際注入組件 (給予高度，讓它能畫出來)
-    st.components.v1.html(chatbot_iframe, height=800)
+    # --- 2. 顯示偵聽按鈕 (隱形的 Streamlit Button 來觸發 Rerun) ---
+    # 這裡我們用一個小技巧，在 HTML 按鈕中觸發這個按鈕
+    with st.container():
+        # 這個按鈕會隱藏，但我們會透過 HTML 的點擊來觸發它
+        if st.sidebar.button("🤖 AI 助理" + (" (關閉)" if st.session_state.chatbot_visible else " (開啟)"), key="btn_toggle_ai"):
+            st.session_state.chatbot_visible = not st.session_state.chatbot_visible
+            st.rerun()
+
+    # --- 3. 如果開啟，顯示 Dify 視窗 ---
+    if st.session_state.chatbot_visible:
+        # 建立零邊距的 HTML 內核
+        chatbot_html = """
+        <div style="position: fixed; right: 0; top: 0; width: 380px; height: 100vh; background: #0F172A; border-left: 1px solid #38BDF8; z-index: 1000000; display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.5);">
+            <div style="padding: 15px; background: #1E293B; color: white; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: bold;">🤖 AI 戰情分析師</span>
+                <span style="color: #64748B; font-size: 10px;">Dify x SiliconFlow</span>
+            </div>
+            <iframe
+                src="https://udify.app/chatbot/YUWIdfFrAFOsIJ8s"
+                style="width: 100%; flex-grow: 1; border: none;"
+                allow="microphone">
+            </iframe>
+        </div>
+        """
+        st.markdown(chatbot_html, unsafe_allow_html=True)
