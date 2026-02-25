@@ -25,13 +25,84 @@ def inject_chatbot(token=None):
             </style>
         """, unsafe_allow_html=True)
 
-    # --- 2. Sidebar Toggle Button ---
+    # --- 2. Sidebar Premium Toggle Button ---
     with st.sidebar:
-        st.markdown("---")
-        label = "❌ 關閉 AI 助理" if st.session_state.chatbot_visible else "🤖 開啟 AI 戰情室"
-        if st.button(label, key="btn_toggle_ai", use_container_width=True):
-            st.session_state.chatbot_visible = not st.session_state.chatbot_visible
-            st.rerun()
+        # 插入一段專屬的 CSS 來美化這個特定的按鈕
+        st.markdown("""
+            <style>
+                /* AI 按鈕專屬外殼 */
+                .ai-toggle-container {
+                    margin-top: 30px;
+                    padding: 10px 0;
+                }
+                
+                /* AI 按鈕小標籤 */
+                .ai-tag-label {
+                    font-size: 10px;
+                    color: #38BDF8;
+                    letter-spacing: 2px;
+                    font-weight: 900;
+                    margin-bottom: 8px;
+                    opacity: 0.8;
+                    text-transform: uppercase;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .ai-tag-label::after {
+                    content: "";
+                    flex: 1;
+                    height: 1px;
+                    background: linear-gradient(90deg, rgba(56, 189, 248, 0.5), transparent);
+                }
+
+                /* 覆蓋這個特定按鈕的 Streamlit 原生樣式 */
+                div.stButton > button[key="btn_toggle_ai"] {
+                    background: linear-gradient(135deg, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.5) 100%) !important;
+                    color: #38BDF8 !important;
+                    border: 1px solid rgba(56, 189, 248, 0.4) !important;
+                    border-radius: 12px !important;
+                    padding: 20px 15px !important;
+                    font-size: 18px !important;
+                    font-weight: 800 !important;
+                    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
+                    backdrop-filter: blur(10px);
+                    text-align: center !important;
+                    display: flex !important;
+                    justify-content: center !important;
+                }
+
+                div.stButton > button[key="btn_toggle_ai"]:hover {
+                    border-color: #38BDF8 !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 0 25px rgba(56, 189, 248, 0.3) !important;
+                    transform: translateY(-2px) !important;
+                    background: rgba(30, 41, 59, 0.8) !important;
+                }
+
+                /* 當 AI 開啟時的特別樣式 */
+                .ai-active-btn button[key="btn_toggle_ai"] {
+                    border-color: #38BDF8 !important;
+                    background: rgba(56, 189, 248, 0.1) !important;
+                    box-shadow: inset 0 0 15px rgba(56, 189, 248, 0.2), 0 0 20px rgba(56, 189, 248, 0.2) !important;
+                }
+            </style>
+        """, unsafe_allow_html=True)
+
+        st.markdown('<div class="ai-toggle-container">', unsafe_allow_html=True)
+        st.markdown('<div class="ai-tag-label">Intelligence Service</div>', unsafe_allow_html=True)
+        
+        # 使用容器類別來區分狀態
+        container_class = "ai-active-btn" if st.session_state.chatbot_visible else ""
+        with st.container():
+            st.markdown(f'<div class="{container_class}">', unsafe_allow_html=True)
+            label = "❌ 關閉｜分析助理" if st.session_state.chatbot_visible else "🤖 AI｜研究諮詢"
+            if st.button(label, key="btn_toggle_ai", use_container_width=True):
+                st.session_state.chatbot_visible = not st.session_state.chatbot_visible
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # --- 3. Right Sidebar Persistent Injector ---
     # We use a trick to inject the iframe into the very root of the document ONE TIME via JS.
