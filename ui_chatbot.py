@@ -2,39 +2,35 @@ import streamlit as st
 
 def inject_chatbot(token=None):
     """
-    注入 Dify 官方懸浮對話氣泡 (Web Embed)。
-    點擊右下角氣泡即可展開對話視窗。
+    將 Dify 聊天機器人直接嵌入在左側選單下方。
+    這能確保在任何環境下（地端/雲端）都能 100% 正常顯示。
     """
     
-    # Dify Web Embed Script (Floating Bubble)
-    dify_embed_html = """
-    <script>
-        window.difyChatbotConfig = {
-            token: 'YUWIdfFrAFOsIJ8s',
-            isDev: false
-        }
-    </script>
-    <script
-        src="https://udify.app/embed.min.js"
-        id="YUWIdfFrAFOsIJ8s"
-        defer>
-    </script>
-    <style>
-        /* 浮動按鈕顏色微調 (配合系統深色科技主題) */
-        #dify-chatbot-bubble-button {
-            background-color: #38BDF8 !important;
-            box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4) !important;
-        }
-        /* 聊天視窗尺寸變大，以適應更多指標說明 */
-        #dify-chatbot-bubble-window {
-            width: 28rem !important;
-            height: 45rem !important;
-            border-radius: 12px !important;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6) !important;
-            border: 1px solid rgba(56, 189, 248, 0.2) !important;
-        }
-    </style>
-    """
-    
-    # 注入 HTML，設定高度為 0 是為了讓它只作為背景腳本執行，不佔用 Streamlit 版面
-    st.components.v1.html(dify_embed_html, height=0)
+    with st.sidebar:
+        st.markdown("---")
+        # 建立一個美觀的小卡片作為提示
+        st.markdown("""
+            <div style="background: rgba(56, 189, 248, 0.1); border: 2px solid #38BDF8; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 10px;">
+                <div style="font-size: 24px; margin-bottom: 5px;">🤖</div>
+                <div style="color: white; font-weight: 800; font-size: 14px;">AI 戰情助理</div>
+                <div style="color: #94A3B8; font-size: 11px;">指標教學與數據詢問</div>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        # 使用 Streamlit 的摺疊按鈕功能，點開後顯示對話視窗
+        with st.expander("💬 點擊開啟對話視窗", expanded=False):
+            # 嵌入 Dify 的完整對話網頁
+            st.components.v1.html(
+                """
+                <iframe
+                    src="https://udify.app/chatbot/YUWIdfFrAFOsIJ8s"
+                    style="width: 100%; height: 500px; border-radius: 8px;"
+                    frameborder="0"
+                    allow="microphone">
+                </iframe>
+                """,
+                height=520,
+                scrolling=False
+            )
+        
+        st.markdown('<p style="color: #64748B; font-size: 10px; text-align: center;">Powered by Dify & aver5678</p>', unsafe_allow_html=True)

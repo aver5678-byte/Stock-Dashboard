@@ -12,6 +12,7 @@ from wave_analyzer import analyze_waves
 from ui_theme import apply_global_theme
 import datetime
 from page_biz_cycle import page_biz_cycle
+from ui_chatbot import inject_chatbot
 
 st.set_page_config(page_title="台股預警儀表板 | 40週乖離率監控", layout="wide", initial_sidebar_state="expanded")
 
@@ -1696,6 +1697,9 @@ def main():
     
     # 執行對應的頁面函數
     pages[selection]()
+
+    # 4. 注入 Dify Chatbot (確保全站每一頁都有)
+    inject_chatbot()
 
 if __name__ == "__main__":
     main()
