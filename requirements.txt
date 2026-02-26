@@ -4,3 +4,5 @@ plotly
 yfinance>=0.2.36
 numpy
 altair
+openpyxl
+xlrd

@@ -17,7 +17,7 @@ from ui_chatbot import inject_chatbot
 import traceback
 
 st.set_page_config(page_title="台股預警儀表板 | v9.0 FINAL", layout="wide", initial_sidebar_state="expanded")
-# Sync Trigger: 2026-02-26 19:58 (Force Cloud Refresh)
+# Sync Trigger: 2026-02-26 20:30 (Force Cloud Redeploy)
 
 # 初始化模擬資料庫 (存在 session_state 中)
 if 'user_role' not in st.session_state:
