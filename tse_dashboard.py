@@ -272,6 +272,11 @@ def page_bias_analysis():
     latest_sma = df['SMA40'].iloc[-1]
     latest_bias = df['Bias'].iloc[-1]
     
+    # --- [核心數據同步至 AI] ---
+    st.session_state['market_snapshot']['bias_40w'] = f"{latest_bias:.1f}%"
+    st.session_state['market_snapshot']['index_price'] = f"{latest_close:,.0f}"
+    st.session_state['market_snapshot']['current_page'] = "40週乖離監控"
+    
     # --- 頂部區域：一體化戰情標頭 (Hero Header) ---
     status_pill_color = "#EF4444" if latest_bias >= 20 else "#FBBF24" if latest_bias >= 15 else "#10B981"
     status_pill_text = "HIGH RISK" if latest_bias >= 20 else "WARNING" if latest_bias >= 15 else "STABLE"
@@ -1111,6 +1116,11 @@ def page_upward_bias():
     
     match_prob = p10 if current_bounce < 20 else (p20 if current_bounce < 30 else (p30 if current_bounce < 40 else (p40 if current_bounce < 50 else p50)))
 
+    # --- [核心數據同步至 AI] ---
+    st.session_state['market_snapshot']['upward_bounce'] = f"{current_bounce:.1f}%"
+    st.session_state['market_snapshot']['upward_prob'] = f"{match_prob}%"
+    st.session_state['market_snapshot']['current_page'] = "上漲強度統計"
+
     # 注入呼吸燈 CSS
     st.markdown(f"""
     <style>
@@ -1323,6 +1333,11 @@ def page_downward_bias():
     # 固定監控台股加權指數
     symbol = "^TWII"
     df, events_df, metrics, dist_df, current_dd, last_date = get_analysis(symbol)
+
+    # --- [核心數據同步至 AI] ---
+    st.session_state['market_snapshot']['downward_dd'] = f"{current_dd:.1f}%"
+    st.session_state['market_snapshot']['downward_risk_p10'] = f"{metrics.get('跌幅超過 10% 機率', 0)}%"
+    st.session_state['market_snapshot']['current_page'] = "下跌強度監控"
 
     if df.empty or events_df.empty:
         st.warning("目前尚無足夠歷史數據可供分析。")
@@ -1708,6 +1723,9 @@ def main():
     # 1. 頂部 Logo (GPT 風格)
     st.sidebar.markdown('<h1 style="border:none; margin-bottom:10px;">📊 台灣指數 | 量化戰情室</h1>', unsafe_allow_html=True)
     
+    # 2. 注入 AI 助理按鈕 (置於導航上方，確保優先加載)
+    inject_chatbot()
+    
     pages = {
         "週期乖離監控系統": page_bias_analysis,
         "景氣燈號觀測系統": page_biz_cycle,
@@ -1746,10 +1764,20 @@ def main():
     # 3. 右上角用戶中心
     render_top_nav_profile()
     
-    # 執行對應的頁面函數 (主要圖表區保持全寬)
+    # 初始化核心數據緩存 (若不存在)
+    if 'market_snapshot' not in st.session_state:
+        st.session_state['market_snapshot'] = {
+            "bias_40w": "待載入...",
+            "index_price": "待載入...",
+            "upward_bounce": "待載入...",
+            "downward_dd": "待載入...",
+            "current_page": "導航中"
+        }
+
+    # 執行對應的頁面函數 (會在執行過程中更新市場數據到 session_state)
     pages[selection]()
     
-    # 4. 注入 Dify Chatbot
+    # 3. 注入 AI 研究助理 (這一步會將剛才生成的數據打包發給 Dify)
     inject_chatbot()
 
 if __name__ == "__main__":
