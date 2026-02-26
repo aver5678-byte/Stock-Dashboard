@@ -15,5 +15,5 @@ jobs:
         # 如果您的雲端網址不一樣，請到 GitHub 網頁上修改這行網址！
         run: |
           echo "Pinging Streamlit App..."
-          curl -sL "https://YOUR_STREAMLIT_APP_URL.streamlit.app/" > /dev/null
+          curl -sL "https://aver5678stock.streamlit.app/" > /dev/null
           echo "Done!"
