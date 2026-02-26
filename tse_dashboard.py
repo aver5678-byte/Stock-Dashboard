@@ -51,7 +51,8 @@ def load_data():
     ticker = "^TWII"
     try:
         # 改用日線抓取，確保能獲取到今天的即時價格
-        df_daily = yf.download(ticker, period="max", interval="1d", progress=False)
+        # 使用 28 年資料 (涵蓋 2000 年至今所有量化事件)，關閉 threads 與進度條，確保雲端穩定
+        df_daily = yf.download(ticker, period="28y", interval="1d", threads=False, progress=False)
         if df_daily.empty:
             return pd.DataFrame()
             
