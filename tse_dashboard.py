@@ -14,6 +14,7 @@ from ui_theme import apply_global_theme
 import datetime
 from page_biz_cycle import page_biz_cycle
 from ui_chatbot import inject_chatbot
+import traceback
 
 st.set_page_config(page_title="台股預警儀表板 | v9.0 FINAL", layout="wide", initial_sidebar_state="expanded")
 # Sync Trigger: 2026-02-26 19:58 (Force Cloud Refresh)
@@ -1720,78 +1721,70 @@ def render_top_nav_profile():
     pass
 
 def main():
-    # 1. 頂部 Logo (GPT 風格)
-    st.sidebar.markdown('<h1 style="border:none; margin-bottom:10px;">📊 台灣指數 | 量化戰情室</h1>', unsafe_allow_html=True)
-    
-    # 2. 注入 AI 助理按鈕 (已移動到主邏輯後執行，確保數據同步)
-    # inject_chatbot() (已移除)
-    
-    pages = {
-        "週期乖離監控系統": page_bias_analysis,
-        "景氣燈號觀測系統": page_biz_cycle,
-        "大盤下跌強度統計": page_downward_bias,
-        "大盤上漲強度統計": page_upward_bias
-    }
-    
-    # --- [核心控制區] ---
-    st.sidebar.markdown('<div class="sidebar-section-header">⚙️ 系統核心控制</div>', unsafe_allow_html=True)
-    scol1, scol2 = st.sidebar.columns(2)
-    with scol1:
-        if st.button("🔄 刷新頁面", key="sys_refresh", use_container_width=True):
-            st.rerun()
-    with scol2:
-        if st.button("🧼 重置緩存", key="sys_reset", use_container_width=True):
-            st.cache_data.clear()
-            st.rerun()
-
-    if st.session_state.get('user_role') == 'admin':
-        st.sidebar.markdown('<div class="sidebar-section-header">🛠️ 戰情管理後台</div>', unsafe_allow_html=True)
-        with st.sidebar.expander("系統控制面板", expanded=True):
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("🔄 刷新數據", help="強制重新載入所有腳本"):
-                    st.rerun()
-            with col2:
-                if st.button("🧹 清除緩存", help="重抓最原始資料"):
-                    st.cache_data.clear()
-                    st.cache_resource.clear()
-                    st.rerun()
-            
-            st.markdown(f"""
-                <div style="font-size:11px; color:#64748B; padding:5px; border-top:1px solid #334155; margin-top:10px;">
-                    <b>當前權限：</b> {st.session_state.get('user_role', 'guest').upper()}<br>
-                    <b>管理員信箱：</b> {ADMIN_EMAIL}
-                </div>
-            """, unsafe_allow_html=True)
-
-
-    # 如果是站長登入，增加後台管理模組
-    if st.session_state.get('user_role') == 'admin':
-        pages["系統管理中心系統"] = page_admin_dashboard
-        
-    selection = st.sidebar.radio("Navigation", list(pages.keys()), label_visibility="collapsed")
-    
-    # 3. 右上角用戶中心
-    render_top_nav_profile()
-    
-    # 初始化核心數據緩存 (若不存在)
-    if 'market_snapshot' not in st.session_state:
-        st.session_state['market_snapshot'] = {
-            "bias_40w": "待載入...",
-            "index_price": "待載入...",
-            "upward_bounce": "待載入...",
-            "downward_dd": "待載入...",
-            "current_page": "導航中"
-        }
-
     try:
+        # 1. 頂部 Logo (GPT 風格)
+        st.sidebar.markdown('<h1 style="border:none; margin-bottom:10px;">📊 台灣指數 | 量化戰情室</h1>', unsafe_allow_html=True)
+        
+        # 2. 注入 AI 助理按鈕 (已移動到主邏輯後執行，確保數據同步)
+        # inject_chatbot() (已移除)
+        
+        pages = {
+            "週期乖離監控系統": page_bias_analysis,
+            "景氣燈號觀測系統": page_biz_cycle,
+            "大盤下跌強度統計": page_downward_bias,
+            "大盤上漲強度統計": page_upward_bias
+        }
+        
+        if st.session_state.get('user_role') == 'admin':
+            st.sidebar.markdown('<div class="sidebar-section-header">🛠️ 戰情管理後台</div>', unsafe_allow_html=True)
+            with st.sidebar.expander("系統控制面板", expanded=True):
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("🔄 刷新數據", help="強制重新載入所有腳本"):
+                        st.rerun()
+                with col2:
+                    if st.button("🧹 清除緩存", help="重抓最原始資料"):
+                        st.cache_data.clear()
+                        st.cache_resource.clear()
+                        st.rerun()
+                
+                st.markdown(f"""
+                    <div style="font-size:11px; color:#64748B; padding:5px; border-top:1px solid #334155; margin-top:10px;">
+                        <b>當前權限：</b> {st.session_state.get('user_role', 'guest').upper()}<br>
+                        <b>管理員信箱：</b> {ADMIN_EMAIL}
+                    </div>
+                """, unsafe_allow_html=True)
+
+
+        # 如果是站長登入，增加後台管理模組
+        if st.session_state.get('user_role') == 'admin':
+            pages["系統管理中心系統"] = page_admin_dashboard
+            
+        selection = st.sidebar.radio("Navigation", list(pages.keys()), label_visibility="collapsed")
+        
+        # 3. 右上角用戶中心
+        render_top_nav_profile()
+        
+        # 初始化核心數據緩存 (若不存在)
+        if 'market_snapshot' not in st.session_state:
+            st.session_state['market_snapshot'] = {
+                "bias_40w": "待載入...",
+                "index_price": "待載入...",
+                "upward_bounce": "待載入...",
+                "downward_dd": "待載入...",
+                "current_page": "導航中"
+            }
+
         # 執行對應的頁面函數 (會在執行過程中更新市場數據到 session_state)
         pages[selection]()
         
         # 3. 注入 AI 研究助理 (這一步會將剛才生成的數據打包發給 Dify)
         inject_chatbot()
+        
     except Exception as e:
-        st.error(f"⚠️ 核心模組加載失敗：{e}")
+        st.error("🆘 系統啟動發生嚴重衝突")
+        st.code(traceback.format_exc())
+        st.info("💡 提示：請將上方錯誤代碼貼給您的 AI 開發助理，我們將立刻修正。")
 
 if __name__ == "__main__":
     main()
