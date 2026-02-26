@@ -1,0 +1,19 @@
+name: Prevent Streamlit From Sleeping
+
+on:
+  schedule:
+    # 每天每 4 小時自動敲門一次，防止雲端睡著
+    - cron: "0 */4 * * *"
+  workflow_dispatch: # 允許手動觸發
+
+jobs:
+  keep-awake:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Streamlit App
+        # 注意：這邊預設幫您填了一個大概的網址。
+        # 如果您的雲端網址不一樣，請到 GitHub 網頁上修改這行網址！
+        run: |
+          echo "Pinging Streamlit App..."
+          curl -sL "https://YOUR_STREAMLIT_APP_URL.streamlit.app/" > /dev/null
+          echo "Done!"
