@@ -40,13 +40,20 @@ def inject_chatbot():
         "downward_dd": "0.0"
     })
     
-    # 【數據純淨化】: 去除所有符號 (%, 逗號)，確保 AI 讀取的是純數字字串，避免格式識別錯誤
+    # 【全面相容模式】: 同時發送英文 ID 與 中文標籤，確保無論 Dify 後台怎麼設都能抓到
     ai_inputs = {}
     for key in ["bias_40w", "index_price", "upward_bounce", "downward_dd"]:
         val = str(market_snapshot.get(key, "0"))
-        # 移除百分比、逗號、以及中文提示字
         clean_val = val.replace("%", "").replace(",", "").replace("待載入...", "0").replace("待載入", "0")
+        
+        # 1. 發送英文鍵名 (標準 ID)
         ai_inputs[key] = clean_val
+        
+        # 2. 發送中文鍵名 (作為備援，因 Dify 網頁版有時會將「顯示名稱」誤認為「變數名稱」)
+        if key == "bias_40w": ai_inputs["40週乖離率"] = clean_val
+        if key == "upward_bounce": ai_inputs["波段上漲幅度"] = clean_val
+        if key == "downward_dd": ai_inputs["波段最大回撤"] = clean_val
+        if key == "index_price": ai_inputs["當前指數"] = clean_val
             
     # 打包 JSON
     json_payload = json.dumps(ai_inputs)
