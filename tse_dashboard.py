@@ -1775,24 +1775,14 @@ def main():
             "current_page": "導航中"
         }
 
-    # --- [初始化狀態監控] ---
-    status_placeholder = st.sidebar.empty()
-    status_placeholder.markdown("⏳ 系統暖機中...")
-    
     try:
         # 執行對應的頁面函數 (會在執行過程中更新市場數據到 session_state)
-        status_placeholder.markdown(f"🛰️ 載入中：{selection}...")
         pages[selection]()
         
         # 3. 注入 AI 研究助理 (這一步會將剛才生成的數據打包發給 Dify)
-        status_placeholder.markdown("🤖 同步 AI 戰情室...")
         inject_chatbot()
-        
-        status_placeholder.markdown("✅ 系統已就緒")
     except Exception as e:
-        status_placeholder.markdown("❌ 系統載入出錯")
-        st.error(f"⚠️ 核心模組加載失敗，請回報代碼：{e}")
-        st.info("💡 建議操作：嘗試「清除緩存」或重啟頁面。")
+        st.error(f"⚠️ 核心模組加載失敗：{e}")
 
 if __name__ == "__main__":
     main()
