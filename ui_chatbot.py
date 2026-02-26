@@ -76,41 +76,50 @@ def inject_chatbot():
     if st.session_state.chatbot_visible:
         js_code = f"""
         <script>
-            var parentDoc = window.parent.document;
-            var existingSidebar = parentDoc.getElementById("persistent-ai-sidebar");
-            var targetUrl = "{chatbot_url}";
-            
-            if (!existingSidebar) {{
-                var sidebarDiv = parentDoc.createElement("div");
-                sidebarDiv.id = "persistent-ai-sidebar";
-                sidebarDiv.style.cssText = "position:fixed; right:0; top:60px; width:400px; height:calc(100vh - 60px); background:#0F172A; border-left:2px solid #38BDF8; z-index:999999; display:flex; flex-direction:column; box-shadow:-15px 0 35px rgba(0,0,0,0.6); transition: all 0.3s ease;";
+            try {{
+                var parentDoc = window.parent.document;
+                if (!parentDoc) throw new Error("Parent document inaccessible (Cross-Origin)");
                 
-                sidebarDiv.innerHTML = `
-                    <div style="padding:10px; background:#1E293B; color:#38BDF8; font-family:sans-serif; font-size:12px; font-weight:bold; border-bottom:1px solid #334155; display:flex; justify-content:space-between;">
-                        <span>🤖 量化助理連線中</span>
-                        <span style="opacity:0.6;">v2.0 // Real-time Sync</span>
-                    </div>
-                    <div id="iframe-container" style="flex-grow:1; display:flex; flex-direction:column;">
-                        <iframe id="ai-chatbot-iframe" src="${{targetUrl}}" style="width:100%; height:100%; border:none;" allow="microphone"></iframe>
-                    </div>
-                `;
-                parentDoc.body.appendChild(sidebarDiv);
-            }} else {{
-                existingSidebar.style.display = "flex";
-                var container = parentDoc.getElementById("iframe-container");
-                var iframe = parentDoc.getElementById("ai-chatbot-iframe");
+                var existingSidebar = parentDoc.getElementById("persistent-ai-sidebar");
+                var targetUrl = "{chatbot_url}";
                 
-                // 【核心強制刷新邏輯】: 如果 URL 變了，直接砍掉重練，強制 Dify 重新讀取變數
-                if (iframe && iframe.src !== targetUrl) {{
-                    container.innerHTML = `<iframe id="ai-chatbot-iframe" src="${{targetUrl}}" style="width:100%; height:100%; border:none;" allow="microphone"></iframe>`;
+                if (!existingSidebar) {{
+                    var sidebarDiv = parentDoc.createElement("div");
+                    sidebarDiv.id = "persistent-ai-sidebar";
+                    sidebarDiv.style.cssText = "position:fixed; right:0; top:60px; width:400px; height:calc(100vh - 60px); background:#0F172A; border-left:2px solid #38BDF8; z-index:999999; display:flex; flex-direction:column; box-shadow:-15px 0 35px rgba(0,0,0,0.6); transition: all 0.3s ease;";
+                    
+                    sidebarDiv.innerHTML = `
+                        <div style="padding:10px; background:#1E293B; color:#38BDF8; font-family:sans-serif; font-size:12px; font-weight:bold; border-bottom:1px solid #334155; display:flex; justify-content:space-between;">
+                            <span>🤖 量化助理連線中</span>
+                            <span style="opacity:0.6;">v2.0 // Real-time Sync</span>
+                        </div>
+                        <div id="iframe-container" style="flex-grow:1; display:flex; flex-direction:column;">
+                            <iframe id="ai-chatbot-iframe" src="${{targetUrl}}" style="width:100%; height:100%; border:none;" allow="microphone"></iframe>
+                        </div>
+                    `;
+                    parentDoc.body.appendChild(sidebarDiv);
+                }} else {{
+                    existingSidebar.style.display = "flex";
+                    var container = parentDoc.getElementById("iframe-container");
+                    var iframe = parentDoc.getElementById("ai-chatbot-iframe");
+                    
+                    if (iframe && iframe.src !== targetUrl) {{
+                        container.innerHTML = `<iframe id="ai-chatbot-iframe" src="${{targetUrl}}" style="width:100%; height:100%; border:none;" allow="microphone"></iframe>`;
+                    }}
                 }}
+            }} catch (e) {{
+                console.warn("AI Chatbot Bridge Error (likely cross-origin): ", e);
             }}
         </script>
         """
-        st.components.v1.html(js_code, height=0)
+        st.components.v1.html(js_code, height=0, key="ai_bridge_active")
     else:
         # 隱藏 JS
         st.components.v1.html("""<script>
-            var sidebar = window.parent.document.getElementById("persistent-ai-sidebar");
-            if (sidebar) sidebar.style.display = "none";
-        </script>""", height=0)
+            try {
+                var sidebar = window.parent.document.getElementById("persistent-ai-sidebar");
+                if (sidebar) sidebar.style.display = "none";
+            } catch (e) {
+                console.warn("AI Chatbot Switch Error: ", e);
+            }
+        </script>""", height=0, key="ai_bridge_hidden")
