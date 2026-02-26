@@ -1778,8 +1778,8 @@ def main():
         # 執行對應的頁面函數 (會在執行過程中更新市場數據到 session_state)
         pages[selection]()
         
-        # 3. 注入 AI 研究助理 (這一步會將剛才生成的數據打包發給 Dify)
-        inject_chatbot()
+        # 3. 注入 AI 研究助理 (暫時移除，排除雲端干擾)
+        # inject_chatbot()
         
     except Exception as e:
         st.error("🆘 系統啟動發生嚴重衝突")
