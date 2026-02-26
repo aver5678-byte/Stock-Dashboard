@@ -15,8 +15,8 @@ import datetime
 from page_biz_cycle import page_biz_cycle
 from ui_chatbot import inject_chatbot
 
-st.set_page_config(page_title="台股預警儀表板 | v8.1", layout="wide", initial_sidebar_state="expanded")
-# Sync Trigger: 2026-02-26 00:43
+st.set_page_config(page_title="台股預警儀表板 | v9.0 FINAL", layout="wide", initial_sidebar_state="expanded")
+# Sync Trigger: 2026-02-26 19:58 (Force Cloud Refresh)
 
 # 初始化模擬資料庫 (存在 session_state 中)
 if 'user_role' not in st.session_state:
@@ -46,7 +46,7 @@ ADMIN_EMAIL = "aver5678@gmail.com"
 apply_global_theme()
 
 
-@st.cache_data(ttl=600) # 縮短為 10 分鐘，增加即時感
+@st.cache_data(ttl=0) # 強制關閉緩存 1 次以重新整理雲端資料
 def load_data():
     ticker = "^TWII"
     try:
@@ -559,8 +559,7 @@ def page_bias_analysis():
             text_color = "#F1F5F9" # 明亮白灰
             status_text = " (已越過 - 強勢慣性)" if is_passed else " (統計預告)"
             opacity = "1.0" # 強制全亮
-        
-        dates.append(f"<div style='opacity:{opacity}; color:{text_color}; font-weight:700; font-size:13px;'>{label}：<span style='font-family:\"JetBrains Mono\"; color:{date_color};'>{d.strftime('%Y / %m / %d')}</span> <span style='font-size:11px; opacity:0.8;'>{status_text}</span></div>")
+            dates.append(f"<div style='opacity:{opacity}; color:{text_color}; font-weight:700; font-size:13px;'>{label}：<span style='font-family:\"JetBrains Mono\"; color:{date_color};'>{d.strftime('%Y / %m / %d')}</span> <span style='font-size:11px; opacity:0.8;'>{status_text}</span></div>")
 
     decision_html = f"""
 <style>
@@ -1734,7 +1733,17 @@ def main():
         "大盤上漲強度統計": page_upward_bias
     }
     
-    # --- [A. 站長管理區] --- (暫時保留邏輯，但因無登入功能故一般人看不到)
+    # --- [核心控制區] ---
+    st.sidebar.markdown('<div class="sidebar-section-header">⚙️ 系統核心控制</div>', unsafe_allow_html=True)
+    scol1, scol2 = st.sidebar.columns(2)
+    with scol1:
+        if st.button("🔄 刷新頁面", key="sys_refresh", use_container_width=True):
+            st.rerun()
+    with scol2:
+        if st.button("🧼 重置緩存", key="sys_reset", use_container_width=True):
+            st.cache_data.clear()
+            st.rerun()
+
     if st.session_state.get('user_role') == 'admin':
         st.sidebar.markdown('<div class="sidebar-section-header">🛠️ 戰情管理後台</div>', unsafe_allow_html=True)
         with st.sidebar.expander("系統控制面板", expanded=True):
