@@ -374,20 +374,24 @@ def page_bias_analysis():
                 <div style="color:#94A3B8; font-size:14px; line-height:1.6;">圖中的<b>白線</b>代表 40 週平均價格（大盤的生命線）。當 K 線（即時價格）遠遠拋開白線時，就像橡皮筋拉得太緊，會產生強大的<b>「引力回歸」</b>。乖離率就是用來量化這條橡皮筋現在繃得有多緊。</div>
             </div>
             <div style="background:rgba(255,255,255,0.03); padding:18px; border-radius:10px; border-left:4px solid #EF4444;">
-                <div style="color:#FCA5A5; font-weight:800; font-size:16px; margin-bottom:10px;">🔴 顏色判別：識別「高壓警戒區」</div>
-                <div style="color:#94A3B8; font-size:14px; line-height:1.6;">當圖中出現 <b>紅色 K 線</b> 時，代表當時的乖離率已突破歷史警戒線（20%）。這不是預測明天就會跌，而是提醒您目前處於「空氣稀薄」的高海拔區，動能隨時可能耗竭，轉向回歸白線。</div>
+                <div style="color:#FCA5A5; font-weight:800; font-size:16px; margin-bottom:10px;">🔴 視覺標記：識別「高壓警戒區」</div>
+                <div style="color:#94A3B8; font-size:14px; line-height:1.6;">當圖中 K 線下方出現 <b>紅色地雷球</b> 時，代表當時的乖離率已突破歷史警戒線（20%）。這不是預測明天就會跌，而是提醒您目前處於「空氣稀薄」的高海拔區，動能隨時可能耗竭，轉向回歸軌跡。</div>
             </div>
             <div style="background:rgba(255,255,255,0.03); padding:18px; border-radius:10px; border-left:4px solid #38BDF8;">
-                <div style="color:#7DD3FC; font-weight:800; font-size:16px; margin-bottom:10px;">🛡️ 實戰要訣：觀察歷史回歸的路徑</div>
-                <div style="color:#94A3B8; font-size:14px; line-height:1.6;">您可以滑動圖表觀察：每當 K 線進入紅色高壓區後，最終都會以「價格下跌」或「盤整」的方式向白線靠攏。目前的數據正處於歷史級的高壓，旨在警告投資人：目前的價格支撐主要來自情緒，而非引力常態。</div>
+                <div style="color:#7DD3FC; font-weight:800; font-size:16px; margin-bottom:10px;">🛡️ 警戒軌跡：觀察紅虛線與價格的距離</div>
+                <div style="color:#94A3B8; font-size:14px; line-height:1.6;">圖中的<b>紅色虛線</b>（20% 警戒軌跡）是基於 40 週均線向上疊加 20% 的動態界線。當 K 線觸碰或超越此線時，即進入極端高壓區。歷史數據顯示：最終價格都會迴向白線靠攏。</div>
             </div>
         </div>
     </div>
     """
     st.markdown(chart_guide_html, unsafe_allow_html=True)
         
-    # 準備 K 線圖的動態警告文字
-    df['WarningText'] = df['Bias'].apply(lambda x: f'<br><br><b style="color:#EF4444;">🚨 偵測到極端乖離: {x:.1f}%</b><br><b style="color:#EF4444;">市場過熱，注意修正風險！</b>' if x >= 20 else '')
+    # 準備 K 線圖的動態警告文字 (門檻對齊 15% 預警)
+    df['WarningText'] = df['Bias'].apply(lambda x: f'<br><b style="color:#EF4444;">🚨 偵測到極端乖離: {x:.1f}%</b><br><b style="color:#EF4444;">注意修正風險！</b>' if x >= 20 
+                                         else (f'<br><b style="color:#FBBF24;">⚠️ 進入警戒區域: {x:.1f}%</b>' if x >= 15 else ''))
+    
+    # 計算 20% 警戒軌跡線 (用來畫在 K 線圖上)
+    df['WarningTrack'] = df['SMA40'] * 1.20
     
     fig = make_subplots(rows=2, cols=1, shared_xaxes=True, 
                         vertical_spacing=0.05, 
@@ -397,20 +401,25 @@ def page_bias_analysis():
     fig.add_trace(go.Candlestick(x=df['WeekRange'],
                     open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'],
                     customdata=np.stack((df['Bias'], df['WarningText']), axis=-1),
-                    name='加權指數',
+                    name='📊 加權指數',
                     increasing_line_color='#10B981', decreasing_line_color='#EF4444',
-                    hovertemplate='<b style="color:#F8FAFC;">週區間: %{x}</b><br><br>' +
-                                  '開: %{open:,.2f}<br>' +
-                                  '高: %{high:,.2f}<br>' +
-                                  '低: %{low:,.2f}<br>' +
-                                  '收: %{close:,.2f}<br><br>' +
-                                  '<b style="color:#38BDF8;">👉 乖離率同步: %{customdata[0]:.2f}%</b>' +
+                    hovertemplate='<b>開盤:</b> %{open:,.0f}<br>' +
+                                  '<b>最高:</b> %{high:,.0f}<br>' +
+                                  '<b>最低:</b> %{low:,.0f}<br>' +
+                                  '<b>收盤:</b> %{close:,.0f}<br>' +
+                                  '────────────────<br>' +
+                                  '<b style="color:#38BDF8;">📈 目前40W乖離: %{customdata[0]:.2f}%</b>' +
                                   '%{customdata[1]}<extra></extra>'), row=1, col=1)
                     
     fig.add_trace(go.Scatter(x=df['WeekRange'], y=df['SMA40'], 
                              line={'color': '#94A3B8', 'width': 2}, 
-                             name='40週均線',
-                             hovertemplate='均線點位: %{y:.2f}<extra></extra>'), row=1, col=1)
+                             name='🛡️ 40週生命線',
+                             hovertemplate='均線點位: %{y:,.0f}<extra></extra>'), row=1, col=1)
+
+    fig.add_trace(go.Scatter(x=df['WeekRange'], y=df['WarningTrack'], 
+                             line={'color': '#EF4444', 'width': 1.5, 'dash': 'dash'}, 
+                             name='🚨 20% 極端警戒',
+                             hovertemplate='警戒位: %{y:,.0f}<extra></extra>'), row=1, col=1)
 
     # --- 新裝：K線下方高壓地雷紅球 (Bias >= 20%) ---
     danger_mask = df['Bias'] >= 20
@@ -432,9 +441,9 @@ def page_bias_analysis():
                              
     fig.add_trace(go.Scatter(x=df['WeekRange'], y=df['Bias'], 
                              line={'color': '#38BDF8', 'width': 2}, 
-                             name='乖離率',
+                             name='📉 乖離率數據',
                              fill='tozeroy', fillcolor='rgba(56, 189, 248, 0.1)',
-                             hovertemplate='乖離率: %{y:.2f}%<extra></extra>'), row=2, col=1)
+                             hovertemplate='當前乖離: %{y:.2f}%<extra></extra>'), row=2, col=1)
                              
     if not b_df.empty:
         # 使用 WeekRange 對齊歷史標記
@@ -463,8 +472,8 @@ def page_bias_analysis():
                       plot_bgcolor="#0F172A",
                       paper_bgcolor="#0F172A",
                       font=dict(color="#F1F5F9", family="JetBrains Mono"),
-                      hovermode="x unified",
-                      hoverlabel=dict(bgcolor="rgba(30, 41, 59, 0.8)", font_size=15, font_family="JetBrains Mono", bordercolor="#475569"),
+                      hovermode="x unified", # 恢復統一橫拉條模式
+                      hoverlabel=dict(bgcolor="rgba(15, 23, 42, 0.9)", font_size=15, font_family="JetBrains Mono", bordercolor="#475569"),
                       margin=dict(l=50, r=50, t=60, b=40),
                       showlegend=False,
                       dragmode="pan") # 預設平移，配合滾輪縮放
